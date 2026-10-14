@@ -101,12 +101,30 @@ for (const file of walk(dist)) {
 }
 if (!gplChunks) problems.push('libredwg worker chunk not found (DWG import missing from the build?)');
 
+// Row 88: no eval. Global eval and the Function constructor are rejected except for
+// (a) core-js's unreachable global-object fallback `(function(){return this})()||Function("return this")()`
+//     (every supported browser has globalThis), and
+// (b) the LibreDWG worker's embind glue (documented decision U-1 in docs/USER-DECISIONS.md; blocked by
+//     the CSP header unless that decision changes).
+const EVAL_RE = /(?<![\w$.}])eval\(|new Function\(|(?<![\w$.])Function\((?!"return this"\)\(\))/g;
+const EVAL_ALLOWED = [/(^|\/)libredwg\.worker-[\w-]+\.js$/];
+for (const file of walk(dist)) {
+  if (!/\.(js|mjs)$/.test(file)) continue;
+  const rel = path.relative(dist, file);
+  if (NOTICE_FILES.some((re) => re.test(rel)) || EVAL_ALLOWED.some((re) => re.test(rel))) continue;
+  const text = readFileSync(file, 'utf8');
+  for (const m of text.matchAll(EVAL_RE)) {
+    // `eval(a, b = 0) {` is a method named eval (e.g. spline evaluation), not a call.
+    if (m[0] === 'eval(' && /^eval\([\w$,\s=.\d]*\)\s*\{/.test(text.slice(m.index, m.index + 80))) continue;
+    const ctx = text.slice(Math.max(0, m.index - 40), m.index + 40).replace(/\s+/g, ' ');
+    problems.push(`${rel}: dynamic code evaluation "${m[0]}" near …${ctx}… (row 88)`);
+  }
+}
+
 if (problems.length) {
-  console.error(
-    `check-dist: ${problems.length} external URL reference(s) found:\n  ${[...new Set(problems)].join('\n  ')}`,
-  );
+  console.error(`check-dist: ${problems.length} problem(s) found:\n  ${[...new Set(problems)].join('\n  ')}`);
   process.exit(1);
 }
 console.log(
-  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk.`,
+  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk; no eval or Function constructor outside it.`,
 );

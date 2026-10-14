@@ -76,6 +76,8 @@ instead of editing shared components:
 | `extraDialogs`                       | `@/components/app/extra-dialogs`           | dialogs opened with `useUiStore.getState().openDialog(id)`                                 |
 | `registerDerivation(fn)`             | `@/core/history`                           | derived data updated inside every commit, same undo step (live offsets)                    |
 | `gripExtensions`                     | `@/features/objects/grips`                 | extra select-tool grips (e.g. segment midpoint "+" grips that insert a vertex)             |
+| `exportKindRenderers[kind] = fn`     | `@/features/export/scene/objects`          | export drawing for an object kind (register from a module the export worker imports)       |
+| `setContourExportProvider(fn)`       | `@/features/export/inputs`                 | contour items/envelopes used by exports and the legend (default: `computeContours`)        |
 
 Overlays with z ≥ 100 draw after the active tool's preview (the magnifier loupe uses z=100).
 `dragPreview()` (`@/features/objects/select-tool`) returns the geometry being dragged, for live
@@ -127,6 +129,16 @@ style (`resolveStyle`), an optional `label` (template fields via `labelText`), a
 `derived` (live offsets) and `measurement` info. Helpers: `@/features/objects/ops` (add, update
 geometry, move/rotate/scale/mirror, delete, reorder), `labels.ts` (`measures(geometry)` →
 area/perimeter/length/radius…), `pick.ts`, `grips.ts`.
+
+## Exports
+
+`src/features/export/scene/` turns the project into one backend-neutral `Scene` (paper mm): sheet
+layout and true-scale world → paper transform, underlays, analysis objects, contours, legend
+(`src/features/legend/legend-model.ts`), title block, scale bar, north arrow and the calibration
+statement (always on the output, row 32). The export worker (`export.worker.ts`) renders it with
+the PDF/SVG/canvas backends (PNG in strips with a streaming encoder) and writes DXF/CSV/XLSX; the
+dialog preview is the same scene drawn by the canvas backend. Export settings are an
+`ExportProfile` without id/name; the sheet layout lives in `Project.sheet`.
 
 ## Underlay access
 

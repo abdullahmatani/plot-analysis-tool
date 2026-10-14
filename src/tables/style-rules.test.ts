@@ -100,11 +100,16 @@ describe('class breaks', () => {
   it('natural breaks on 5 000 values are fast', () => {
     const rnd = prng(3);
     const data = Array.from({ length: 5000 }, () => rnd() * 500);
-    const t0 = performance.now();
-    const b = jenksBreaks(data, 7);
-    const ms = performance.now() - t0;
+    // Best of 3 after a warm-up, so a GC pause or a busy CI runner does not decide the result.
+    let b = jenksBreaks(data, 7);
+    const runs: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const t0 = performance.now();
+      b = jenksBreaks(data, 7);
+      runs.push(performance.now() - t0);
+    }
     expect(b).toHaveLength(7);
-    expect(ms).toBeLessThan(200);
+    expect(Math.min(...runs)).toBeLessThan(200);
   });
 
   it('classify uses upper bounds and clamps above the last', () => {

@@ -22,6 +22,12 @@ export function StatusBar() {
   const display = useProject((p) => p.display);
   const units = display?.units ?? 'm';
   const precision = display?.precision ?? 2;
+  // Plant coordinates (row 31): with a coordinates calibration, world X/Y are plant E/N.
+  const plant =
+    useProject(
+      (p) => p.display.plantCoords && p.drawings.some((d) => d.calibration?.method === 'coordinates'),
+    ) ?? false;
+  const [ax, ay] = plant ? ['E', 'N'] : ['X', 'Y'];
 
   const coord = (v: number) => formatNumber(fromMetres(v, units), precision + 1);
   // Zoom % relative to 1:1 paper at 96 dpi (1 m world shown as 1 m on screen would be 3780 px).
@@ -35,10 +41,12 @@ export function StatusBar() {
       <div className="min-w-[19rem] font-mono tabular-nums" data-testid="cursor-coords">
         {cursor ? (
           <>
-            X {coord(cursor.x)} Y {coord(cursor.y)} {UNIT_LABEL[units]}
+            {ax} {coord(cursor.x)} {ay} {coord(cursor.y)} {UNIT_LABEL[units]}
           </>
         ) : (
-          <span className="text-muted-foreground">X — Y —</span>
+          <span className="text-muted-foreground">
+            {ax} — {ay} —
+          </span>
         )}
       </div>
       <CalibrationBadge />

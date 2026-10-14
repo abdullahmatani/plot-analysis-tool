@@ -97,16 +97,28 @@ test.describe('autosave', () => {
     await createProject(page, 'Crashy');
     for (let i = 0; i < 3; i++) await commitEdit(page, 'Add layer', `C${i}`);
     await waitSaved(page);
-    const crashed = new Promise((r) => page.once('crash', r));
-    page.goto('chrome://crash').catch(() => {});
-    await crashed;
-    const page2 = await context.newPage();
-    await openApp(page2);
-    await expect(page2.getByTestId('recovery-dialog')).toBeVisible();
-    await expect(page2.getByTestId('recovery-dialog')).toContainText('Crashy');
-    await page2.getByTestId('recovery-apply').click();
-    await expect(page2.getByTestId('workspace')).toBeVisible();
-    expect(await layerNames(page2)).toEqual(['Analysis', 'C0', 'C1', 'C2']);
+    await test.step('crash the renderer', async () => {
+      const sleep = (ms: number) => new Promise<false>((r) => setTimeout(() => r(false), ms));
+      const crashed = new Promise<true>((r) => page.once('crash', () => r(true)));
+      page.goto('chrome://crash').catch(() => {});
+      if (!(await Promise.race([crashed, sleep(15_000)]))) {
+        // Some environments ignore chrome://crash; crash the renderer through DevTools instead.
+        const cdp = await context.newCDPSession(page);
+        cdp.send('Page.crash').catch(() => {});
+        expect(await Promise.race([crashed, sleep(15_000)]), 'renderer crashed').toBe(true);
+      }
+    });
+    const page2 = await test.step('open a new tab', () => context.newPage());
+    await test.step('recovery dialog offers the crashed project', async () => {
+      await openApp(page2);
+      await expect(page2.getByTestId('recovery-dialog')).toBeVisible();
+      await expect(page2.getByTestId('recovery-dialog')).toContainText('Crashy');
+    });
+    await test.step('recover', async () => {
+      await page2.getByTestId('recovery-apply').click();
+      await expect(page2.getByTestId('workspace')).toBeVisible();
+      expect(await layerNames(page2)).toEqual(['Analysis', 'C0', 'C1', 'C2']);
+    });
   });
 
   test('second tab opens read-only, follows edits and can take over (row 100)', async ({ page, context }) => {
@@ -142,13 +154,17 @@ test.describe('autosave', () => {
     await page.keyboard.press('Control+,');
     await page.getByLabel(/Automatic restore point every/).fill('3');
     await page.getByRole('button', { name: 'Save' }).click();
-    const minutes = await page.evaluate(() => {
-      const w = window as unknown as {
-        __pat: { session(): { engine: { settings: { restorePointIntervalMin: number } } } };
-      };
-      return w.__pat.session().engine.settings.restorePointIntervalMin;
-    });
-    expect(minutes).toBe(3);
+    // Applied to the running autosave engine without a reload (saving is asynchronous).
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const w = window as unknown as {
+            __pat: { session(): { engine: { settings: { restorePointIntervalMin: number } } } };
+          };
+          return w.__pat.session().engine.settings.restorePointIntervalMin;
+        }),
+      )
+      .toBe(3);
     await page.reload();
     await openFirstRecent(page);
     await page.keyboard.press('Control+,');

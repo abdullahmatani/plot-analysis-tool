@@ -2986,6 +2986,321 @@
       "binary": false
     },
     {
+      "file": "r2018_trace_site.dxf",
+      "entities": [
+        {
+          "handle": "8F",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600010.0, 2500010.0, 600030.0, 2500010.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "90",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600050.0, 2500010.0, 600030.0, 2500010.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "91",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600050.0, 2500010.0, 600050.0, 2500025.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "92",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600035.0, 2500025.0, 600050.0, 2500025.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "93",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600035.0, 2500025.0, 600035.0, 2500040.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "94",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600035.0, 2500040.0, 600030.0, 2500040.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "95",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600010.0, 2500040.0, 600030.0, 2500040.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "96",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600010.0, 2500040.0, 600010.0, 2500010.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "97",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600030.0, 2500010.0, 600030.0, 2500040.0],
+          "layer": "BUILDING"
+        },
+        {
+          "handle": "98",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600070.05, 2500010.0, 600099.95, 2500010.0]
+        },
+        {
+          "handle": "99",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600100.0, 2500010.05, 600100.0, 2500029.95]
+        },
+        {
+          "handle": "9A",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600099.95, 2500030.0, 600070.05, 2500030.0]
+        },
+        {
+          "handle": "9B",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600070.0, 2500029.95, 600070.0, 2500010.05]
+        },
+        {
+          "handle": "9C",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600010.05, 2500060.0, 600059.95, 2500060.0],
+          "layer": "BUND"
+        },
+        {
+          "handle": "9D",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600060.0, 2500060.05, 600060.0, 2500099.95],
+          "layer": "BUND"
+        },
+        {
+          "handle": "9E",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600059.95, 2500100.0, 600010.05, 2500100.0],
+          "layer": "BUND"
+        },
+        {
+          "handle": "9F",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600010.0, 2500099.95, 600010.0, 2500060.05],
+          "layer": "BUND"
+        },
+        {
+          "handle": "A0",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600035.125, 2500080.375, 12.5],
+          "layer": "TANKS"
+        },
+        {
+          "handle": "A2",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [600072.0, 2500090.0, 0.0],
+            [600098.0, 2500090.0, 0.41421356237],
+            [600100.0, 2500092.0, 0.0],
+            [600100.0, 2500103.0, 0.41421356237],
+            [600098.0, 2500105.0, 0.0],
+            [600072.0, 2500105.0, 0.41421356237],
+            [600070.0, 2500103.0, 0.0],
+            [600070.0, 2500092.0, 0.41421356237]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "A3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ELLIPSE",
+          "c": [600130.0, 2500020.0],
+          "points": [
+            [600140.0, 2500020.0],
+            [600135.0, 2500024.330127019],
+            [600125.0, 2500024.330127019],
+            [600120.0, 2500020.0],
+            [600125.0, 2500015.669872981],
+            [600135.0, 2500015.669872981],
+            [600140.0, 2500020.0]
+          ]
+        },
+        {
+          "handle": "A4",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ELLIPSE",
+          "c": [600130.0, 2500050.0],
+          "points": [
+            [600130.0, 2500058.0],
+            [600128.0, 2500056.9282032303],
+            [600126.5358983849, 2500054.0],
+            [600126.0, 2500050.0],
+            [600126.5358983849, 2500046.0],
+            [600128.0, 2500043.0717967697],
+            [600130.0, 2500042.0]
+          ]
+        },
+        {
+          "handle": "A8",
+          "insert": "AD",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [600128.1519237886, 2500082.2009618944, 600133.3480762114, 2500085.2009618944]
+        },
+        {
+          "handle": "A9",
+          "insert": "AD",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [600133.3480762114, 2500085.2009618944, 600131.8480762114, 2500087.7990381056]
+        },
+        {
+          "handle": "AA",
+          "insert": "AD",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [600131.8480762114, 2500087.7990381056, 600126.6519237886, 2500084.7990381056]
+        },
+        {
+          "handle": "AB",
+          "insert": "AD",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [600126.6519237886, 2500084.7990381056, 600128.1519237886, 2500082.2009618944]
+        },
+        {
+          "handle": "AC",
+          "insert": "AD",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [600130.6495190528, 2500085.375, 1.125]
+        }
+      ],
+      "texts": [],
+      "hatches": [
+        {
+          "handle": "A1",
+          "insert": null,
+          "rings": 1,
+          "pattern": false,
+          "segments": 0,
+          "length": 0
+        }
+      ],
+      "splines": [],
+      "ellipsePoints": [],
+      "props": [],
+      "version": "AC1032",
+      "insunits": 6,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "BUILDING": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "BUND": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16744192,
+          "lineweight": -3
+        },
+        "TANKS": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16711935,
+          "lineweight": -3
+        },
+        "PAVING": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 8421504,
+          "lineweight": -3
+        },
+        "EQUIPMENT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 65535,
+          "lineweight": -3
+        }
+      },
+      "counts": {
+        "LINE": 17,
+        "CIRCLE": 1,
+        "HATCH": 1,
+        "LWPOLYLINE": 1,
+        "ELLIPSE": 2,
+        "INSERT": 1
+      },
+      "skipped": {},
+      "inserts": 1,
+      "binary": false
+    },
+    {
       "file": "malformed.dxf",
       "error": {
         "line": 5703,

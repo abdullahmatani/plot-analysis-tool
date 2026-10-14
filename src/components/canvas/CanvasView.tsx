@@ -24,6 +24,7 @@ export function CanvasView() {
   const project = useProjectStore((s) => s.history?.project ?? null);
   const drawingsCount = project?.drawings.length ?? 0;
   const objectsCount = project?.objects.length ?? 0;
+  const datasetsCount = project?.datasets.length ?? 0;
 
   useEffect(() => {
     const c = new CanvasController(containerRef.current!, glRef.current!, overlayRef.current!);
@@ -70,7 +71,7 @@ export function CanvasView() {
           WebGL2 is unavailable ({webglError}). Drawings cannot be displayed in this browser.
         </div>
       )}
-      {drawingsCount === 0 && objectsCount === 0 && !dragOver && <EmptyHint />}
+      {drawingsCount === 0 && objectsCount === 0 && datasetsCount === 0 && !dragOver && <EmptyHint />}
       {dragOver && (
         <div className="border-primary/60 bg-primary/5 pointer-events-none absolute inset-3 flex items-center justify-center rounded-xl border-2 border-dashed text-lg">
           Drop DXF, DWG, PDF, project or table files to import

@@ -155,7 +155,7 @@ export interface LabelSpec {
 export type ObjectKind = 'shape' | 'trace' | 'offset' | 'measurement' | 'text' | 'callout' | 'tag' | 'cloud';
 
 export interface MeasurementInfo {
-  mode: 'distance' | 'chain' | 'length' | 'area' | 'radius' | 'angle' | 'check';
+  mode: 'distance' | 'chain' | 'length' | 'area' | 'radius' | 'angle' | 'check' | 'point';
   /** For angle measurements: vertex is pts[1]. */
   value?: number;
 }

@@ -11,11 +11,11 @@ export function openOffsetDialog(mode: OffsetDialogMode) {
   useUiStore.getState().openDialog(OFFSET_DIALOG, { mode });
 }
 
-export const JOINS: { v: OffsetJoin; l: string }[] = [
-  { v: 'round', l: 'Round — true distance' },
-  { v: 'miter', l: 'Mitre — square corners' },
-  { v: 'bevel', l: 'Bevel' },
-  { v: 'square', l: 'Square (cut at distance)' },
+export const JOINS: { v: OffsetJoin; l: string; short: string }[] = [
+  { v: 'round', l: 'Round — true distance', short: 'Round' },
+  { v: 'miter', l: 'Mitre — square corners', short: 'Mitre' },
+  { v: 'bevel', l: 'Bevel', short: 'Bevel' },
+  { v: 'square', l: 'Square (cut at distance)', short: 'Square' },
 ];
 
 export const CAPS: { v: OffsetCap; l: string }[] = [

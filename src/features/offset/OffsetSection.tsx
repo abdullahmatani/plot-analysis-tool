@@ -76,7 +76,7 @@ export function OffsetSection() {
               <SelectContent>
                 {JOINS.map((j) => (
                   <SelectItem key={j.v} value={j.v}>
-                    {j.l}
+                    {j.short}
                   </SelectItem>
                 ))}
               </SelectContent>

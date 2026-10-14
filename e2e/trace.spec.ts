@@ -253,6 +253,45 @@ test('trace editing: simplify within tolerance, "+" grip inserts a vertex, rever
   expect(ins.x).toBeGreaterThan(55);
 });
 
+test('an unfinished manual trace survives a reload and can be resumed (rows 49, 93)', async ({ page }) => {
+  await page.getByTestId('canvas').focus();
+  await page.keyboard.press('t');
+  for (const pt of ['0,0', '30,0', '30,20']) await typeOnCanvas(page, pt);
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const w = window as unknown as {
+          __pat: {
+            db(): { drafts: { toArray(): Promise<{ key: string; state: { points: unknown[] } }[]> } };
+          };
+        };
+        return (await w.__pat.db().drafts.toArray()).find((x) => x.key === 'tool:trace.manual')?.state.points
+          .length;
+      }),
+    )
+    .toBe(3);
+  await page.reload();
+  await expect(page.locator('[data-ready="true"]')).toBeVisible();
+  await page.getByTestId('recent-projects').getByRole('button').first().click();
+  await expect(page.getByTestId('workspace')).toBeVisible();
+  await expect(page.getByText('Unfinished trace recovered')).toBeVisible();
+  await page.getByRole('button', { name: 'Resume' }).click();
+  await page.getByTestId('canvas').focus();
+  await typeOnCanvas(page, '0,20');
+  await page.keyboard.press('c');
+  await expect.poll(async () => (await objects(page)).length).toBe(1);
+  expect((await objects(page))[0].geometry).toEqual({
+    type: 'polyline',
+    pts: [
+      { x: 0, y: 0 },
+      { x: 30, y: 0 },
+      { x: 30, y: 20 },
+      { x: 0, y: 20 },
+    ],
+    closed: true,
+  });
+});
+
 test('ortho and grid snap constrain manual tracing (row 54)', async ({ page }) => {
   await page.getByTestId('canvas').focus();
   await page.keyboard.press('t');

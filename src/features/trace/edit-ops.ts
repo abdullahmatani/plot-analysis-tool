@@ -262,8 +262,12 @@ export interface InsertGrip {
   pt: Pt;
 }
 
-/** Midpoints of every segment (for "+" grips), polylines and multipolygons up to `max` segments. */
-export function segmentMidpoints(g: Geometry, max = 400): InsertGrip[] {
+/**
+ * Midpoints of the segments (for "+" grips) of polylines and multipolygons up to `max` segments.
+ * Straight segments shorter than `minFraction` of the shape's size (e.g. the chords of a
+ * tessellated round corner) get none, to keep grips readable.
+ */
+export function segmentMidpoints(g: Geometry, max = 400, minFraction = 0.02): InsertGrip[] {
   if (g.type !== 'polyline' && g.type !== 'multipolygon') return [];
   const rings: { pts: Vertex[]; closed: boolean }[] =
     g.type === 'polyline'
@@ -271,6 +275,18 @@ export function segmentMidpoints(g: Geometry, max = 400): InsertGrip[] {
       : g.rings.map((pts) => ({ pts, closed: true }));
   const total = rings.reduce((n, r) => n + segmentCount(r), 0);
   if (total > max) return [];
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const r of rings)
+    for (const v of r.pts) {
+      minX = Math.min(minX, v.x);
+      minY = Math.min(minY, v.y);
+      maxX = Math.max(maxX, v.x);
+      maxY = Math.max(maxY, v.y);
+    }
+  const minLen = minFraction * Math.hypot(maxX - minX, maxY - minY);
   const out: InsertGrip[] = [];
   rings.forEach((r, ring) => {
     const n = r.pts.length;
@@ -278,6 +294,7 @@ export function segmentMidpoints(g: Geometry, max = 400): InsertGrip[] {
       const a = r.pts[i];
       const b = r.pts[(i + 1) % n];
       if (a.x === b.x && a.y === b.y) continue;
+      if (!a.bulge && Math.hypot(b.x - a.x, b.y - a.y) < minLen) continue;
       out.push({ ring, index: i, pt: bulgeMidpoint(a, b, a.bulge) });
     }
   });

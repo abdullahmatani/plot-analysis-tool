@@ -16,6 +16,7 @@ export default tseslint.config(
       'src/generated',
       '.claude',
       'tests/fixtures',
+      'vendor',
     ],
   },
   {

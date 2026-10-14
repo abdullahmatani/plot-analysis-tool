@@ -1,7 +1,8 @@
 import { LibreDwg, createModule, type LibreDwgEx } from '@mlightcad/libredwg-web';
-// The package's "exports" map does not expose the .wasm file, so it is referenced by path. Vite emits
-// it as a same-origin asset (precached by the service worker); it is never fetched from a CDN.
-import wasmUrl from '../../../node_modules/@mlightcad/libredwg-web/wasm/libredwg-web.wasm?url';
+// LibreDWG rebuilt without run-time code generation (vendor/libredwg-web, decision U-1); vite.config.ts
+// points the package at the matching glue. Vite emits the .wasm as a same-origin asset (precached by
+// the service worker); it is never fetched from a CDN.
+import wasmUrl from '../../../vendor/libredwg-web/libredwg-web.wasm?url';
 
 /**
  * Loads LibreDWG (GPL-3.0, decision D-1). Only the DWG worker imports this module, so LibreDWG ends

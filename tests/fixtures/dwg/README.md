@@ -29,7 +29,7 @@ below (`node scripts/fixtures/dwg-fetch.mjs`).
 | `2018_Leader.dwg`      | `2018/Leader.dwg`               | AC1032 (2018)  | LEADER, MULTILEADER and IMAGE entities                                                                   |
 | `r14_v.dwg`            | `r14/v.dwg`                     | AC1014 (R14)   | Release 14                                                                                               |
 | `r11_entities-2d.dwg`  | `r11/entities-2d.dwg`           | AC1009 (R11)   | Pre-R13 format (limited support in LibreDWG)                                                             |
-| `example_r14.dwg`      | `example_r14.dwg`               | AC1014 (R14)   | LibreDWG 0.13 (libredwg-web 0.8.0) crashes on it — tests the readable-error path                         |
+| `example_r14.dwg`      | `example_r14.dwg`               | AC1014 (R14)   | Same drawing in R14. The published libredwg-web 0.8.0 build crashed on it; the rebuilt reader reads it (one polyline short of its last vertex, with the reader warning). Corrupted copies test the readable-error path |
 
 Damaged, truncated and newer-format inputs are derived from these files in memory by the tests.
 

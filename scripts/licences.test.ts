@@ -66,10 +66,8 @@ describe('third-party licence list (row 25)', () => {
     const tree = [...productionTree()].map(
       (k) => `${k.replace(/^.*node_modules\//, '')}@${lock.packages[k].version}`,
     );
-    const listed = generated.packages.filter(
-      (p) =>
-        !/\(font\)|pdf\.js|^pdf\.js/.test(p.name) && !p.version.includes('pdfjs-dist') && p.version !== '2.x',
-    );
+    // Components that are not npm packages (fonts, pdf.js assets, the DWG reader's linked runtime).
+    const listed = generated.packages.filter((p) => !/^(Bundled|Linked into)/.test(p.scope ?? ''));
     const names = listed.map((p) => `${p.name}@${p.version}`);
     const missing = tree.filter((t) => !names.includes(t));
     const extra = names.filter((n) => !tree.includes(n));

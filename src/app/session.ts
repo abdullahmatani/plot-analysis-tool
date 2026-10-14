@@ -12,6 +12,7 @@ import { ProjectLock, type ProjectChannelMessage } from '@/persistence/locks';
 import { buildProjectFile } from '@/persistence/project-file';
 import { metaFor, touchProject } from '@/persistence/projects';
 import { loadProjectState, type RecoveryReport } from '@/persistence/recovery';
+import { journalWriter } from '@/persistence/journal-client';
 import { createSnapshotService } from '@/persistence/serializer-client';
 import {
   DEFAULT_AUTOSAVE_SETTINGS,
@@ -135,6 +136,7 @@ export class ProjectSession {
         // After a schema upgrade the stored snapshot is outdated: force a fresh checkpoint.
         lastSnapshotSeq: loaded.report.migratedFrom !== undefined ? -1 : loaded.report.snapshotSeq,
         storeCheckpoint: snapshots.checkpointFromStore,
+        journalWriter: journalWriter(),
       },
     );
     useSessionStore
@@ -255,7 +257,11 @@ export class ProjectSession {
       this.settings,
       snapshots.serialize,
       loaded.seq,
-      { lastSnapshotSeq: loaded.report.snapshotSeq, storeCheckpoint: snapshots.checkpointFromStore },
+      {
+        lastSnapshotSeq: loaded.report.snapshotSeq,
+        storeCheckpoint: snapshots.checkpointFromStore,
+        journalWriter: journalWriter(),
+      },
     );
     this.unsubs.push(this.engine.subscribe((status) => useSessionStore.getState().set({ status })));
     this.becomeWriter();
@@ -403,7 +409,14 @@ export function installTestHooks() {
     view: () => useViewStore.getState(),
     autosaveTiming: (reset = false) => {
       const t = { ...autosaveTiming, maxByKind: { ...autosaveTiming.maxByKind } };
-      if (reset) Object.assign(autosaveTiming, { maxSyncMs: 0, totalSyncMs: 0, samples: 0, maxByKind: {} });
+      if (reset)
+        Object.assign(autosaveTiming, {
+          maxSyncMs: 0,
+          totalSyncMs: 0,
+          samples: 0,
+          maxByKind: {},
+          maxDurableMs: 0,
+        });
       return t;
     },
     /** Links the project to a file in the Origin Private File System (fault-injection tests of row 98). */

@@ -2,15 +2,20 @@ import { quickHash } from '@/core/canonical';
 import { summariseOps, type HistoryState, type JournalOp } from '@/core/history';
 import { nowIso } from '@/core/ids';
 
-import { getDb, isQuotaError, type JournalRecord, type SnapshotKind, type SnapshotRecord } from './db';
+import { isQuotaError, type JournalRecord, type SnapshotKind, type SnapshotRecord } from './db';
+import type { JournalWorkerMessage, JournalWriter } from './journal-client';
+import { writeJournalBatch } from './journal-write';
 import type { Serializer, StoreCheckpointer } from './serializer-client';
 import type { AutosaveSettings } from './settings';
 import { compactJournal, pruneSnapshots, writeSnapshot } from './snapshots';
 
 /**
- * Continuous autosave (rows 90–92, 94, 96, 99). Every committed command is appended to an
- * in-memory queue and written to the IndexedDB journal in batches (first write ≤ FLUSH_DELAY_MS
- * after an edit, never later than 1 s). Snapshots (checkpoints) are serialised in a worker every
+ * Continuous autosave (rows 90–92, 94, 96, 99). Every committed command is appended to the
+ * IndexedDB journal in small batches. In the app, records go to the journal worker the moment they
+ * are committed and are written there on the worker's own timer (~100 ms), so a busy main thread
+ * cannot delay durability (NFR-9); this thread keeps unacknowledged records for the status and
+ * resends them if the worker dies. Without workers (unit tests) records are written here, first
+ * write ≤ FLUSH_DELAY_MS after an edit. Snapshots (checkpoints) are serialised in a worker every
  * `checkpointEvery` entries, after idle, on lifecycle events and before exports; automatic restore
  * points are taken every N minutes of active editing and before high-impact operations.
  */
@@ -54,6 +59,8 @@ export const autosaveTiming = {
   totalSyncMs: 0,
   samples: 0,
   maxByKind: {} as Record<string, number>,
+  /** Longest time from an edit to its journal record being durable (NFR-9), as reported by the writer. */
+  maxDurableMs: 0,
 };
 
 function timed<T>(kind: string, fn: () => T): T {
@@ -90,6 +97,10 @@ export class AutosaveEngine {
   /** Highest sequence number known to be durable in the journal. */
   private flushedSeq: number;
   private storeCheckpoint: StoreCheckpointer | null;
+  /** Off-main-thread journal writer (null: write on this thread). */
+  private writer: JournalWriter | null;
+  private unlistenWriter: (() => void) | null = null;
+  private waiters: { seq: number; resolve: () => void; reject: (e: Error) => void }[] = [];
   status: AutosaveStatus;
 
   constructor(
@@ -97,11 +108,23 @@ export class AutosaveEngine {
     private settings: AutosaveSettings,
     private serialize: Serializer,
     startSeq: number,
-    opts: { lastSnapshotSeq?: number; available?: boolean; storeCheckpoint?: StoreCheckpointer | null } = {},
+    opts: {
+      lastSnapshotSeq?: number;
+      available?: boolean;
+      storeCheckpoint?: StoreCheckpointer | null;
+      journalWriter?: JournalWriter | null;
+    } = {},
   ) {
     this.seq = startSeq;
     this.flushedSeq = startSeq;
     this.storeCheckpoint = opts.storeCheckpoint ?? null;
+    this.writer = opts.available === false ? null : (opts.journalWriter ?? null);
+    if (this.writer)
+      this.unlistenWriter = this.writer.listen(
+        host.projectId,
+        (m) => this.onWriterMessage(m),
+        () => this.onWriterCrash(),
+      );
     this.lastSnapshotSeq = opts.lastSnapshotSeq ?? startSeq;
     this.status = {
       state: opts.available === false ? 'unavailable' : 'saved',
@@ -169,7 +192,8 @@ export class AutosaveEngine {
     if (this.lastRecordAt) this.activeEditingMs += Math.min(now - this.lastRecordAt, 60_000);
     this.lastRecordAt = now;
     if (!this.firstPendingAt) this.firstPendingAt = now;
-    this.scheduleFlush();
+    if (this.writer && this.status.state !== 'unavailable') this.writer.record(rec, this.host.getMeta?.());
+    else this.scheduleFlush();
     this.scheduleIdle();
     this.emit({});
   }
@@ -198,6 +222,12 @@ export class AutosaveEngine {
 
   /** Writes all queued journal records. Resolves when they are durable (or rejects on failure). */
   flush(): Promise<void> {
+    if (this.writer) {
+      if (!this.queue.length || this.status.state === 'unavailable') return Promise.resolve();
+      const seq = this.seq;
+      this.writer.flush(this.host.projectId);
+      return new Promise((resolve, reject) => this.waiters.push({ seq, resolve, reject }));
+    }
     const p = this.flushChain.then(() => this.doFlush());
     this.flushChain = p.catch(() => {});
     return p;
@@ -212,41 +242,14 @@ export class AutosaveEngine {
     const batch = this.queue;
     this.queue = [];
     this.firstPendingAt = 0;
-    const db = getDb();
     const meta = this.host.getMeta?.();
-    const last = batch[batch.length - 1];
-    this.inFlight = db.transaction('rw', db.journal, db.projects, async () => {
-      await timed('journal', () => db.journal.bulkPut(batch));
-      const existing = await db.projects.get(this.host.projectId);
-      if (existing) {
-        await db.projects.put({
-          ...existing,
-          ...(meta ?? {}),
-          updatedAt: last.at,
-          lastSeq: Math.max(existing.lastSeq, last.seq),
-        });
-      }
-    });
+    this.inFlight = timed('journal', () => writeJournalBatch(this.host.projectId, batch, meta));
     this.emit({});
     try {
       await this.inFlight;
       this.inFlight = null;
       this.retryDelay = 0;
-      this.flushedSeq = Math.max(this.flushedSeq, last.seq);
-      this.entriesSinceSnapshot += batch.length;
-      this.emit({
-        lastSavedAt: nowIso(),
-        state: this.status.state === 'error' ? 'saving' : this.status.state,
-        reason: null,
-        quotaExceeded: false,
-        retryInMs: null,
-      });
-      this.host.onFlushed?.(batch);
-      if (this.entriesSinceSnapshot >= this.settings.checkpointEvery) void this.checkpoint('interval');
-      if (this.activeEditingMs >= this.settings.restorePointIntervalMin * 60_000) {
-        this.activeEditingMs = 0;
-        void this.restorePoint('auto-restore-point', 'Automatic');
-      }
+      this.durable(batch);
     } catch (e) {
       this.inFlight = null;
       // Keep the batch in memory, in order, ahead of anything recorded meanwhile.
@@ -269,6 +272,68 @@ export class AutosaveEngine {
       }, this.retryDelay);
       throw e;
     }
+  }
+
+  /** Bookkeeping once records are durable (from either write path). */
+  private durable(batch: JournalRecord[]) {
+    if (!batch.length) return;
+    const last = batch[batch.length - 1];
+    this.flushedSeq = Math.max(this.flushedSeq, last.seq);
+    this.entriesSinceSnapshot += batch.length;
+    this.emit({
+      lastSavedAt: nowIso(),
+      state: this.status.state === 'error' ? 'saving' : this.status.state,
+      reason: null,
+      quotaExceeded: false,
+      retryInMs: null,
+    });
+    this.host.onFlushed?.(batch);
+    if (this.entriesSinceSnapshot >= this.settings.checkpointEvery) void this.checkpoint('interval');
+    if (this.activeEditingMs >= this.settings.restorePointIntervalMin * 60_000) {
+      this.activeEditingMs = 0;
+      void this.restorePoint('auto-restore-point', 'Automatic');
+    }
+  }
+
+  private onWriterMessage(m: JournalWorkerMessage) {
+    if (this.disposed) return;
+    if (m.type === 'ack') {
+      const done = this.queue.filter((r) => r.seq <= m.upTo);
+      if (m.committedAt && done.length)
+        autosaveTiming.maxDurableMs = Math.max(
+          autosaveTiming.maxDurableMs,
+          m.committedAt - Date.parse(done[0].at),
+        );
+      this.queue = this.queue.filter((r) => r.seq > m.upTo);
+      if (!this.queue.length) this.firstPendingAt = 0;
+      this.durable(done);
+      const ready = this.waiters.filter((w) => w.seq <= m.upTo);
+      this.waiters = this.waiters.filter((w) => w.seq > m.upTo);
+      for (const w of ready) w.resolve();
+      if (!done.length) this.emit({});
+    } else {
+      this.emit({
+        state: 'error',
+        reason: m.quota
+          ? 'Browser storage is full. Changes are kept in memory — save the project to a file now.'
+          : `Could not write to browser storage (${m.message}). Retrying…`,
+        quotaExceeded: m.quota,
+        retryInMs: m.retryInMs,
+      });
+      const failed = this.waiters;
+      this.waiters = [];
+      for (const w of failed) w.reject(new Error(m.message));
+    }
+  }
+
+  /** The worker died: write everything not yet acknowledged on this thread (puts are idempotent). */
+  private onWriterCrash() {
+    this.writer = null;
+    this.unlistenWriter = null;
+    const waiting = this.waiters;
+    this.waiters = [];
+    const p = this.flush();
+    for (const w of waiting) p.then(w.resolve, w.reject);
   }
 
   /** Takes a checkpoint snapshot, then compacts the journal and prunes old snapshots. */
@@ -372,6 +437,7 @@ export class AutosaveEngine {
 
   dispose() {
     this.disposed = true;
+    this.unlistenWriter?.();
     for (const t of [this.flushTimer, this.idleTimer, this.retryTimer]) if (t) clearTimeout(t);
     this.listeners.clear();
   }

@@ -5,7 +5,9 @@ import { createLayer, createProject } from '@/core/project';
 
 import { AutosaveEngine } from './autosave';
 import { getBlobBytes, putBlob } from './blobs';
-import { getDb, PatDb, setDb } from './db';
+import { getDb, PatDb, setDb, type JournalRecord } from './db';
+import type { JournalWorkerMessage, JournalWriter } from './journal-client';
+import { writeJournalBatch } from './journal-write';
 import { DraftManager } from './drafts';
 import { buildProjectFile, readProjectFile } from './project-file';
 import { storeNewProject } from './projects';
@@ -356,5 +358,111 @@ describe('schema migrations on open (row 87)', () => {
     const again = await loadProjectState(h.state.project.id);
     expect(again.report.migratedFrom).toBeUndefined();
     expect(again.state.project).toEqual(loaded.state.project);
+  });
+});
+
+/** In-process stand-in for the journal worker (same batching and ack protocol). */
+function fakeWriter(opts: { failFirst?: number } = {}) {
+  let fails = opts.failFirst ?? 0;
+  const listeners = new Map<string, { fn: (m: JournalWorkerMessage) => void; onCrash: () => void }>();
+  const pending = new Map<string, JournalRecord[]>();
+  const commit = async (projectId: string) => {
+    const batch = pending.get(projectId) ?? [];
+    if (!batch.length) return;
+    pending.set(projectId, []);
+    if (fails > 0) {
+      fails--;
+      pending.set(projectId, [...batch, ...(pending.get(projectId) ?? [])]);
+      listeners
+        .get(projectId)
+        ?.fn({ type: 'error', projectId, message: 'disk busy', quota: false, retryInMs: 1 });
+      setTimeout(() => void commit(projectId), 1);
+      return;
+    }
+    await writeJournalBatch(projectId, batch);
+    listeners.get(projectId)?.fn({ type: 'ack', projectId, upTo: batch[batch.length - 1].seq });
+  };
+  const writer: JournalWriter = {
+    record(rec) {
+      const q = pending.get(rec.projectId) ?? [];
+      q.push(rec);
+      pending.set(rec.projectId, q);
+      setTimeout(() => void commit(rec.projectId), 5);
+    },
+    flush: (projectId) => void commit(projectId),
+    listen(projectId, fn, onCrash) {
+      listeners.set(projectId, { fn, onCrash });
+      return () => listeners.delete(projectId);
+    },
+  };
+  return { writer, crash: (projectId: string) => listeners.get(projectId)?.onCrash() };
+}
+
+describe('journal written off the main thread (row 90, NFR-9)', () => {
+  function harness(writer: JournalWriter) {
+    const h = new Harness();
+    h.engine.dispose();
+    h.engine = new AutosaveEngine(
+      { projectId: h.state.project.id, getState: () => h.state },
+      DEFAULT_AUTOSAVE_SETTINGS,
+      serializeSnapshot,
+      0,
+      {
+        journalWriter: writer,
+      },
+    );
+    return h;
+  }
+
+  it('records reach storage through the writer and flush() waits for the acknowledgement', async () => {
+    const { writer } = fakeWriter();
+    const h = harness(writer);
+    await storeNewProject(h.state.project);
+    for (let i = 0; i < 6; i++) h.addLayer(`W${i}`);
+    expect(h.engine.status.state).toBe('saving');
+    await h.engine.flush();
+    expect(h.engine.status.state).toBe('saved');
+    expect(h.engine.hasUnflushed).toBe(false);
+    const loaded = await loadProjectState(h.state.project.id);
+    expect(loaded.state.project).toEqual(h.state.project);
+    h.engine.dispose();
+  });
+
+  it('reports errors, keeps the records and recovers when the retry succeeds', async () => {
+    const { writer } = fakeWriter({ failFirst: 2 });
+    const h = harness(writer);
+    await storeNewProject(h.state.project);
+    const states: string[] = [];
+    h.engine.subscribe((s) => states.push(s.state));
+    h.addLayer('E1');
+    await expect.poll(() => h.engine.status.state).toBe('saved');
+    expect(states).toContain('error');
+    expect((await loadProjectState(h.state.project.id)).state.project).toEqual(h.state.project);
+    h.engine.dispose();
+  });
+
+  it('writes unacknowledged records on this thread when the worker dies', async () => {
+    const { writer, crash } = fakeWriter();
+    const h = harness(writer);
+    await storeNewProject(h.state.project);
+    // Records handed to a writer that never commits them, then the worker "crashes".
+    const silent: JournalWriter = { ...writer, record: () => {}, flush: () => {} };
+    h.engine.dispose();
+    h.engine = new AutosaveEngine(
+      { projectId: h.state.project.id, getState: () => h.state },
+      DEFAULT_AUTOSAVE_SETTINGS,
+      serializeSnapshot,
+      0,
+      {
+        journalWriter: { ...silent, listen: writer.listen },
+      },
+    );
+    h.addLayer('C1');
+    h.addLayer('C2');
+    const flushed = h.engine.flush();
+    crash(h.state.project.id);
+    await flushed;
+    expect((await loadProjectState(h.state.project.id)).state.project).toEqual(h.state.project);
+    h.engine.dispose();
   });
 });

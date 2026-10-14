@@ -752,6 +752,15 @@ function makeLargeDxf(targetBytes: number): { bytes: Uint8Array; entities: numbe
   return { bytes: enc(parts.join('')), entities: n };
 }
 
+/**
+ * V8 block coverage (`--coverage`, as in CI) slows parsing about 3× and CI runs test files in
+ * parallel, so the 5 s bound is asserted on plain runs; coverage runs keep a loose sanity bound (as
+ * in src/geometry/offset.test.ts). NFR-2 itself is measured by e2e/perf.spec.ts in its own CI job.
+ */
+const coverageEnabled =
+  (globalThis as { __vitest_worker__?: { config?: { coverage?: { enabled?: boolean } } } }).__vitest_worker__
+    ?.config?.coverage?.enabled === true;
+
 describe('performance', () => {
   it('parses a generated 20 MB ASCII DXF (~200 000 entities) in under 5 s', { timeout: 60000 }, () => {
     const { bytes, entities } = makeLargeDxf(20 * 1024 * 1024);
@@ -767,6 +776,6 @@ describe('performance', () => {
     expect(r.store.count).toBe(entities);
     expect(r.report.counts.LINE + r.report.counts.LWPOLYLINE + r.report.counts.TEXT).toBe(entities);
     expect(r.extents.minX).toBe(600000);
-    expect(ms).toBeLessThan(5000);
+    expect(ms).toBeLessThan(coverageEnabled ? 20000 : 5000);
   });
 });

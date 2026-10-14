@@ -1,0 +1,138 @@
+# Plot Analysis Tool — architecture guide
+
+This guide is for contributors. It explains how the code is organised and the conventions every
+feature follows. The requirements live in `plot-analysis-tool-FDR.md` (register rows are cited as
+"row N").
+
+## Commands
+
+| Task           | Command                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| Dev server     | `npm run dev`                                                                              |
+| Typecheck      | `npm run typecheck` (`tsc -b`; generates `src/generated/licences.json` first)              |
+| Lint / format  | `npm run lint`, `npm run format:check` (`npx prettier --write <files>`)                    |
+| Unit tests     | `npm test` (Vitest, Node environment, `fake-indexeddb`)                                    |
+| Build          | `npm run build` (typecheck, Vite build, `scripts/check-dist.mjs` URL audit)                |
+| E2E            | `npm run e2e` (Playwright; serves `dist/` with `vite preview` on `PAT_PORT`, default 4173) |
+| Offline bundle | `npm run bundle`, `npm run test:bundle`                                                    |
+
+Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y npm@11 install …`.
+
+## Hard rules (FDR §4)
+
+- **No network.** Nothing may fetch from another origin. The CSP in the built `index.html` blocks
+  it, `check-dist` fails the build on loadable external URLs, and every E2E test fails on any
+  non-origin request (`e2e/fixtures.ts`). Bundle every asset (fonts, wasm, cmaps) locally.
+- **No `eval` / `new Function`** (ESLint enforces; CSP has no `unsafe-eval`).
+- **UI is shadcn/ui** — vendored in `src/components/ui`. Use those components, `lucide-react`
+  icons, `sonner` toasts (`toast` from `sonner`), Tailwind v4 classes. No other UI kits.
+- **No lost work.** Every project change goes through `commit()` (journaled within ~150 ms).
+  Every multi-step tool saves an in-progress **draft** (`session.drafts.set`) within 1 s
+  (C7, row 93). High-impact operations call `currentSession()?.beforeHighImpact(label)` first
+  (automatic restore point, row 96).
+- **Geometry is float64 world metres.** Never round stored geometry. Display formatting uses
+  `src/core/units.ts` (`formatNumber`, `formatLength`, `parseLength`, area factors).
+- **GPL isolation (D-1):** `@mlightcad/libredwg-web` is only imported from the DWG worker.
+
+## Source layout
+
+```
+src/core/         data model (types.ts), units, affine, ids, history (Immer patches), migrations
+src/store/        zustand stores: project (history/commit/undo), view (camera, selection, snap,
+                  active tool), ui (theme, panels, dialogs), app
+src/persistence/  IndexedDB (Dexie) journal/snapshots/recovery/drafts/settings, .patproj files
+src/app/          session (open/lock/autosave), commands registry, menus, features loader
+src/components/   ui/ (shadcn), app/ (shell, dialogs), inspector/ (panels), canvas/, import/
+src/render/       canvas controller (pointer/keys/overlays/tools), WebGL2 underlay renderer, view math
+src/underlay/     EntityStore (typed arrays shared by DXF/DWG/PDF), models store, picking
+src/import/       file detection, DXF/DWG/PDF parsers (in workers), import pipeline
+src/geometry/     pure geometry: measure, convert, clipper (Clipper2), offset, boolean, calibration,
+                  intersect, nearest, simplify, polyline-edit, hit
+src/tracing/      chain tracer and boundary detection over underlay entities
+src/tables/       CSV/TSV/XLSX/clipboard parsing, column suggestion, contour computation,
+                  filters, style rules, label templates, validation, diff
+src/export/       Scene model + PDF (pdf-lib), SVG, canvas/PNG, DXF writer, fonts, bidi shaping
+src/features/     self-registering feature modules (see below)
+src/workers/      module workers (snapshot, zip, cad, dwg, pdf-extract)
+e2e/              Playwright specs; tests/fixtures/ reference files
+```
+
+## Feature modules
+
+`src/app/features.ts` imports every `src/features/<name>/register.ts` at build time and calls its
+`register()` (which may return an unregister function). A feature adds itself to shared registries
+instead of editing shared components:
+
+| Registry                             | Import from                                | Use                                                                                        |
+| ------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `registerCommands([...])`            | `@/app/commands`                           | menu items, palette entries, shortcuts, tool-rail buttons (`rail: true`)                   |
+| `registerTool(tool)` / `setTool(id)` | `@/tools/registry`                         | canvas tools                                                                               |
+| `registerOverlay(z, draw)`           | `@/render/canvas-controller`               | Canvas2D overlay drawing each frame (objects z=20, labels z=30, selection z=60, snap z=90) |
+| `registerExtentProvider(fn)`         | `@/render/canvas-controller`               | bounds included in Zoom extents                                                            |
+| `kindRenderers[kind] = fn`           | `@/features/objects/render`                | custom drawing for an object kind (measurement, text, callout, tag…)                       |
+| `propertySections`                   | `@/components/inspector/property-sections` | sections in the Properties tab                                                             |
+| `layerSections`                      | `@/components/inspector/LayersPanel`       | sections in the Layers tab                                                                 |
+| `dataPanels`, `legendPanels`         | `@/components/inspector/panels`            | Data / Legend tab content                                                                  |
+| `extraDialogs`                       | `@/components/app/extra-dialogs`           | dialogs opened with `useUiStore.getState().openDialog(id)`                                 |
+
+Menus are `File, Edit, View, Draw, Trace, Offset, Data, Export, Help` (`MenuGroup`). Shortcut
+strings look like `Mod+Shift+N`, `Alt+[`, `F3`, single letters (`C`). Check `allCommands()` for
+collisions before choosing one.
+
+## Project state and undo
+
+- `getProject()` (non-reactive) and `useProject(selector)` (React) read the current project.
+- `commit(label, draft => { … }, { coalesceKey? })` applies one undoable change (Immer recipe,
+  mutate the draft). Returns `false` when read-only. One user action = one commit; consecutive
+  commits with the same `coalesceKey` within 1.5 s merge (sliders, typing).
+- Never keep project objects in component state across commits; re-read from the store.
+- Undo/redo, journal, snapshots, multi-tab following and recovery are automatic.
+- Non-project UI state: `useViewStore` (view `{cx, cy, scale px/m, rotation}`, `selection`,
+  `activeTool`, snap settings), `useUiStore` (dialogs, inspector tab, theme).
+- Prompts: `promptText({title, label, defaultValue})`, `confirmAction({title, description,
+destructive})` from `@/app/prompt` (never `window.prompt/confirm`).
+
+## Coordinates
+
+- **World** = metres, +Y up. For drawings calibrated with plant coordinates, world coordinates
+  _are_ plant E/N.
+- A drawing's entities are in **drawing units** (CAD units, or PDF points with origin at the page's
+  bottom-left). `drawingPlacement(d)` (`@/underlay/pick`) = alignment ∘ (calibration.transform or
+  the default unit scale) maps drawing units → world.
+- Screen: `frame.toScreen(pt)` / `frame.toWorld(pt)`; `frame.scale` = px per metre.
+
+## Tools
+
+A `Tool` (`src/tools/types.ts`) receives pointer events with `world` (raw) and `pt` (snapped and
+constrained) and draws previews in `render(g, frame)`. For point-collecting tools use
+`createPickTool(spec)` from `@/features/draw/pick-tool`: it handles snapping bases, typed input
+(`x,y`, `@dx,dy`, `@d<angle`, plain distance), Backspace/Esc/Enter/double-click, previews and
+drafts. Tools that create objects set `creates: true` and finish with
+`addObjects([{ kind, geometry, … }], 'Undo label')` from `@/features/objects/ops`.
+
+Typed input is captured only while the canvas has focus; tools may allow extra leading characters
+with `typedStart`.
+
+## Analysis objects
+
+`AnalysisObject` (`src/core/types.ts`) has a `kind`, a `geometry` (circle, arc, rect, ellipse,
+polyline with bulges, multipolygon, point), a per-object `style` override on top of its layer
+style (`resolveStyle`), an optional `label` (template fields via `labelText`), attributes,
+`derived` (live offsets) and `measurement` info. Helpers: `@/features/objects/ops` (add, update
+geometry, move/rotate/scale/mirror, delete, reorder), `labels.ts` (`measures(geometry)` →
+area/perimeter/length/radius…), `pick.ts`, `grips.ts`.
+
+## Underlay access
+
+`useModelsStore.getState().models[drawingId]` gives the parsed `EntityStore` (typed arrays: entity
+types, layers, flags, geometry offsets), a Flatbush spatial index and text index.
+`pickUnderlay(...)`, `entityToGeometry(store, i)` (exact geometry of an entity in drawing units;
+transform with `drawingPlacement`), `entityTypeName`, `entityText`.
+
+## Testing conventions
+
+- Unit tests next to the code (`*.test.ts`), Vitest, no DOM.
+- E2E specs in `e2e/*.spec.ts` import `test, expect, openApp, createProject` from
+  `./fixtures` (the egress guard is automatic). Prefer `data-testid` and accessible names.
+  `window.__pat` exposes `project()`, `session()`, `store()` for assertions.
+- Fixtures in `tests/fixtures/<kind>/`; generators in `scripts/fixtures/`.

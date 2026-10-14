@@ -19,6 +19,11 @@ export type DialogId =
   | 'open-project'
   | 'storage'
   | 'help'
+  | 'import-report'
+  | 'pdf-pages'
+  | 'align'
+  | 'measure'
+  | 'labels'
   | null;
 
 interface Prefs {

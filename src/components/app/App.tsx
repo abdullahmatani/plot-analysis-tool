@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { handleShortcut } from '@/app/commands';
 import { registerCoreCommands } from '@/app/core-commands';
+import { registerFeatures } from '@/app/features';
 import { initApp } from '@/app/init';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -33,7 +34,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    const unregister = registerCoreCommands();
+    const unregisterCore = registerCoreCommands();
+    const unregisterFeatures = registerFeatures();
     const onKey = (e: KeyboardEvent) => {
       handleShortcut(e);
     };
@@ -43,7 +45,8 @@ export function App() {
       void initApp();
     }
     return () => {
-      unregister();
+      unregisterCore();
+      unregisterFeatures();
       window.removeEventListener('keydown', onKey);
     };
   }, []);

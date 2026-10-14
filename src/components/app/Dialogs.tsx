@@ -27,6 +27,7 @@ import { SettingsDialog } from './SettingsDialog';
 import { ShortcutsDialog } from './ShortcutsDialog';
 import { StorageDialog } from './StorageDialog';
 import { extraDialogs } from './extra-dialogs';
+import { PdfPagePickerHost } from '@/import/pdf/page-picker';
 
 function NewProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const [name, setName] = useState('Untitled project');
@@ -113,6 +114,7 @@ export function Dialogs() {
       <CommandPalette />
       <PromptHost />
       <QuotaAlert />
+      <PdfPagePickerHost />
       <NewProjectDialog {...props('new-project')} />
       <ShortcutsDialog {...props('shortcuts')} />
       <AboutDialog {...props('about')} />

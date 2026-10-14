@@ -1,10 +1,15 @@
 import { createProject, expect, openApp, test } from './fixtures';
 
-test.describe('offline PWA (row 6) @smoke', () => {
+test.describe('offline PWA (row 6)', () => {
+  // Chromium only: Playwright cannot route navigations through a service worker while offline in
+  // Firefox/WebKit (NS_ERROR_OFFLINE / internal error), so offline start-up is verified on the
+  // primary browsers (row 83).
   test('after one load, the app starts and works with the network disconnected', async ({
     page,
     context,
+    browserName,
   }) => {
+    test.skip(browserName !== 'chromium', 'Service-worker offline navigation is only automatable in Chromium.');
     await openApp(page);
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
@@ -33,7 +38,7 @@ test.describe('offline PWA (row 6) @smoke', () => {
     await context.setOffline(false);
   });
 
-  test('the production build carries a strict Content Security Policy', async ({ page }) => {
+  test('the production build carries a strict Content Security Policy @smoke', async ({ page }) => {
     await openApp(page);
     const csp = await page.evaluate(
       () =>

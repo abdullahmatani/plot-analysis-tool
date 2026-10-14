@@ -49,7 +49,8 @@ export async function newProject(name = 'Untitled project'): Promise<void> {
   }
   await storeNewProject(project);
   const first = (await getDb().projects.count()) === 1;
-  if (first) await ensurePersistence();
+  // Not awaited: some browsers (Firefox) show a permission prompt and only resolve after the user answers.
+  if (first) void ensurePersistence();
   await openSession(project.id);
   await refreshRecents();
 }

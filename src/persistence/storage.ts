@@ -14,6 +14,7 @@ export async function requestPersistence(): Promise<boolean | null> {
     if (!navigator.storage?.persist) return null;
     if (await navigator.storage.persisted()) return true;
     return await navigator.storage.persist();
+    // (Callers must not block on this: Firefox resolves only after the user answers a prompt.)
   } catch {
     return null;
   }

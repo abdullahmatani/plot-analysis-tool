@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Lint, typecheck, unit tests, build, E2E (Chromium), offline bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - name: Unit tests with coverage (offline)
+        run: npm run test:coverage
+      - name: Build (static dist/, external-URL check)
+        run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: E2E (zero-egress guard on every test)
+        run: npx playwright test --project=chromium
+      - name: Offline bundle (Node, Python and PowerShell launchers)
+        run: npm run bundle && npm run test:bundle
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: offline-bundle
+          path: dist-bundle/*.zip
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+
+  fault-injection:
+    name: Autosave fault injection (100 kill-points)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=faults
+        env:
+          KILL_POINTS: '100'
+
+  secondary-browsers:
+    name: Smoke tests on Firefox and WebKit; E2E on Edge
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps firefox webkit msedge
+      - run: npx playwright test --project=firefox --project=webkit
+        env:
+          PAT_SECONDARY: '1'
+      - run: npx playwright test --project=msedge
+        env:
+          PAT_EDGE: '1'
+
+  performance:
+    name: Performance budget (NFR-1, NFR-2, NFR-4, NFR-10)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # CI runners render WebGL in software: GPU timings are reported, not enforced (see e2e/perf.spec.ts).
+      # On the reference machine run `PAT_PERF_STRICT=1 npm run e2e:perf` to enforce the FDR budgets.
+      - run: npx playwright test --project=perf
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: test-results/perf.json
+          if-no-files-found: ignore

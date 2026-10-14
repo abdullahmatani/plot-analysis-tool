@@ -1,0 +1,51 @@
+# Plot Analysis Tool
+
+An offline, private, in-browser tool for analysing plant plot plans: import DXF, DWG or PDF
+drawings; calibrate their scale; trace, offset and highlight areas; overlay consequence contours
+from results tables; and export true-scale PDF, PNG, SVG, DXF and tables.
+
+**Privacy:** the app makes no network requests. Drawings, tables and projects never leave the
+computer. A strict Content-Security-Policy blocks other hosts, and every automated end-to-end test
+fails if a request leaves the app's origin.
+
+Requirements and progress are tracked in [`plot-analysis-tool-FDR.md`](plot-analysis-tool-FDR.md).
+Current product version: **0.1.0**. See [`CHANGELOG.md`](CHANGELOG.md) for what each register row
+delivers, and [`docs/USER-DECISIONS.md`](docs/USER-DECISIONS.md) for the items that need your
+decision or verification.
+
+## Using it
+
+- **Hosted (PWA):** serve `dist/` from any static web server. After the first visit the app works
+  fully offline and can be installed.
+- **Air-gapped PCs:** `npm run bundle` creates `dist-bundle/plot-analysis-tool-<version>.zip`. Unzip
+  it and run `Start Plot Analysis Tool.cmd` on Windows (no install or admin rights needed),
+  `start.sh` (Python 3 or Node), or `node serve.mjs`. The launchers listen on 127.0.0.1 only;
+  `README.txt` in the bundle explains each one.
+- **Help:** press F1 in the app for the quick start, the workflow guides (W1–W4) and the tool
+  reference.
+
+## Development
+
+Requires Node 22. Use npm 11 for dependency changes (`npx -y npm@11 install …`): npm 10 has a
+lockfile bug with this project. `npm ci` works with either version.
+
+| Task                          | Command                                                            |
+| ----------------------------- | ------------------------------------------------------------------ |
+| Install                       | `npm ci`                                                           |
+| Dev server                    | `npm run dev`                                                      |
+| Lint, format, types           | `npm run lint`, `npm run format:check`, `npm run typecheck`        |
+| Unit tests (+ coverage gate)  | `npm test`, `npm run test:coverage`                                |
+| Build (+ audit of the bundle) | `npm run build`                                                    |
+| End-to-end tests              | `npm run e2e` (Chromium), `npm run e2e:faults`, `npm run e2e:perf` |
+| Offline bundle                | `npm run bundle && npm run test:bundle`                            |
+
+Further reading: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (code structure and conventions),
+[`docs/TEST-PLAN.md`](docs/TEST-PLAN.md) (suites, reference drawing set, accuracy targets) and
+[`docs/SECURITY-REVIEW.md`](docs/SECURITY-REVIEW.md).
+
+## Licences
+
+The app's third-party components and their licences are listed in About → Licences; the list is
+generated at build time from the dependency tree. The DWG reader (LibreDWG, GPL-3.0) ships only in
+its own worker chunk. The test DWG files in `tests/fixtures/dwg` come from LibreDWG's test data
+(GPL-3.0) and are not part of the app.

@@ -1,0 +1,16 @@
+dist
+dist-bundle
+coverage
+node_modules
+playwright-report
+test-results
+public/pdfjs
+tests/fixtures/**/*.dxf
+tests/fixtures/**/*.dwg
+tests/fixtures/**/*.pdf
+package-lock.json
+plot-analysis-tool-FDR.md
+tests/fixtures
+.claude
+src/generated
+public/fonts

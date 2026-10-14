@@ -1,0 +1,87 @@
+# Security and privacy review checklist (row 88)
+
+This checklist is prepared for sign-off. Each item names the automated check behind it, which runs
+in CI on every push. **Sign-off needs a person** (see the last section).
+
+## 1. Zero egress (C1, C2, NFR-8)
+
+| Check                                                                      | Evidence                                                                                                                                                                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Every E2E test fails on any request to a host other than the app's origin  | `e2e/fixtures.ts` (`guardEgress`, auto-fixture on all specs)                                                                                                                                      |
+| The production build contains no loadable external URL                     | `scripts/check-dist.mjs` (runs in `npm run build`); inert identifiers (XML namespaces, licence texts, library error-doc strings, pdf.js/core-js URL parsing probes) are allow-listed individually |
+| Fonts, pdf.js CMaps, standard fonts, decoders and ICC profiles are bundled | `vite.config.ts` `bundledAssets` plugin; `check-dist`                                                                                                                                             |
+| The app works with the network disconnected after the first load           | `e2e/offline.spec.ts`                                                                                                                                                                             |
+| The offline bundle's launchers listen on the loopback interface only       | `scripts/bundle/serve.*`, `npm run test:bundle`                                                                                                                                                   |
+
+## 2. Content-Security-Policy (C3)
+
+The policy is set as a `<meta>` tag in `index.html` and as an HTTP header by the bundle launchers
+and `vite preview`:
+
+```
+default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:;
+connect-src 'self' blob: data:; img-src 'self' blob: data:; font-src 'self' data:;
+style-src 'self' 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'self';
+form-action 'none'; manifest-src 'self'
+```
+
+- `connect-src 'self'` blocks fetch, XHR and WebSocket to any other host.
+- `'wasm-unsafe-eval'` is required to compile the bundled WebAssembly (Clipper2, pdf.js decoders,
+  LibreDWG). It does not allow JavaScript `eval`.
+- `style-src 'unsafe-inline'` is required by Radix UI and Tailwind for runtime style attributes.
+  No user content is ever rendered as HTML.
+- Evidence: `e2e/offline.spec.ts` "the production build carries a strict Content Security Policy".
+
+## 3. No `eval` (row 88)
+
+| Check        | Evidence                                                                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Source code  | ESLint `no-eval`, `no-implied-eval`, `no-new-func` (`eslint.config.js`)                                                                                                                                |
+| Built bundle | `check-dist` rejects global `eval(`, `new Function(` and `Function(…)` in every chunk except two documented ones: core-js's unreachable global-object fallback, and the LibreDWG worker (decision U-1) |
+| pdf.js       | v6 has no eval path (font programs are interpreted)                                                                                                                                                    |
+
+## 4. Untrusted input handling
+
+Every input file is parsed **in a Web Worker**: DXF, DWG, PDF, CSV, TSV, XLSX, and the zip of
+.patproj files. So a malformed file cannot freeze the UI, and the worker can be terminated.
+
+- DWG: size guard (200 MB); time limit (60 s plus 15 s per MB); WebAssembly crashes become
+  readable errors. Tests: `src/import/dwg/read.test.ts`.
+- DXF: malformed-file fixtures (`tests/fixtures/dxf/malformed.dxf`) parse with errors reported,
+  never thrown to the UI.
+- File type is detected by signature, not by extension (`src/import/detect.ts`).
+- Text from drawings and tables is rendered as text (React escaping, Canvas `fillText`). There is
+  no `dangerouslySetInnerHTML` or `innerHTML` anywhere in `src/`.
+- Project files are validated on open, and schema migrations are versioned
+  (`src/core/migrations.ts`, `src/persistence/project-file.ts`).
+
+## 5. Local data
+
+- Projects, the journal, snapshots and drafts are stored in IndexedDB, and source drawings and each
+  project's backup copy in the Origin Private File System, in this browser profile only. The Storage
+  dialog lists and deletes them ("Clear local data" empties both).
+- Saving to a file uses the File System Access API: the user picks the file, and permission is
+  per-handle and revocable. Browsers without it fall back to downloads.
+- The service worker serves only same-origin precached assets (Workbox, `registerType: 'prompt'`).
+
+## 6. Dependencies and licences
+
+| Check                                                                            | Evidence                                                                          |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `npm audit` (all and production-only)                                            | 0 vulnerabilities on 14 Oct 2026 — re-run before release                          |
+| Licence list generated at build time and matching the production dependency tree | `scripts/gen-licences.mjs`, `scripts/licences.test.ts`; shown in About → Licences |
+| GPL-3.0 code (LibreDWG) only in its own worker chunk                             | `check-dist` (row 25)                                                             |
+| Dependency versions pinned by `package-lock.json`; `npm ci` in CI                | `.github/workflows/ci.yml`                                                        |
+
+## 7. Open items for sign-off
+
+- **U-1 (DWG reader vs. CSP).** See `docs/USER-DECISIONS.md`. Until it is decided, the strict
+  CSP header blocks the DWG reader.
+- **D-1 licensing.** Get legal advice on distributing the GPL-3.0 LibreDWG component.
+- **Reviewer sign-off.** A person should review this checklist and the CSP, and confirm the
+  zero-egress behaviour on the target machines (for example with the browser's network panel
+  or a firewall log during a working session).
+
+| Reviewer | Date | Result |
+| -------- | ---- | ------ |
+|          |      |        |

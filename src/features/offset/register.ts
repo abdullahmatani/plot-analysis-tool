@@ -96,7 +96,8 @@ async function promptChordTolerance() {
 
 export function register() {
   const unDerive = registerDerivation(derivation);
-  if (!propertySections.includes(OffsetSection)) propertySections.push(OffsetSection);
+  // First, so the live distance is visible without scrolling past the style editor.
+  if (!propertySections.includes(OffsetSection)) propertySections.unshift(OffsetSection);
   if (!extraDialogs.some((d) => d.id === OFFSET_DIALOG))
     extraDialogs.push({ id: OFFSET_DIALOG, Component: OffsetDialog });
   const unPreview = registerOverlay(61, drawLivePreview);

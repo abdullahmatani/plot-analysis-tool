@@ -82,3 +82,26 @@ jobs:
       - run: npx playwright test --project=msedge
         env:
           PAT_EDGE: '1'
+
+  performance:
+    name: Performance budget (NFR-1, NFR-2, NFR-4, NFR-10)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # CI runners render WebGL in software: GPU timings are reported, not enforced (see e2e/perf.spec.ts).
+      # On the reference machine run `PAT_PERF_STRICT=1 npm run e2e:perf` to enforce the FDR budgets.
+      - run: npx playwright test --project=perf
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: test-results/perf.json
+          if-no-files-found: ignore

@@ -186,9 +186,11 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/geometry/**/*.ts'],
+      // Row 85: geometry modules (incl. tracing geometry) keep ≥ 90 % coverage.
+      include: ['src/geometry/**/*.ts', 'src/tracing/**/*.ts'],
       exclude: ['**/*.test.ts'],
       reporter: ['text-summary', 'json-summary'],
+      thresholds: { statements: 90, branches: 90, functions: 90, lines: 90 },
     },
   },
 });

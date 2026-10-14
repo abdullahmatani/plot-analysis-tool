@@ -1,5 +1,5 @@
 import { Plus, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 
 import { promptText } from '@/app/prompt';
 import { newId } from '@/core/ids';
@@ -668,6 +668,9 @@ function AttributesSection({ o, readOnly }: { o: AnalysisObject; readOnly: boole
   );
 }
 
+/** Extra sections for a single selected object, contributed by features (text, tags, offsets…). */
+export const objectSections: ComponentType<{ o: AnalysisObject; readOnly: boolean }>[] = [];
+
 export function SelectionProperties() {
   const selection = useViewStore((s) => s.selection);
   const project = useProject((p) => p);
@@ -725,6 +728,7 @@ export function SelectionProperties() {
           </SelectContent>
         </Select>
       </Field>
+      {objs.length === 1 && objectSections.map((S, i) => <S key={i} o={o} readOnly={readOnly} />)}
       {m && (
         <div className="space-y-0.5 text-xs" data-testid="object-measures">
           {m.area !== undefined && (

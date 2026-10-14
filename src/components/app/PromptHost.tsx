@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export function PromptHost() {
   const req = usePromptStore((s) => s.request);
@@ -44,7 +45,30 @@ export function PromptHost() {
             }}
           >
             {req.label && <Label htmlFor="prompt-input">{req.label}</Label>}
-            <Input id="prompt-input" autoFocus value={value} onChange={(e) => setValue(e.target.value)} />
+            {req.multiline ? (
+              <Textarea
+                id="prompt-input"
+                autoFocus
+                dir="auto"
+                rows={4}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && value.trim()) {
+                    e.preventDefault();
+                    finish(value.trim());
+                  }
+                }}
+              />
+            ) : (
+              <Input
+                id="prompt-input"
+                autoFocus
+                dir="auto"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            )}
           </form>
         )}
         <DialogFooter>

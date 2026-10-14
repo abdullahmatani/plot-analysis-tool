@@ -150,13 +150,20 @@ export function updateGeometries(
   );
 }
 
+/** Called after objects were deleted (e.g. to offer renumbering of bubble tags, row 41). */
+export const deleteHooks: ((deleted: AnalysisObject[]) => void)[] = [];
+
 export function deleteObjects(ids: string[]) {
   if (!ids.length) return false;
   const set = new Set(ids);
+  const deleted = getProject()?.objects.filter((o) => set.has(o.id)) ?? [];
   const ok = commit(ids.length === 1 ? 'Delete object' : `Delete ${ids.length} objects`, (d) => {
     d.objects = d.objects.filter((o) => !set.has(o.id));
   });
-  if (ok) useViewStore.getState().set({ selection: [] });
+  if (ok) {
+    useViewStore.getState().set({ selection: [] });
+    for (const h of deleteHooks) h(deleted);
+  }
   return ok;
 }
 

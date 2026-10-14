@@ -2,6 +2,8 @@ import { formatNumber, fromMetres, AREA_FACTORS, AREA_LABEL, UNIT_LABEL } from '
 import type { AnalysisObject, Geometry, Project, Pt } from '@/core/types';
 import { area, bounds, centroid, length, perimeter, radiusOf } from '@/geometry/measure';
 import { isClosed } from '@/geometry/convert';
+import { nearestOnPrim } from '@/geometry/nearest';
+import { primsFromGeometry } from '@/geometry/prims';
 import { renderTemplate } from '@/tables/template';
 
 import { layerOf } from './style';
@@ -72,9 +74,24 @@ export function labelAnchor(o: AnalysisObject): Pt {
   const g = o.geometry;
   const placement = o.label?.placement ?? 'centroid';
   if (g.type === 'point') return g.p;
-  if (placement === 'top' || placement === 'boundary') {
+  if (placement === 'top') {
     const b = bounds(g);
     return { x: (b.minX + b.maxX) / 2, y: b.maxY };
+  }
+  if (placement === 'boundary') {
+    // The boundary point nearest to the top-centre of the bounds.
+    const b = bounds(g);
+    const target = { x: (b.minX + b.maxX) / 2, y: b.maxY };
+    let best = target;
+    let bestD = Infinity;
+    for (const prim of primsFromGeometry(g)) {
+      const r = nearestOnPrim(target, prim);
+      if (r.dist < bestD) {
+        bestD = r.dist;
+        best = r.pt;
+      }
+    }
+    return best;
   }
   if (g.type === 'polyline' && !g.closed) {
     // Midpoint along an open line.

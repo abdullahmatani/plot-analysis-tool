@@ -10,6 +10,8 @@ export interface PromptRequest {
   defaultValue?: string;
   confirmLabel?: string;
   destructive?: boolean;
+  /** Multi-line text entry (Ctrl+Enter submits). */
+  multiline?: boolean;
   resolve: (value: string | boolean | null) => void;
 }
 

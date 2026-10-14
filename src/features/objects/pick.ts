@@ -1,4 +1,4 @@
-import type { AnalysisObject, Bounds, Project, Pt } from '@/core/types';
+import type { AnalysisObject, Bounds, ObjectKind, Project, Pt } from '@/core/types';
 import {
   distanceToGeometry,
   geometryInsidePolygon,
@@ -13,6 +13,14 @@ import { expand, geomBounds, intersects } from './geometry-cache';
 import { resolveStyle } from './style';
 
 /** Object hit-testing for selection (row 43). Hidden and locked layers are excluded. */
+
+/**
+ * Custom hit tests for kinds whose visible extent is not their geometry (text boxes, tag bubbles).
+ * Returns a distance in world units (≤ tolerance counts as a hit) or null when not hit.
+ */
+export const kindHitTests: Partial<
+  Record<ObjectKind, (o: AnalysisObject, world: Pt, scale: number, p: Project) => number | null>
+> = {};
 
 function selectable(p: Project): (o: AnalysisObject) => boolean {
   const off = new Set(p.layers.filter((l) => !l.visible || l.locked).map((l) => l.id));
@@ -33,6 +41,15 @@ export function pickObject(p: Project, world: Pt, scale: number, tolPx = 6): Ana
   let best: AnalysisObject | null = null;
   let bestD = Infinity;
   for (const o of ordered) {
+    const custom = kindHitTests[o.kind];
+    if (custom) {
+      const d = custom(o, world, scale, p);
+      if (d !== null && d <= tol && d < bestD) {
+        best = o;
+        bestD = d;
+      }
+      continue;
+    }
     const b = expand(geomBounds(o.geometry), tol);
     if (world.x < b.minX || world.x > b.maxX || world.y < b.minY || world.y > b.maxY) continue;
     const d = distanceToGeometry(world, o.geometry);

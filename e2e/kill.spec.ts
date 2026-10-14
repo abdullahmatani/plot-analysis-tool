@@ -151,6 +151,10 @@ test('autosave survives 100 random kill-points with zero lost edits beyond NFR-9
     const editCount = 3 + Math.floor(rand() * 25);
     const gap = Math.floor(rand() * 80);
     const killDelay = 150 + Math.floor(rand() * 1800);
+    if (process.env.KILL_VERBOSE)
+      console.log(
+        `iteration ${iter}: ${phase}, ${editCount} edits, gap ${gap} ms, kill after ${killDelay} ms`,
+      );
     void page
       .evaluate(
         async ([iter, editCount, gap, phase]) => {

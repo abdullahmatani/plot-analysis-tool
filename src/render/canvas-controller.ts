@@ -265,6 +265,8 @@ export class CanvasController {
       }
       if (this.renderer) {
         const t0 = performance.now();
+        // Large drawings are uploaded over several frames (NFR-2: no long main-thread blocks).
+        if (this.renderer.uploadPending()) this.requestRender();
         this.renderer.render(f.view, f.width, f.height, states, lightBg);
         this.lastGpuMs = performance.now() - t0;
       }

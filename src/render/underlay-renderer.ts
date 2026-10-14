@@ -1,9 +1,9 @@
-import type { Affine2D } from '@/core/types';
-import type { RenderData } from '@/underlay/render-data';
+import type { Affine2D, Bounds } from '@/core/types';
+import type { RenderData, SegmentBatch, TriangleBatch } from '@/underlay/render-data';
 import { SEG_STRIDE, TRI_STRIDE } from '@/underlay/render-data';
 import type { ViewTransform } from '@/store/view';
 
-import { batchClipTransform } from './view';
+import { batchClipTransform, worldToScreen } from './view';
 
 /**
  * WebGL2 underlay renderer (decision D-2, option (a) with a minimal custom WebGL2 layer instead of
@@ -169,7 +169,41 @@ interface GpuBatch {
   count: number;
   ox: number;
   oy: number;
+  bounds?: Bounds;
 }
+
+/** Whether a batch's bounds (drawing units) intersect the viewport (with a margin for line widths). */
+function onScreen(
+  b: Bounds | undefined,
+  placement: Affine2D,
+  view: ViewTransform,
+  w: number,
+  h: number,
+): boolean {
+  if (!b || !Number.isFinite(b.minX)) return true;
+  const [a, bb, c, d, e, f] = placement;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const [x, y] of [
+    [b.minX, b.minY],
+    [b.maxX, b.minY],
+    [b.maxX, b.maxY],
+    [b.minX, b.maxY],
+  ]) {
+    const s = worldToScreen(view, w, h, { x: a * x + c * y + e, y: bb * x + d * y + f });
+    if (s.x < minX) minX = s.x;
+    if (s.y < minY) minY = s.y;
+    if (s.x > maxX) maxX = s.x;
+    if (s.y > maxY) maxY = s.y;
+  }
+  const m = 64;
+  return maxX >= -m && minX <= w + m && maxY >= -m && minY <= h + m;
+}
+
+/** Bytes of vertex data uploaded per frame, so large drawings never block the UI (NFR-2). */
+export const UPLOAD_BUDGET_BYTES = 8 * 1024 * 1024;
 
 interface GpuTile {
   tex: WebGLTexture;
@@ -186,6 +220,9 @@ interface GpuDrawing {
   layers: WebGLTexture;
   patterns: WebGLTexture;
   tiles: GpuTile[];
+  /** Batches waiting to be uploaded (see `uploadPending`). */
+  pendingSegs?: SegmentBatch[];
+  pendingTris?: TriangleBatch[];
 }
 
 export interface DrawingRenderState {
@@ -264,58 +301,94 @@ export class UnderlayRenderer {
     return this.drawings.has(id);
   }
 
-  /** Uploads render data for a drawing (replacing any previous data). */
+  /**
+   * Registers render data for a drawing (replacing any previous data). Vertex data is uploaded
+   * incrementally by `uploadPending` (a few MB per frame) so that big drawings keep the UI
+   * responsive; batches appear as they are uploaded.
+   */
   setDrawing(id: string, data: RenderData, layerCount: number) {
     this.removeDrawing(id);
     const gl = this.gl;
-    const segs: GpuBatch[] = data.segments.map((b) => {
-      const vao = gl.createVertexArray()!;
-      gl.bindVertexArray(vao);
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.cornerBuf);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-      const buffer = gl.createBuffer()!;
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, b.data, gl.STATIC_DRAW);
-      const attr = (loc: number, size: number, type: number, norm: boolean, offset: number) => {
-        gl.enableVertexAttribArray(loc);
-        gl.vertexAttribPointer(loc, size, type, norm, SEG_STRIDE, offset);
-        gl.vertexAttribDivisor(loc, 1);
-      };
-      attr(1, 2, gl.FLOAT, false, 0);
-      attr(2, 2, gl.FLOAT, false, 8);
-      attr(3, 4, gl.UNSIGNED_BYTE, true, 16);
-      attr(4, 1, gl.FLOAT, false, 20);
-      attr(5, 1, gl.FLOAT, false, 24);
-      attr(6, 2, gl.UNSIGNED_SHORT, false, 28);
-      attr(7, 1, gl.FLOAT, false, 32);
-      gl.bindVertexArray(null);
-      return { vao, buffer, count: b.count, ox: b.ox, oy: b.oy };
-    });
-    const tris: GpuBatch[] = data.triangles.map((b) => {
-      const vao = gl.createVertexArray()!;
-      gl.bindVertexArray(vao);
-      const buffer = gl.createBuffer()!;
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, b.data, gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, TRI_STRIDE, 0);
-      gl.enableVertexAttribArray(1);
-      gl.vertexAttribPointer(1, 4, gl.UNSIGNED_BYTE, true, TRI_STRIDE, 8);
-      gl.enableVertexAttribArray(2);
-      gl.vertexAttribPointer(2, 1, gl.UNSIGNED_SHORT, false, TRI_STRIDE, 12);
-      gl.bindVertexArray(null);
-      return { vao, buffer, count: b.count, ox: b.ox, oy: b.oy };
-    });
     const layers = gl.createTexture()!;
     const patterns = gl.createTexture()!;
-    this.drawings.set(id, { segs, tris, layers, patterns, tiles: [] });
+    this.drawings.set(id, {
+      segs: [],
+      tris: [],
+      layers,
+      patterns,
+      tiles: [],
+      pendingSegs: [...data.segments],
+      pendingTris: [...data.triangles],
+    });
     this.setLayerVisibility(id, new Uint8Array(Math.max(1, layerCount)).fill(1));
     gl.bindTexture(gl.TEXTURE_2D, patterns);
     const rows = Math.max(1, data.patterns.length / 16);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, 16, rows, 0, gl.RED, gl.FLOAT, data.patterns);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  }
+
+  /** Uploads queued vertex data up to `budget` bytes; returns true while more is pending. */
+  uploadPending(budget = UPLOAD_BUDGET_BYTES): boolean {
+    let used = 0;
+    let more = false;
+    for (const d of this.drawings.values()) {
+      while (d.pendingTris?.length && used < budget) {
+        const b = d.pendingTris.shift()!;
+        d.tris.push(this.uploadTris(b));
+        used += b.data.byteLength;
+      }
+      while (d.pendingSegs?.length && used < budget) {
+        const b = d.pendingSegs.shift()!;
+        d.segs.push(this.uploadSegs(b));
+        used += b.data.byteLength;
+      }
+      if (d.pendingSegs?.length || d.pendingTris?.length) more = true;
+    }
+    return more;
+  }
+
+  private uploadSegs(b: SegmentBatch): GpuBatch {
+    const gl = this.gl;
+    const vao = gl.createVertexArray()!;
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.cornerBuf);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    const buffer = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, b.data, gl.STATIC_DRAW);
+    const attr = (loc: number, size: number, type: number, norm: boolean, offset: number) => {
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, type, norm, SEG_STRIDE, offset);
+      gl.vertexAttribDivisor(loc, 1);
+    };
+    attr(1, 2, gl.FLOAT, false, 0);
+    attr(2, 2, gl.FLOAT, false, 8);
+    attr(3, 4, gl.UNSIGNED_BYTE, true, 16);
+    attr(4, 1, gl.FLOAT, false, 20);
+    attr(5, 1, gl.FLOAT, false, 24);
+    attr(6, 2, gl.UNSIGNED_SHORT, false, 28);
+    attr(7, 1, gl.FLOAT, false, 32);
+    gl.bindVertexArray(null);
+    return { vao, buffer, count: b.count, ox: b.ox, oy: b.oy, bounds: b.bounds };
+  }
+
+  private uploadTris(b: TriangleBatch): GpuBatch {
+    const gl = this.gl;
+    const vao = gl.createVertexArray()!;
+    gl.bindVertexArray(vao);
+    const buffer = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, b.data, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, TRI_STRIDE, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 4, gl.UNSIGNED_BYTE, true, TRI_STRIDE, 8);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 1, gl.UNSIGNED_SHORT, false, TRI_STRIDE, 12);
+    gl.bindVertexArray(null);
+    return { vao, buffer, count: b.count, ox: b.ox, oy: b.oy, bounds: b.bounds };
   }
 
   /** Creates an (empty) entry for drawings rendered only as raster tiles (PDF). */
@@ -440,6 +513,7 @@ export class UnderlayRenderer {
         gl.uniform1f(this.u(this.triProg, 'u_ghost'), ds.ghost ? 1 : 0);
         gl.uniform1f(this.u(this.triProg, 'u_lightBg'), lightBg ? 1 : 0);
         for (const b of d.tris) {
+          if (!onScreen(b.bounds, ds.placement, view, cssW, cssH)) continue;
           const { m, t } = batchClipTransform(view, cssW, cssH, ds.placement, b.ox, b.oy);
           gl.uniformMatrix2fv(this.u(this.triProg, 'u_m'), false, m);
           gl.uniform2fv(this.u(this.triProg, 'u_t'), t);
@@ -463,6 +537,7 @@ export class UnderlayRenderer {
         gl.uniform1f(this.u(this.segProg, 'u_ghost'), ds.ghost ? 1 : 0);
         gl.uniform1f(this.u(this.segProg, 'u_lightBg'), lightBg ? 1 : 0);
         for (const b of d.segs) {
+          if (!onScreen(b.bounds, ds.placement, view, cssW, cssH)) continue;
           const { m, t } = batchClipTransform(view, cssW, cssH, ds.placement, b.ox, b.oy);
           gl.uniformMatrix2fv(this.u(this.segProg, 'u_m'), false, m);
           gl.uniform2fv(this.u(this.segProg, 'u_t'), t);

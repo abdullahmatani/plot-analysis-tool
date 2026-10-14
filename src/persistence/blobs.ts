@@ -21,8 +21,47 @@ async function opfsDir(): Promise<FileSystemDirectoryHandle | null> {
   }
 }
 
+/** Inputs above this size are hashed in a worker (hashing 20 MB takes ~200 ms). */
+const WORKER_HASH_MIN = 1024 * 1024;
+let hashWorker: Worker | null = null;
+let hashSeq = 0;
+const hashWaiters = new Map<number, { resolve: (hex: string) => void; reject: (e: Error) => void }>();
+
+function hashInWorker(bytes: Uint8Array): Promise<string> | null {
+  if (typeof Worker === 'undefined') return null;
+  try {
+    if (!hashWorker) {
+      hashWorker = new Worker(new URL('../workers/hash.worker.ts', import.meta.url), { type: 'module' });
+      hashWorker.onmessage = (e: MessageEvent<{ id: number; hex?: string; error?: string }>) => {
+        const w = hashWaiters.get(e.data.id);
+        hashWaiters.delete(e.data.id);
+        if (e.data.hex) w?.resolve(e.data.hex);
+        else w?.reject(new Error(e.data.error ?? 'hash failed'));
+      };
+    }
+    const id = ++hashSeq;
+    return new Promise((resolve, reject) => {
+      hashWaiters.set(id, { resolve, reject });
+      hashWorker!.postMessage({ id, bytes });
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function hashBytes(bytes: ArrayBuffer | Uint8Array): Promise<string> {
-  return sha256Hex(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  if (u8.byteLength >= WORKER_HASH_MIN) {
+    const p = hashInWorker(u8);
+    if (p) {
+      try {
+        return await p;
+      } catch {
+        /* fall back to hashing here */
+      }
+    }
+  }
+  return sha256Hex(u8);
 }
 
 /** Stores bytes (deduplicated by hash) and returns the hash key. */

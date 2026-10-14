@@ -54,9 +54,13 @@ export interface LoadedSnapshot {
 }
 
 /** Latest snapshot that passes its checksum; corrupt ones are skipped and reported (row 91). */
-export async function loadLatestValidSnapshot(projectId: string): Promise<LoadedSnapshot | null> {
+export async function loadLatestValidSnapshot(
+  projectId: string,
+  maxSeq = Infinity,
+): Promise<LoadedSnapshot | null> {
   const skipped: LoadedSnapshot['skipped'] = [];
   for (const rec of await listSnapshots(projectId)) {
+    if (rec.seq > maxSeq) continue;
     try {
       const state = await verifySnapshot(rec);
       return { record: rec, state, skipped };

@@ -3,7 +3,7 @@ import { summariseOps, type HistoryState, type JournalOp } from '@/core/history'
 import { nowIso } from '@/core/ids';
 
 import { getDb, isQuotaError, type JournalRecord, type SnapshotKind, type SnapshotRecord } from './db';
-import type { Serializer } from './serializer-client';
+import type { Serializer, StoreCheckpointer } from './serializer-client';
 import type { AutosaveSettings } from './settings';
 import { compactJournal, pruneSnapshots, writeSnapshot } from './snapshots';
 
@@ -44,6 +44,31 @@ export interface AutosaveHost {
 
 type Listener = (s: AutosaveStatus) => void;
 
+/**
+ * Main-thread time spent synchronously in autosave work (NFR-10: no block > 16 ms while editing):
+ * journal record bookkeeping, IndexedDB request creation (structured clone of records), snapshot
+ * hand-off to the serializer worker (structured clone of the state) and status notifications.
+ */
+export const autosaveTiming = {
+  maxSyncMs: 0,
+  totalSyncMs: 0,
+  samples: 0,
+  maxByKind: {} as Record<string, number>,
+};
+
+function timed<T>(kind: string, fn: () => T): T {
+  const t0 = performance.now();
+  try {
+    return fn();
+  } finally {
+    const d = performance.now() - t0;
+    autosaveTiming.samples++;
+    autosaveTiming.totalSyncMs += d;
+    if (d > autosaveTiming.maxSyncMs) autosaveTiming.maxSyncMs = d;
+    if (d > (autosaveTiming.maxByKind[kind] ?? 0)) autosaveTiming.maxByKind[kind] = d;
+  }
+}
+
 export class AutosaveEngine {
   private seq: number;
   private queue: JournalRecord[] = [];
@@ -62,6 +87,9 @@ export class AutosaveEngine {
   private opsSinceRestorePoint: JournalOp[] = [];
   private listeners = new Set<Listener>();
   private disposed = false;
+  /** Highest sequence number known to be durable in the journal. */
+  private flushedSeq: number;
+  private storeCheckpoint: StoreCheckpointer | null;
   status: AutosaveStatus;
 
   constructor(
@@ -69,9 +97,11 @@ export class AutosaveEngine {
     private settings: AutosaveSettings,
     private serialize: Serializer,
     startSeq: number,
-    opts: { lastSnapshotSeq?: number; available?: boolean } = {},
+    opts: { lastSnapshotSeq?: number; available?: boolean; storeCheckpoint?: StoreCheckpointer | null } = {},
   ) {
     this.seq = startSeq;
+    this.flushedSeq = startSeq;
+    this.storeCheckpoint = opts.storeCheckpoint ?? null;
     this.lastSnapshotSeq = opts.lastSnapshotSeq ?? startSeq;
     this.status = {
       state: opts.available === false ? 'unavailable' : 'saved',
@@ -122,6 +152,10 @@ export class AutosaveEngine {
   /** Records a committed command (do / undo / redo). Never throws. */
   record(op: JournalOp) {
     if (this.disposed) return;
+    timed('record', () => this.recordNow(op));
+  }
+
+  private recordNow(op: JournalOp) {
     const now = Date.now();
     const rec: JournalRecord = {
       projectId: this.host.projectId,
@@ -142,9 +176,12 @@ export class AutosaveEngine {
 
   private scheduleFlush() {
     if (this.status.state === 'unavailable' || this.retryTimer) return;
+    // Throttle, not debounce: the oldest pending record is written within FLUSH_DELAY_MS even while
+    // edits keep arriving faster than that (a debounce would hold it back until the cap, leaving
+    // no headroom for the commit itself within NFR-9's 1 s).
+    if (this.flushTimer) return;
     const elapsed = Date.now() - this.firstPendingAt;
     const delay = Math.max(0, Math.min(FLUSH_DELAY_MS, MAX_FLUSH_DELAY_MS - elapsed));
-    if (this.flushTimer) clearTimeout(this.flushTimer);
     this.flushTimer = setTimeout(() => {
       this.flushTimer = null;
       void this.flush();
@@ -179,7 +216,7 @@ export class AutosaveEngine {
     const meta = this.host.getMeta?.();
     const last = batch[batch.length - 1];
     this.inFlight = db.transaction('rw', db.journal, db.projects, async () => {
-      await db.journal.bulkPut(batch);
+      await timed('journal', () => db.journal.bulkPut(batch));
       const existing = await db.projects.get(this.host.projectId);
       if (existing) {
         await db.projects.put({
@@ -195,6 +232,7 @@ export class AutosaveEngine {
       await this.inFlight;
       this.inFlight = null;
       this.retryDelay = 0;
+      this.flushedSeq = Math.max(this.flushedSeq, last.seq);
       this.entriesSinceSnapshot += batch.length;
       this.emit({
         lastSavedAt: nowIso(),
@@ -255,16 +293,44 @@ export class AutosaveEngine {
     summary?: string,
   ): Promise<SnapshotRecord | null> {
     if (this.status.state === 'unavailable' || this.disposed) return null;
+    // A restore point captures the state at the moment it was requested (states are immutable, so
+    // keeping the reference is free); checkpoints may capture any later consistent state.
+    const reqSeq = this.seq;
+    const reqState = this.host.getState();
     if (this.snapshotting) await this.snapshotting.catch(() => null);
     if (kind === 'checkpoint' && this.seq === this.lastSnapshotSeq && this.queue.length === 0) return null;
     const task = (async () => {
       await this.flush();
-      const seq = this.seq;
-      const state = this.host.getState();
-      const serialized = await this.serialize(state);
-      const rec = await writeSnapshot(this.host.projectId, seq, kind, serialized, { label, summary });
+      // Preferred: the worker rebuilds the state from storage (no main-thread clone, NFR-10).
+      const target = kind === 'checkpoint' ? this.flushedSeq : reqSeq;
+      if (
+        this.storeCheckpoint &&
+        target <= this.flushedSeq &&
+        (kind !== 'checkpoint' || target > this.lastSnapshotSeq)
+      ) {
+        const done = await this.storeCheckpoint({
+          projectId: this.host.projectId,
+          seq: target,
+          kind,
+          label,
+          summary,
+          settings: this.settings,
+        });
+        if (done) {
+          this.lastSnapshotSeq = Math.max(this.lastSnapshotSeq, target);
+          if (kind === 'checkpoint') this.entriesSinceSnapshot = 0;
+          this.emit({ lastSnapshotAt: done.at });
+          return { ...done, projectId: this.host.projectId } as SnapshotRecord;
+        }
+      }
+      const seq = kind === 'checkpoint' ? this.seq : reqSeq;
+      const state = kind === 'checkpoint' ? this.host.getState() : reqState;
+      const serialized = await timed('snapshot-handoff', () => this.serialize(state));
+      const rec = await timed('snapshot-write', () =>
+        writeSnapshot(this.host.projectId, seq, kind, serialized, { label, summary }),
+      );
       this.lastSnapshotSeq = Math.max(this.lastSnapshotSeq, seq);
-      this.entriesSinceSnapshot = 0;
+      if (kind === 'checkpoint') this.entriesSinceSnapshot = 0;
       await compactJournal(this.host.projectId);
       await pruneSnapshots(this.host.projectId, this.settings);
       this.emit({ lastSnapshotAt: rec.at });

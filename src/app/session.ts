@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { newId } from '@/core/ids';
 import { createLayer } from '@/core/project';
 import type { HistoryState, JournalOp } from '@/core/history';
-import { AutosaveEngine, type AutosaveStatus } from '@/persistence/autosave';
+import { AutosaveEngine, autosaveTiming, type AutosaveStatus } from '@/persistence/autosave';
 import { getDb, type JournalRecord } from '@/persistence/db';
 import { DraftManager } from '@/persistence/drafts';
 import { FileLinkManager, fsaSupported, type FileLinkStatus } from '@/persistence/file-link';
@@ -12,7 +12,7 @@ import { ProjectLock, type ProjectChannelMessage } from '@/persistence/locks';
 import { buildProjectFile } from '@/persistence/project-file';
 import { metaFor, touchProject } from '@/persistence/projects';
 import { loadProjectState, type RecoveryReport } from '@/persistence/recovery';
-import { createSerializer } from '@/persistence/serializer-client';
+import { createSnapshotService } from '@/persistence/serializer-client';
 import {
   DEFAULT_AUTOSAVE_SETTINGS,
   loadAutosaveSettings,
@@ -21,6 +21,8 @@ import {
 import { getSnapshot, verifySnapshot } from '@/persistence/snapshots';
 import { SessionTracker } from '@/persistence/sessions';
 import { setJournalSink, useProjectStore } from '@/store/project';
+import { useViewStore } from '@/store/view';
+import { useModelsStore } from '@/underlay/models';
 
 /**
  * Project session controller: opens a project (recovering from snapshot + journal), owns its
@@ -29,7 +31,7 @@ import { setJournalSink, useProjectStore } from '@/store/project';
 
 export const TAB_ID = newId('tab');
 export const sessionTracker = new SessionTracker();
-const serializer = createSerializer();
+const snapshots = createSnapshotService();
 
 interface SessionStore {
   projectId: string | null;
@@ -111,9 +113,9 @@ export class ProjectSession {
         },
       },
       this.settings,
-      serializer,
+      snapshots.serialize,
       loaded.seq,
-      { lastSnapshotSeq: loaded.report.snapshotSeq },
+      { lastSnapshotSeq: loaded.report.snapshotSeq, storeCheckpoint: snapshots.checkpointFromStore },
     );
     useSessionStore
       .getState()
@@ -227,9 +229,9 @@ export class ProjectSession {
         onFlushed: (records) => this.lock.post({ type: 'ops', from: TAB_ID, records }),
       },
       this.settings,
-      serializer,
+      snapshots.serialize,
       loaded.seq,
-      { lastSnapshotSeq: loaded.report.snapshotSeq },
+      { lastSnapshotSeq: loaded.report.snapshotSeq, storeCheckpoint: snapshots.checkpointFromStore },
     );
     this.unsubs.push(this.engine.subscribe((status) => useSessionStore.getState().set({ status })));
     this.becomeWriter();
@@ -365,6 +367,21 @@ export function installTestHooks() {
     project: () => useProjectStore.getState().history?.project ?? null,
     db: () => getDb(),
     store: () => useProjectStore.getState(),
+    /** Parsed drawings (status/progress) and the view store, for E2E and performance tests. */
+    models: () =>
+      Object.values(useModelsStore.getState().models).map((m) => ({
+        id: m.drawingId,
+        status: m.status,
+        progress: m.progress,
+        segments: m.render?.segments.reduce((n, b) => n + b.count, 0) ?? 0,
+        error: m.error,
+      })),
+    view: () => useViewStore.getState(),
+    autosaveTiming: (reset = false) => {
+      const t = { ...autosaveTiming, maxByKind: { ...autosaveTiming.maxByKind } };
+      if (reset) Object.assign(autosaveTiming, { maxSyncMs: 0, totalSyncMs: 0, samples: 0, maxByKind: {} });
+      return t;
+    },
     /** Links the project to a file in the Origin Private File System (fault-injection tests of row 98). */
     linkTestFile: async (name = 'linked.patproj') => {
       const root = await navigator.storage.getDirectory();

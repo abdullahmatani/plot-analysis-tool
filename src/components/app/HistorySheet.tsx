@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { SnapshotRecord } from '@/persistence/db';
 import { storeProjectCopy } from '@/persistence/projects';
+import { useSessionStore } from '@/app/session';
 import { getSnapshot, listRestorePoints, verifySnapshot } from '@/persistence/snapshots';
 import { useProjectStore } from '@/store/project';
 
@@ -20,6 +21,8 @@ type Point = Omit<SnapshotRecord, 'data'>;
 export function HistorySheet({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const projectId = useProjectStore((s) => s.history?.project.id);
   const [points, setPoints] = useState<Point[]>([]);
+  // Refresh when a new snapshot is written (e.g. a restore point finishing in the background).
+  const lastSnapshotAt = useSessionStore((s) => s.status?.lastSnapshotAt);
 
   const reload = useCallback(async () => {
     if (projectId) setPoints(await listRestorePoints(projectId));
@@ -27,7 +30,7 @@ export function HistorySheet({ open, onOpenChange }: { open: boolean; onOpenChan
 
   useEffect(() => {
     if (open) void reload();
-  }, [open, reload]);
+  }, [open, reload, lastSnapshotAt]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

@@ -44,10 +44,11 @@ export function verifyJournalRecord(rec: JournalRecord): JournalOp {
  */
 export async function loadProjectState(
   projectId: string,
-  opts: { checkpointOnly?: boolean } = {},
+  opts: { checkpointOnly?: boolean; uptoSeq?: number } = {},
 ): Promise<LoadedProject> {
   const t0 = performance.now();
-  const snap = await loadLatestValidSnapshot(projectId);
+  const upto = opts.uptoSeq ?? Infinity;
+  const snap = await loadLatestValidSnapshot(projectId, upto);
   if (!snap) throw new Error('No readable snapshot was found for this project.');
   let state = snap.state;
   let migratedFrom: number | undefined;
@@ -56,7 +57,9 @@ export async function loadProjectState(
     migratedFrom = migrated.from;
     state = { ...state, project: migrated.project };
   }
-  const entries = opts.checkpointOnly ? [] : await journalAfter(projectId, snap.record.seq);
+  const entries = opts.checkpointOnly
+    ? []
+    : (await journalAfter(projectId, snap.record.seq)).filter((r) => r.seq <= upto);
   const skippedEntries: RecoveryReport['skippedEntries'] = [];
   const applied: JournalOp[] = [];
   let seq = snap.record.seq;

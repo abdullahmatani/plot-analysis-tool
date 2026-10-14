@@ -35,6 +35,8 @@ export interface SegmentBatch {
   oy: number;
   count: number;
   data: ArrayBuffer;
+  /** Bounds of the batch in drawing units (viewport culling). */
+  bounds?: Bounds;
 }
 
 export interface TriangleBatch {
@@ -42,6 +44,7 @@ export interface TriangleBatch {
   oy: number;
   count: number;
   data: ArrayBuffer;
+  bounds?: Bounds;
 }
 
 export interface RenderData {
@@ -80,6 +83,7 @@ class SegWriter {
   private u8 = new Uint8Array(this.buf);
   private u16 = new Uint16Array(this.buf);
   private n = 0;
+  private b = [Infinity, Infinity, -Infinity, -Infinity];
   constructor(
     public ox: number,
     public oy: number,
@@ -108,6 +112,14 @@ class SegWriter {
   ) {
     if (this.n >= MAX_SEGMENTS_PER_BATCH) this.flush();
     if ((this.n + 1) * SEG_STRIDE > this.buf.byteLength) this.grow();
+    if (x0 < this.b[0]) this.b[0] = x0;
+    if (x1 < this.b[0]) this.b[0] = x1;
+    if (y0 < this.b[1]) this.b[1] = y0;
+    if (y1 < this.b[1]) this.b[1] = y1;
+    if (x0 > this.b[2]) this.b[2] = x0;
+    if (x1 > this.b[2]) this.b[2] = x1;
+    if (y0 > this.b[3]) this.b[3] = y0;
+    if (y1 > this.b[3]) this.b[3] = y1;
     const o = (this.n * SEG_STRIDE) >> 2;
     this.f32[o] = x0 - this.ox;
     this.f32[o + 1] = y0 - this.oy;
@@ -134,8 +146,10 @@ class SegWriter {
       oy: this.oy,
       count: this.n,
       data: this.buf.slice(0, this.n * SEG_STRIDE),
+      bounds: { minX: this.b[0], minY: this.b[1], maxX: this.b[2], maxY: this.b[3] },
     });
     this.n = 0;
+    this.b = [Infinity, Infinity, -Infinity, -Infinity];
   }
 }
 
@@ -146,6 +160,7 @@ class TriWriter {
   private u8 = new Uint8Array(this.buf);
   private u16 = new Uint16Array(this.buf);
   private n = 0;
+  private b = [Infinity, Infinity, -Infinity, -Infinity];
   constructor(
     public ox: number,
     public oy: number,
@@ -166,6 +181,12 @@ class TriWriter {
     for (let i = 0; i < idx.length; i++) {
       if ((this.n + 1) * TRI_STRIDE > this.buf.byteLength) this.grow();
       const k = idx[i];
+      const vx = coords[k * 2];
+      const vy = coords[k * 2 + 1];
+      if (vx < this.b[0]) this.b[0] = vx;
+      if (vy < this.b[1]) this.b[1] = vy;
+      if (vx > this.b[2]) this.b[2] = vx;
+      if (vy > this.b[3]) this.b[3] = vy;
       const o = (this.n * TRI_STRIDE) >> 2;
       this.f32[o] = coords[k * 2] - this.ox;
       this.f32[o + 1] = coords[k * 2 + 1] - this.oy;
@@ -186,8 +207,10 @@ class TriWriter {
       oy: this.oy,
       count: this.n,
       data: this.buf.slice(0, this.n * TRI_STRIDE),
+      bounds: { minX: this.b[0], minY: this.b[1], maxX: this.b[2], maxY: this.b[3] },
     });
     this.n = 0;
+    this.b = [Infinity, Infinity, -Infinity, -Infinity];
   }
 }
 

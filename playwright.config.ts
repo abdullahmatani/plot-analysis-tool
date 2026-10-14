@@ -28,9 +28,15 @@ export default defineConfig({
     timeout: 60_000,
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: /kill\.spec/ },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: /(kill|perf)\.spec/ },
     ...(process.env.PAT_EDGE
-      ? [{ name: 'msedge', use: { ...devices['Desktop Edge'], channel: 'msedge' }, testIgnore: /kill\.spec/ }]
+      ? [
+          {
+            name: 'msedge',
+            use: { ...devices['Desktop Edge'], channel: 'msedge' },
+            testIgnore: /(kill|perf)\.spec/,
+          },
+        ]
       : []),
     ...(process.env.PAT_SECONDARY
       ? [
@@ -38,6 +44,8 @@ export default defineConfig({
           { name: 'webkit', use: { ...devices['Desktop Safari'] }, grep: /@smoke/ },
         ]
       : []),
+    // Performance budget (row 82): `npm run e2e:perf`; PAT_PERF_STRICT=1 on the reference machine.
+    { name: 'perf', testMatch: /perf\.spec/, use: { ...devices['Desktop Chrome'] }, timeout: 10 * 60_000 },
     { name: 'faults', testMatch: /kill\.spec/, use: { ...devices['Desktop Chrome'] }, timeout: 30 * 60_000 },
   ],
 });

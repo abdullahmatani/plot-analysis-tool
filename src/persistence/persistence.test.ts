@@ -12,7 +12,9 @@ import { storeNewProject } from './projects';
 import { loadProjectState, pendingRecovery } from './recovery';
 import { serializeSnapshot } from './serialize';
 import { DEFAULT_AUTOSAVE_SETTINGS } from './settings';
-import { listSnapshots, pruneSnapshots } from './snapshots';
+import type { StoreCheckpointer } from './serializer-client';
+import { listSnapshots, pruneSnapshots, verifySnapshot } from './snapshots';
+import { checkpointFromStorage } from './store-checkpoint';
 
 let dbCounter = 0;
 
@@ -31,13 +33,18 @@ class Harness {
   state: HistoryState;
   engine: AutosaveEngine;
   ops: JournalOp[] = [];
-  constructor(project = createProject('P'), settings = DEFAULT_AUTOSAVE_SETTINGS) {
+  constructor(
+    project = createProject('P'),
+    settings = DEFAULT_AUTOSAVE_SETTINGS,
+    storeCheckpoint: StoreCheckpointer | null = null,
+  ) {
     this.state = { project, undo: [], redo: [] };
     this.engine = new AutosaveEngine(
       { projectId: project.id, getState: () => this.state },
       settings,
       serializeSnapshot,
       0,
+      { storeCheckpoint },
     );
   }
   apply(r: { state: HistoryState; op: JournalOp } | null) {
@@ -52,6 +59,86 @@ class Harness {
     );
   }
 }
+
+/** The snapshot worker's checkpoint path, run in-process. */
+let storeCalls: string[] = [];
+const fromStorage: StoreCheckpointer = async (a) => {
+  const r = await checkpointFromStorage(a);
+  storeCalls.push('record' in r ? 'stored' : `fallback: ${r.fallback}`);
+  return 'record' in r ? r.record : null;
+};
+
+describe('checkpoints built from storage (NFR-10)', () => {
+  beforeEach(() => {
+    storeCalls = [];
+  });
+
+  it('produce exactly the in-memory state, including undo/redo history', async () => {
+    const h = new Harness(
+      createProject('P'),
+      { ...DEFAULT_AUTOSAVE_SETTINGS, checkpointEvery: 1000 },
+      fromStorage,
+    );
+    await storeNewProject(h.state.project);
+    for (let i = 0; i < 8; i++) h.addLayer(`L${i}`);
+    h.apply(undo(h.state));
+    h.apply(undo(h.state));
+    h.apply(redo(h.state));
+    const rec = await h.engine.checkpoint('test');
+    expect(storeCalls).toEqual(['stored']);
+    expect(rec?.seq).toBe(11);
+    const [latest] = await listSnapshots(h.state.project.id);
+    const snap = await verifySnapshot(latest);
+    expect(snap.project).toEqual(h.state.project);
+    expect(snap.undo.map((e) => e.id)).toEqual(h.state.undo.map((e) => e.id));
+    expect(snap.redo.map((e) => e.id)).toEqual(h.state.redo.map((e) => e.id));
+    // Edits after the checkpoint still recover on top of it.
+    h.addLayer('After');
+    await h.engine.flush();
+    const loaded = await loadProjectState(h.state.project.id);
+    expect(loaded.report.snapshotSeq).toBe(11);
+    expect(loaded.state.project).toEqual(h.state.project);
+    h.engine.dispose();
+  });
+
+  it('a restore point captures the state at the moment it was requested', async () => {
+    const h = new Harness(
+      createProject('P'),
+      { ...DEFAULT_AUTOSAVE_SETTINGS, checkpointEvery: 1000 },
+      fromStorage,
+    );
+    await storeNewProject(h.state.project);
+    h.addLayer('Before');
+    const expected = h.state.project;
+    const pending = h.engine.restorePoint('named', 'Baseline');
+    h.addLayer('After'); // edited while the restore point is being written
+    const rec = await pending;
+    expect(storeCalls).toEqual(['stored']);
+    const snap = await verifySnapshot(
+      (await listSnapshots(h.state.project.id)).find((r) => r.id === rec!.id)!,
+    );
+    expect(snap.project).toEqual(expected);
+    h.engine.dispose();
+  });
+
+  it('fall back to serialising the in-memory state when the stored journal has a gap', async () => {
+    const h = new Harness(
+      createProject('P'),
+      { ...DEFAULT_AUTOSAVE_SETTINGS, checkpointEvery: 1000 },
+      fromStorage,
+    );
+    await storeNewProject(h.state.project);
+    for (let i = 0; i < 5; i++) h.addLayer(`L${i}`);
+    await h.engine.flush();
+    const entries = await getDb().journal.where('projectId').equals(h.state.project.id).toArray();
+    await getDb().journal.delete([h.state.project.id, entries[2].seq]);
+    await h.engine.checkpoint('test');
+    expect(storeCalls[0]).toMatch(/^fallback/);
+    const [latest] = await listSnapshots(h.state.project.id);
+    expect((await verifySnapshot(latest)).project).toEqual(h.state.project);
+    h.engine.dispose();
+  });
+});
 
 describe('autosave journal + recovery', () => {
   it('replays journal entries on top of the initial snapshot', async () => {

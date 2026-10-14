@@ -41,6 +41,19 @@ export interface OffsetPlan {
   warnings: string[];
 }
 
+/** Makes result names unique in the project ("Tank +10 m", "Tank +10 m (2)", …). */
+function uniqueNames(project: Project, inputs: NewObjectInput[]): NewObjectInput[] {
+  const used = new Set(project.objects.map((o) => o.name));
+  for (const i of inputs) {
+    if (!i.name) continue;
+    let name = i.name;
+    for (let k = 2; used.has(name); k++) name = `${i.name} (${k})`;
+    used.add(name);
+    i.name = name;
+  }
+  return inputs;
+}
+
 /** "+10 m", "-2.5 m": signed distance in display units with trailing zeros removed. */
 export function formatOffset(d: number, units: Units, precision: number): string {
   const n = formatNumber(fromMetres(Math.abs(d), units), precision)
@@ -76,7 +89,14 @@ export function planOffsets(project: Project, sources: AnalysisObject[], p: Offs
     derived: p.live ? derivation(src.id, p) : undefined,
     attributes: { offset: label, source: src.name },
   });
-  if (!p.merge || results.length < 2) return { inputs: results.map((r) => one(r.src, r.geometry)), warnings };
+  if (!p.merge || results.length < 2)
+    return {
+      inputs: uniqueNames(
+        project,
+        results.map((r) => one(r.src, r.geometry)),
+      ),
+      warnings,
+    };
   const closed = results.filter((r) => isClosed(r.geometry));
   const open = results.filter((r) => !isClosed(r.geometry));
   const inputs: NewObjectInput[] = open.map((r) => one(r.src, r.geometry));
@@ -96,7 +116,7 @@ export function planOffsets(project: Project, sources: AnalysisObject[], p: Offs
   }
   if (open.length && closed.length > 1)
     warnings.push(`${open.length} open result(s) (arcs) have no area and were not merged`);
-  return { inputs, warnings };
+  return { inputs: uniqueNames(project, inputs), warnings };
 }
 
 export interface RingParams extends Omit<OffsetParams, 'distance' | 'merge' | 'live'> {
@@ -156,5 +176,5 @@ export function planRings(
     });
   });
   rings.reverse();
-  return { inputs: rings, warnings, group };
+  return { inputs: uniqueNames(project, rings), warnings, group };
 }

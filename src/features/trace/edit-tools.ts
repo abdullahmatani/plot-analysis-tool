@@ -222,7 +222,7 @@ export function splitObject(o: AnalysisObject, parts: Geometry[]) {
 
 // ------------------------------------------------------------------------------- convert segment
 
-let convertPending: { id: string; ring: number; index: number } | null = null;
+let convertPending: { id: string; ring: number; index: number; at: Pt } | null = null;
 let convertCursor: Pt | null = null;
 const convertDraft = {
   key: 'tool:trace.convertSegment',
@@ -233,7 +233,7 @@ const convertDraft = {
 function saveConvertDraft() {
   const s = currentSession();
   if (!s) return;
-  if (convertPending) s.drafts.set(convertDraft, { points: [], segment: convertPending });
+  if (convertPending) s.drafts.set(convertDraft, { points: [convertPending.at], segment: convertPending });
   else s.drafts.clear(convertDraft.key);
 }
 
@@ -257,7 +257,7 @@ const convertBase = makeClickTool({
       if (g) updateGeometries([t.obj.id], 'Convert arc to line', () => g);
       return;
     }
-    convertPending = { id: t.obj.id, ring: t.seg.ring, index: t.seg.index };
+    convertPending = { id: t.obj.id, ring: t.seg.ring, index: t.seg.index, at: t.seg.pt };
     snapExclusions.add(t.obj.id);
     saveConvertDraft();
     refreshHint();
@@ -327,7 +327,7 @@ export const convertSegmentTool: Tool & { restoreDraft(state: unknown): void } =
     g.setLineDash([]);
   },
   restoreDraft(state: unknown) {
-    const s = state as { segment?: { id: string; ring: number; index: number } } | null;
+    const s = state as { segment?: { id: string; ring: number; index: number; at: Pt } } | null;
     if (!s?.segment) return;
     if (!getProject()?.objects.some((o) => o.id === s.segment!.id)) return;
     convertPending = { ...s.segment };

@@ -109,7 +109,7 @@ export const pickTraceTool: Tool = {
     } else {
       geometry = entityWorldGeometry(source, index, chordTol());
     }
-    if (!geometry || geometry.type === 'point') {
+    if (!geometry || geometry.type === 'point' || (geometry.type === 'polyline' && geometry.pts.length < 2)) {
       toast.error('This entity has no geometry that can be traced.');
       return;
     }

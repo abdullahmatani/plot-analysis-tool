@@ -124,6 +124,8 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
   const [opts, setOpts] = useState<ParseOptions>(restored?.opts ?? {});
   const [draft, setDraft] = useState<MappingDraft | null>(restored?.draft ?? null);
   const [name, setName] = useState(restored?.name ?? '');
+  /** The user typed a name: stop suggesting one from the source. */
+  const [nameEdited, setNameEdited] = useState(!!restored?.name);
   const [loading, setLoading] = useState(!!payload.file);
   const [templates, setTemplates] = useState<MappingTemplate[]>([]);
   const [busy, setBusy] = useState(false);
@@ -169,8 +171,9 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
   const columns = useMemo(() => result?.table.columns ?? [], [result]);
 
   useEffect(() => {
-    if (src && result && !name) setName(target?.name ?? datasetNameFor(src, result.sheet, result.sheets));
-  }, [src, result, name, target]);
+    if (src && result && !nameEdited)
+      setName(target?.name ?? datasetNameFor(src, result.sheet, result.sheets));
+  }, [src, result, nameEdited, target]);
 
   // Draft of the open dialog (row 93).
   useEffect(() => {
@@ -195,21 +198,20 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
   );
   const best = matches[0];
 
-  const startMapping = (from?: TemplateSource) => {
+  const startMapping = () => {
     if (!result) return;
-    const base: MappingDraft = from
-      ? { mapping: from.mapping, labelTemplate: from.labelTemplate, labelPlacement: from.labelPlacement }
-      : target
-        ? {
-            mapping: target.mapping,
-            labelTemplate: target.labelTemplate,
-            labelPlacement: target.labelPlacement,
-          }
-        : {
-            mapping: initialMapping(result.table.columns, result.table.rows),
-            labelTemplate: '',
-            labelPlacement: 'top',
-          };
+    // Re-import keeps the dataset's mapping (columns that disappeared are flagged for remapping).
+    const base: MappingDraft = target
+      ? {
+          mapping: target.mapping,
+          labelTemplate: target.labelTemplate,
+          labelPlacement: target.labelPlacement,
+        }
+      : {
+          mapping: initialMapping(result.table.columns, result.table.rows),
+          labelTemplate: '',
+          labelPlacement: 'top',
+        };
     setDraft(base);
     setTplStyles(null);
     setStage('mapping');
@@ -331,7 +333,7 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
           setSrc={(s) => {
             setSrc(s);
             setOpts({});
-            setName('');
+            setNameEdited(false);
           }}
           pasteRef={pasteRef}
           parsed={parsed}
@@ -351,7 +353,10 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
                 id="ds-name"
                 className="h-8 text-xs"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setNameEdited(true);
+                }}
                 onKeyDown={(e) => e.stopPropagation()}
               />
             </div>
@@ -417,7 +422,10 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
             </Button>
           )}
           {stage === 'source' && result && target && (
-            <Button data-testid="reimport-next" onClick={() => setStage(headersOk ? 'reimport' : 'mapping')}>
+            <Button
+              data-testid="reimport-next"
+              onClick={() => (headersOk ? setStage('reimport') : startMapping())}
+            >
               {headersOk ? 'Next: review changes' : 'Next: remap columns'}
             </Button>
           )}

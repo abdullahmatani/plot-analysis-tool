@@ -1,4 +1,4 @@
-import type { CellValue, ContourDataset, Project } from '@/core/types';
+import type { CellValue, Project } from '@/core/types';
 import { detectFileType } from '@/import/detect';
 import { importTable, type ImportInput, type ImportKind, type ImportResult } from '@/tables/table';
 import { suggestMapping, type Mapping } from '@/tables/suggest';
@@ -85,15 +85,6 @@ export function initialMapping(columns: string[], rows: CellValue[][]): Mapping 
 export function datasetNameFor(src: TableSource, sheet?: string, sheets?: string[]): string {
   const base = src.name.replace(/\.[a-z0-9]+$/i, '') || 'Pasted table';
   return sheet && sheets && sheets.length > 1 && sheet !== sheets[0] ? `${base} – ${sheet}` : base;
-}
-
-/** Datasets whose mapping still works with a re-imported table's headers (row 72). */
-export function mappingStillValid(
-  ds: ContourDataset,
-  columns: string[],
-  errors: (m: Mapping, c: string[]) => string[],
-): boolean {
-  return errors(ds.mapping, columns).length === 0;
 }
 
 /** Plant positioning (row 64) needs a drawing calibrated by coordinates (row 31). */

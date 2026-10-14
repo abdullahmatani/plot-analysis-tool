@@ -32,8 +32,3 @@ export const useContoursUi = create<ContoursUi>()((set) => ({
   set: (patch) => set(patch),
   revealRow: (ref) => set({ reveal: { ...ref, seq: ++seq } }),
 }));
-
-export function isRowSelected(ds: string, row: number): boolean {
-  const s = useContoursUi.getState().selection;
-  return !!s && s.ds === ds && s.rows.includes(row);
-}

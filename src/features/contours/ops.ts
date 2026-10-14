@@ -1,6 +1,6 @@
 import type { Draft } from 'immer';
 
-import { newId, nowIso } from '@/core/ids';
+import { newId } from '@/core/ids';
 import type {
   CellValue,
   ContourDataset,
@@ -268,5 +268,3 @@ export function nextDatasetName(project: Project, base: string): string {
   if (!used.has(base)) return base;
   for (let n = 2; ; n++) if (!used.has(`${base} (${n})`)) return `${base} (${n})`;
 }
-
-export { nowIso };

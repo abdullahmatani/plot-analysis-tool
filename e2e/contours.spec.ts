@@ -436,6 +436,33 @@ test('row 72: re-import of an updated file needs no remapping and summarises the
   expect(after.table.rows.some((r) => r[0] === 'X-900')).toBe(true);
 });
 
+test('row 72: re-import with renamed headers asks to remap only the missing role, keeping styles', async ({
+  page,
+}, info) => {
+  await importFixture(page, 'consequences.csv');
+  const [before] = await datasets(page);
+  const columns = before.table.columns.map((c) => (c === 'X' ? 'East' : c));
+  const q = (v: string | number | null) => (v === null ? '' : `"${String(v).replace(/"/g, '""')}"`);
+  const file = info.outputPath('results-renamed.csv');
+  writeFileSync(file, [columns, ...before.table.rows].map((r) => r.map(q).join(',')).join('\r\n'));
+
+  await page.getByRole('button', { name: `Dataset options for ${before.name}` }).click();
+  await page.getByRole('menuitem', { name: /Re-import data/ }).click();
+  await page.getByTestId('table-file-input').setInputFiles(file);
+  await expect(page.getByTestId('reimport-next')).toHaveText('Next: remap columns');
+  await page.getByTestId('reimport-next').click();
+  await expect(page.getByTestId('mapping-errors')).toContainText('Map the X column.');
+  await expect(page.getByTestId('reimport-apply-mapping')).toBeDisabled();
+  await pick(page, 'map-x', 'East');
+  await page.getByTestId('reimport-apply-mapping').click();
+  await expect(page.getByTestId('import-table-dialog')).toBeHidden();
+  const [after] = await datasets(page);
+  expect(after.mapping.position).toMatchObject({ mode: 'xy', x: 'East', y: 'Y' });
+  expect(after.mapping.sizeColumns).toEqual(before.mapping.sizeColumns);
+  expect(after.sizeStyles).toEqual(before.sizeStyles);
+  expect((await rings(page, after.id)).length).toBe((await rings(page, before.id)).length);
+});
+
 test('row 73: a mapping template saved once applies in one click to a file with known headers', async ({
   page,
 }) => {

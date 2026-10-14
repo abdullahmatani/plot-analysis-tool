@@ -1,0 +1,2996 @@
+{
+  "ezdxf": "1.4.4",
+  "files": [
+    {
+      "file": "r12_entities.dxf",
+      "entities": [
+        {
+          "handle": "93",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 0.0, 100.0, 50.0],
+          "color": 16711680,
+          "layer": "GEOM",
+          "linetype": "DASHED"
+        },
+        {
+          "handle": "94",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 0.0, 10.0, 10.0],
+          "color": 65535,
+          "layer": "OFFLAYER"
+        },
+        {
+          "handle": "95",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [5.0, 5.0, 6.0, 6.0],
+          "color": 255,
+          "layer": "FROZEN"
+        },
+        {
+          "handle": "96",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [50.0, 50.0, 12.5],
+          "color": 16711680
+        },
+        {
+          "handle": "97",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ARC",
+          "c": [80.0, 20.0],
+          "r": 10.0,
+          "start": [88.66025403784438, 25.0],
+          "end": [75.0, 28.66025403784439],
+          "mid": [82.58819045102521, 29.65925826289068]
+        },
+        {
+          "handle": "98",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ARC",
+          "c": [-10.0, 10.0],
+          "r": 5.0,
+          "start": [-15.0, 10.0],
+          "end": [-10.0, 15.0],
+          "mid": [-13.535533905932738, 13.535533905932738]
+        },
+        {
+          "handle": "99",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [-20.0, 5.0, 3.0]
+        },
+        {
+          "handle": "9A",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POINT",
+          "geom": [5.0, 7.0]
+        },
+        {
+          "handle": "9B",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0],
+            [10.0, 0.0, 0.5],
+            [10.0, 10.0, 0],
+            [0.0, 10.0, 0]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "A1",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [-30.0, 0.0, 0.25],
+            [-40.0, 0.0, 0],
+            [-40.0, 10.0, 0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "A6",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0.0],
+            [5.0, 5.0, 0.0],
+            [10.0, 0.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "B1",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "FILL",
+          "rings": [
+            [
+              [0.0, -20.0],
+              [10.0, -20.0],
+              [10.0, -10.0],
+              [0.0, -10.0]
+            ]
+          ],
+          "color": 16711680
+        },
+        {
+          "handle": "B2",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "FILL",
+          "rings": [
+            [
+              [20.0, -20.0],
+              [30.0, -20.0],
+              [25.0, -10.0]
+            ]
+          ]
+        },
+        {
+          "handle": "B3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "FILL",
+          "rings": [
+            [
+              [40.0, -20.0],
+              [50.0, -20.0],
+              [50.0, -18.0],
+              [40.0, -18.0]
+            ]
+          ]
+        },
+        {
+          "handle": "B4",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0.0],
+            [10.0, 0.0, 0.0],
+            [10.0, 10.0, 0.0],
+            [0.0, 10.0, 0.0]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "C0",
+          "insert": "C2",
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [30.0, 30.0, 1.0]
+        },
+        {
+          "handle": "CA",
+          "insert": "C6",
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 15.125, 0.0, 20.375]
+        },
+        {
+          "handle": "CB",
+          "insert": "C6",
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [30.0, 15.125, 30.0, 20.375]
+        },
+        {
+          "handle": "D0",
+          "insert": "C6",
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 20.0, 30.0, 20.0]
+        }
+      ],
+      "texts": [
+        {
+          "handle": "B5",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Hello",
+          "anchor": [1.0, 2.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.5,
+          "rotation": 0.5235987755982988,
+          "widthSign": 1
+        },
+        {
+          "handle": "B6",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Centre",
+          "anchor": [50.0, 60.0],
+          "hAlign": 1,
+          "vAlign": 2,
+          "height": 3.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B7",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "TopRight",
+          "anchor": [70.0, 60.0],
+          "hAlign": 2,
+          "vAlign": 3,
+          "height": 1.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B8",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [0.0, -30.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B9",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Ø50 45° ±0.5 100%",
+          "anchor": [0.0, -35.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "BA",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Back",
+          "anchor": [0.0, -40.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": -1
+        },
+        {
+          "handle": "BB",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Upside",
+          "anchor": [20.0, -40.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 3.141592653589793,
+          "widthSign": -1
+        },
+        {
+          "handle": "BC",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Mirrored OCS",
+          "anchor": [-5.0, -45.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "C4",
+          "insert": "C2",
+          "tol": 1e-9,
+          "text": "P-101",
+          "anchor": [30.0, 28.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1,
+          "hidden": false
+        },
+        {
+          "handle": "C5",
+          "insert": "C2",
+          "tol": 1e-9,
+          "text": "hidden value",
+          "anchor": [30.0, 25.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1,
+          "hidden": true
+        }
+      ],
+      "hatches": [],
+      "splines": [],
+      "ellipsePoints": [],
+      "props": [
+        {
+          "handle": "B5",
+          "insert": null,
+          "color": 16776960,
+          "layer": "TXT"
+        }
+      ],
+      "version": "AC1009",
+      "insunits": 0,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "GEOM": {
+          "off": false,
+          "frozen": false,
+          "linetype": "DASHED",
+          "plot": true,
+          "color": 16711680,
+          "lineweight": -3
+        },
+        "OFFLAYER": {
+          "off": true,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 65280,
+          "lineweight": -3
+        },
+        "FROZEN": {
+          "off": false,
+          "frozen": true,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 255,
+          "lineweight": -3
+        },
+        "TXT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16776960,
+          "lineweight": -3
+        }
+      },
+      "counts": {
+        "LINE": 3,
+        "CIRCLE": 2,
+        "ARC": 2,
+        "POINT": 1,
+        "POLYLINE": 3,
+        "SOLID": 2,
+        "TRACE": 1,
+        "3DFACE": 1,
+        "TEXT": 8,
+        "INSERT": 1,
+        "ATTRIB": 2,
+        "DIMENSION": 1
+      },
+      "skipped": {
+        "POLYLINE (polyface mesh)": 1
+      },
+      "inserts": 2,
+      "layoutCounts": {
+        "Layout1": {
+          "LINE": 1,
+          "TEXT": 1
+        }
+      },
+      "binary": false
+    },
+    {
+      "file": "r12_entities_binary.dxf",
+      "entities": [
+        {
+          "handle": "93",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 0.0, 100.0, 50.0],
+          "color": 16711680,
+          "layer": "GEOM",
+          "linetype": "DASHED"
+        },
+        {
+          "handle": "94",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 0.0, 10.0, 10.0],
+          "color": 65535,
+          "layer": "OFFLAYER"
+        },
+        {
+          "handle": "95",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [5.0, 5.0, 6.0, 6.0],
+          "color": 255,
+          "layer": "FROZEN"
+        },
+        {
+          "handle": "96",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [50.0, 50.0, 12.5],
+          "color": 16711680
+        },
+        {
+          "handle": "97",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ARC",
+          "c": [80.0, 20.0],
+          "r": 10.0,
+          "start": [88.66025403784438, 25.0],
+          "end": [75.0, 28.66025403784439],
+          "mid": [82.58819045102521, 29.65925826289068]
+        },
+        {
+          "handle": "98",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ARC",
+          "c": [-10.0, 10.0],
+          "r": 5.0,
+          "start": [-15.0, 10.0],
+          "end": [-10.0, 15.0],
+          "mid": [-13.535533905932738, 13.535533905932738]
+        },
+        {
+          "handle": "99",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [-20.0, 5.0, 3.0]
+        },
+        {
+          "handle": "9A",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POINT",
+          "geom": [5.0, 7.0]
+        },
+        {
+          "handle": "9B",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0],
+            [10.0, 0.0, 0.5],
+            [10.0, 10.0, 0],
+            [0.0, 10.0, 0]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "A1",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [-30.0, 0.0, 0.25],
+            [-40.0, 0.0, 0],
+            [-40.0, 10.0, 0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "A6",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0.0],
+            [5.0, 5.0, 0.0],
+            [10.0, 0.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "B1",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "FILL",
+          "rings": [
+            [
+              [0.0, -20.0],
+              [10.0, -20.0],
+              [10.0, -10.0],
+              [0.0, -10.0]
+            ]
+          ],
+          "color": 16711680
+        },
+        {
+          "handle": "B2",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "FILL",
+          "rings": [
+            [
+              [20.0, -20.0],
+              [30.0, -20.0],
+              [25.0, -10.0]
+            ]
+          ]
+        },
+        {
+          "handle": "B3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "FILL",
+          "rings": [
+            [
+              [40.0, -20.0],
+              [50.0, -20.0],
+              [50.0, -18.0],
+              [40.0, -18.0]
+            ]
+          ]
+        },
+        {
+          "handle": "B4",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0.0],
+            [10.0, 0.0, 0.0],
+            [10.0, 10.0, 0.0],
+            [0.0, 10.0, 0.0]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "C0",
+          "insert": "C2",
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [30.0, 30.0, 1.0]
+        },
+        {
+          "handle": "CA",
+          "insert": "C6",
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 15.125, 0.0, 20.375]
+        },
+        {
+          "handle": "CB",
+          "insert": "C6",
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [30.0, 15.125, 30.0, 20.375]
+        },
+        {
+          "handle": "D0",
+          "insert": "C6",
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, 20.0, 30.0, 20.0]
+        }
+      ],
+      "texts": [
+        {
+          "handle": "B5",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Hello",
+          "anchor": [1.0, 2.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.5,
+          "rotation": 0.5235987755982988,
+          "widthSign": 1
+        },
+        {
+          "handle": "B6",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Centre",
+          "anchor": [50.0, 60.0],
+          "hAlign": 1,
+          "vAlign": 2,
+          "height": 3.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B7",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "TopRight",
+          "anchor": [70.0, 60.0],
+          "hAlign": 2,
+          "vAlign": 3,
+          "height": 1.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B8",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [0.0, -30.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B9",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Ø50 45° ±0.5 100%",
+          "anchor": [0.0, -35.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "BA",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Back",
+          "anchor": [0.0, -40.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": -1
+        },
+        {
+          "handle": "BB",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Upside",
+          "anchor": [20.0, -40.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.0,
+          "rotation": 3.141592653589793,
+          "widthSign": -1
+        },
+        {
+          "handle": "BC",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Mirrored OCS",
+          "anchor": [-5.0, -45.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "C4",
+          "insert": "C2",
+          "tol": 1e-9,
+          "text": "P-101",
+          "anchor": [30.0, 28.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1,
+          "hidden": false
+        },
+        {
+          "handle": "C5",
+          "insert": "C2",
+          "tol": 1e-9,
+          "text": "hidden value",
+          "anchor": [30.0, 25.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1,
+          "hidden": true
+        }
+      ],
+      "hatches": [],
+      "splines": [],
+      "ellipsePoints": [],
+      "props": [
+        {
+          "handle": "B5",
+          "insert": null,
+          "color": 16776960,
+          "layer": "TXT"
+        }
+      ],
+      "version": "AC1009",
+      "insunits": 0,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "GEOM": {
+          "off": false,
+          "frozen": false,
+          "linetype": "DASHED",
+          "plot": true,
+          "color": 16711680,
+          "lineweight": -3
+        },
+        "OFFLAYER": {
+          "off": true,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 65280,
+          "lineweight": -3
+        },
+        "FROZEN": {
+          "off": false,
+          "frozen": true,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 255,
+          "lineweight": -3
+        },
+        "TXT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16776960,
+          "lineweight": -3
+        }
+      },
+      "counts": {
+        "LINE": 3,
+        "CIRCLE": 2,
+        "ARC": 2,
+        "POINT": 1,
+        "POLYLINE": 3,
+        "SOLID": 2,
+        "TRACE": 1,
+        "3DFACE": 1,
+        "TEXT": 8,
+        "INSERT": 1,
+        "ATTRIB": 2,
+        "DIMENSION": 1
+      },
+      "skipped": {
+        "POLYLINE (polyface mesh)": 1
+      },
+      "inserts": 2,
+      "layoutCounts": {
+        "Layout1": {
+          "LINE": 1,
+          "TEXT": 1
+        }
+      },
+      "binary": true,
+      "sameAs": "r12_entities.dxf"
+    },
+    {
+      "file": "r2000_cp1256.dxf",
+      "entities": [
+        {
+          "handle": "8C",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 0.0, 0.5],
+            [10.0, 0.0, 0.0],
+            [10.0, 10.0, -1.0],
+            [0.0, 10.0, 0.0]
+          ],
+          "closed": true,
+          "layer": "0"
+        },
+        {
+          "handle": "8D",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [20.0, 0.0, 0.0],
+            [30.0, 5.0, 0.0],
+            [40.0, 0.0, 0.0]
+          ],
+          "closed": false,
+          "color": 65280,
+          "lineweight": 50,
+          "layer": "LWLAYER"
+        },
+        {
+          "handle": "8E",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [-50.0, 0.0, -1.0],
+            [-60.0, 0.0, -0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "8F",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [0.0, -5.0, 10.0, -5.0],
+          "color": 16744192,
+          "lineweight": 35,
+          "linetype": "DASHED",
+          "ltscale": 6.0
+        },
+        {
+          "handle": "90",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ELLIPSE",
+          "c": [0.0, 30.0],
+          "points": [
+            [10.0, 35.0],
+            [3.2679491924311233, 35.96410161513776],
+            [-6.732050807568875, 30.964101615137753],
+            [-10.0, 25.0],
+            [-3.2679491924311277, 24.035898384862243],
+            [6.7320508075688785, 29.035898384862247],
+            [10.0, 35.0]
+          ]
+        },
+        {
+          "handle": "91",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ELLIPSE",
+          "c": [30.0, 30.0],
+          "points": [
+            [28.817919173354642, 37.642691913004846],
+            [27.52652078772105, 36.287098086215586],
+            [26.563958855761896, 34.09566661490064],
+            [26.05820108004616, 31.359737143201926],
+            [26.07648537895173, 28.443037549045638],
+            [26.616380948136218, 25.73332817673333],
+            [27.606111423584174, 23.59085107562453]
+          ]
+        },
+        {
+          "handle": "92",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ELLIPSE",
+          "c": [60.0, 30.0],
+          "points": [
+            [65.0, 30.0],
+            [64.3301270189222, 28.75],
+            [62.5, 27.834936490538905],
+            [60.0, 27.5],
+            [57.5, 27.834936490538905],
+            [55.66987298107781, 28.75],
+            [55.0, 30.0]
+          ]
+        },
+        {
+          "handle": "9F",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "closed": false,
+          "pts": [
+            [0, 170, 0],
+            [10, 180, 0],
+            [20, 180, 0]
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "handle": "9A",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [0.0, 120.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 2.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "9B",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Bold line1\nline2 1/2 big end red under 50°",
+          "anchor": [0.0, 130.0],
+          "hAlign": 1,
+          "vAlign": 2,
+          "height": 2.5,
+          "rotation": 0.0
+        },
+        {
+          "handle": "9C",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Long MTEXT word000 word001 word002 word003 word004 word005 word006 word007 word008 word009 word010 word011 word012 word013 word014 word015 word016 word017 word018 word019 word020 word021 word022 word023 word024 word025 word026 word027 word028 word029 word030 word031 word032 word033 word034 word035 word036 word037 word038 word039 word040 word041 word042 word043 word044 word045 word046 word047 word048 word049 word050 word051 word052 word053 word054 word055 word056 word057 word058 word059 word060 word061 word062 word063 word064 word065 word066 word067 word068 word069 word070 word071 word072 word073 word074 word075 word076 word077 word078 word079",
+          "anchor": [0.0, 140.0],
+          "hAlign": 0,
+          "vAlign": 3,
+          "height": 1.0,
+          "rotation": 0.0
+        },
+        {
+          "handle": "9D",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر\nØ25",
+          "anchor": [0.0, 150.0],
+          "hAlign": 2,
+          "vAlign": 1,
+          "height": 2.0,
+          "rotation": 1.5707963267948966
+        },
+        {
+          "handle": "9E",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Stack 1/2 3/4",
+          "anchor": [0.0, 160.0],
+          "hAlign": 0,
+          "vAlign": 3,
+          "height": 2.0,
+          "rotation": 0.0
+        }
+      ],
+      "hatches": [
+        {
+          "handle": "97",
+          "insert": null,
+          "rings": 2,
+          "pattern": false,
+          "segments": 0,
+          "length": 0,
+          "ringPts": [
+            [
+              [0, 80],
+              [20, 80],
+              [20, 100],
+              [0, 100]
+            ],
+            [
+              [5, 85],
+              [15, 85],
+              [15, 95],
+              [5, 95]
+            ]
+          ]
+        },
+        {
+          "handle": "98",
+          "insert": null,
+          "rings": 1,
+          "pattern": false,
+          "segments": 0,
+          "length": 0,
+          "onBoundary": [
+            [30, 80],
+            [40, 80],
+            [45, 85],
+            [40, 90],
+            [35, 90],
+            [32.5, 87.5],
+            [30, 90],
+            [28, 85]
+          ],
+          "offBoundary": [[32.5, 92.5]]
+        },
+        {
+          "handle": "99",
+          "insert": null,
+          "rings": 2,
+          "pattern": true,
+          "segments": 20,
+          "length": 172.86911933679937
+        }
+      ],
+      "splines": [
+        {
+          "handle": "93",
+          "through": [
+            [0.0, 50.0],
+            [40.0, 50.0]
+          ],
+          "near": [
+            [0.0, 50.0],
+            [3.525390625, 52.86865234375],
+            [6.640625, 54.19921875],
+            [9.404296875, 54.32861328125],
+            [11.875, 53.59375],
+            [14.111328125, 52.33154296875],
+            [16.171875, 50.87890625],
+            [18.115234375, 49.57275390625],
+            [20.0, 48.75],
+            [21.884765625, 48.64990234375],
+            [23.828125, 49.12109375],
+            [25.888671875, 49.91455078125],
+            [28.125, 50.78125],
+            [30.595703125, 51.47216796875],
+            [33.359375, 51.73828125],
+            [36.474609375, 51.33056640625],
+            [40.0, 50.0]
+          ],
+          "nearTol": 0.02
+        },
+        {
+          "handle": "94",
+          "through": [
+            [50, 50],
+            [55, 58],
+            [62, 52],
+            [70, 60]
+          ],
+          "tol": 1e-9
+        },
+        {
+          "handle": "95",
+          "onCircle": {
+            "c": [100, 50],
+            "r": 10
+          },
+          "tol": 1e-9,
+          "through": [
+            [110, 50],
+            [100, 60]
+          ]
+        },
+        {
+          "handle": "96",
+          "closed": true,
+          "near": [
+            [128.33333333333331, 51.66666666666666],
+            [129.27083333333331, 53.17708333333333],
+            [129.58333333333331, 55.0],
+            [129.27083333333331, 56.822916666666664],
+            [128.33333333333331, 58.33333333333333],
+            [126.82291666666666, 59.270833333333336],
+            [125.0, 59.58333333333332],
+            [123.17708333333333, 59.27083333333333],
+            [121.66666666666666, 58.33333333333333],
+            [120.72916666666667, 56.822916666666664],
+            [120.41666666666664, 54.99999999999999],
+            [120.72916666666666, 53.17708333333333],
+            [121.66666666666666, 51.66666666666666],
+            [123.17708333333333, 50.72916666666666],
+            [124.99999999999999, 50.416666666666664],
+            [126.82291666666666, 50.729166666666664],
+            [128.33333333333331, 51.66666666666666]
+          ],
+          "nearTol": 0.02
+        }
+      ],
+      "ellipsePoints": [],
+      "props": [
+        {
+          "handle": "97",
+          "insert": null,
+          "color": 65280,
+          "layer": "HATCH"
+        }
+      ],
+      "version": "AC1015",
+      "insunits": 6,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "LWLAYER": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 65280,
+          "lineweight": 50
+        },
+        "HATCH": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 65280,
+          "lineweight": -3
+        }
+      },
+      "counts": {
+        "LWPOLYLINE": 3,
+        "LINE": 1,
+        "ELLIPSE": 3,
+        "SPLINE": 4,
+        "HATCH": 3,
+        "TEXT": 1,
+        "MTEXT": 4,
+        "LEADER": 1,
+        "POINT": 1
+      },
+      "skipped": {
+        "3DSOLID": 1,
+        "RAY": 1,
+        "XLINE": 1
+      },
+      "codepage": "ANSI_1256",
+      "binary": false
+    },
+    {
+      "file": "r2010_blocks.dxf",
+      "entities": [
+        {
+          "handle": "90",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [116.58845726811988, 207.26794919243113, 114.58845726811988, 210.7320508075689]
+        },
+        {
+          "handle": "91",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [113.856406460551, 208.0, 0.9999999999999999]
+        },
+        {
+          "handle": "92",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [116.58845726811988, 207.26794919243113],
+          "r": 1.9999999999999998,
+          "start": [115.58845726811988, 209.0],
+          "end": [114.856406460551, 206.26794919243113],
+          "mid": [114.65660561554175, 207.7855872826362]
+        },
+        {
+          "handle": "93",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [116.58845726811988, 207.26794919243113, 113.12435565298213, 205.26794919243113]
+        },
+        {
+          "handle": "94",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [116.58845726811988, 207.26794919243113, 0.5],
+            [115.58845726811988, 209.0, 0.0],
+            [113.856406460551, 208.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "9B",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [107.9282032302755, 202.26794919243113, 104.9282032302755, 207.46410161513776]
+        },
+        {
+          "handle": "90",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [88.37564434701785, 192.13397459621555, 87.37564434701785, 193.86602540378442]
+        },
+        {
+          "handle": "91",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [88.74166975080229, 193.5, 0.49999999999999994]
+        },
+        {
+          "handle": "92",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [88.37564434701785, 192.13397459621555],
+          "r": 0.9999999999999999,
+          "start": [87.87564434701785, 193.0],
+          "end": [89.24166975080229, 192.63397459621555],
+          "mid": [88.63446339212038, 193.09990042250462]
+        },
+        {
+          "handle": "93",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [88.37564434701785, 192.13397459621555, 90.10769515458674, 193.13397459621555]
+        },
+        {
+          "handle": "94",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [88.37564434701785, 192.13397459621555, -0.5],
+            [87.87564434701785, 193.0, -0.0],
+            [88.74166975080229, 193.5, -0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "9B",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [92.70577136594005, 194.63397459621555, 91.20577136594005, 197.23205080756887]
+        },
+        {
+          "handle": "90",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [105.0, 191.3397459621556, 106.73205080756888, 192.3397459621556]
+        },
+        {
+          "handle": "91",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [105.36602540378443, 192.70577136594005, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [105.0, 191.3397459621556],
+          "r": 1.0,
+          "start": [105.86602540378443, 191.8397459621556],
+          "end": [104.5, 192.20577136594005],
+          "mid": [105.25881904510253, 192.30567178844467]
+        },
+        {
+          "handle": "93",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [105.0, 191.3397459621556, 104.0, 193.07179676972447]
+        },
+        {
+          "handle": "94",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [105.0, 191.3397459621556, 0.5],
+            [105.86602540378443, 191.8397459621556, 0.0],
+            [105.36602540378443, 192.70577136594005, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "A5",
+          "insert": "A6",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [100.0, 200.0, 1.0],
+            [103.46410161513775, 202.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "A8",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [0.0, 50.0, -2.0, 50.0]
+        },
+        {
+          "handle": "91",
+          "insert": "A8",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [-1.0, 51.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "A8",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [0.0, 50.0],
+          "r": 1.0,
+          "start": [-1.0, 50.0],
+          "end": [-6.123233995736766e-17, 51.0],
+          "mid": [-0.7071067811865476, 50.707106781186546]
+        },
+        {
+          "handle": "93",
+          "insert": "A8",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [0.0, 50.0, 0.0, 52.0]
+        },
+        {
+          "handle": "94",
+          "insert": "A8",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 50.0, -0.5],
+            [-1.0, 50.0, -0.0],
+            [-1.0, 51.0, -0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [0.0, 100.0, 2.0, 100.0]
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [1.0, 101.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [0.0, 100.0],
+          "r": 1.0,
+          "start": [1.0, 100.0],
+          "end": [6.123233995736766e-17, 101.0],
+          "mid": [0.7071067811865476, 100.70710678118655]
+        },
+        {
+          "handle": "93",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [0.0, 100.0, 0.0, 102.0]
+        },
+        {
+          "handle": "94",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 100.0, 0.5],
+            [1.0, 100.0, 0.0],
+            [1.0, 101.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [5.0, 100.0, 7.0, 100.0]
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [6.0, 101.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [5.0, 100.0],
+          "r": 1.0,
+          "start": [6.0, 100.0],
+          "end": [5.0, 101.0],
+          "mid": [5.707106781186548, 100.70710678118655]
+        },
+        {
+          "handle": "93",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [5.0, 100.0, 5.0, 102.0]
+        },
+        {
+          "handle": "94",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [5.0, 100.0, 0.5],
+            [6.0, 100.0, 0.0],
+            [6.0, 101.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [10.0, 100.0, 12.0, 100.0]
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [11.0, 101.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [10.0, 100.0],
+          "r": 1.0,
+          "start": [11.0, 100.0],
+          "end": [10.0, 101.0],
+          "mid": [10.707106781186548, 100.70710678118655]
+        },
+        {
+          "handle": "93",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [10.0, 100.0, 10.0, 102.0]
+        },
+        {
+          "handle": "94",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [10.0, 100.0, 0.5],
+            [11.0, 100.0, 0.0],
+            [11.0, 101.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [0.0, 104.0, 2.0, 104.0]
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [1.0, 105.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [0.0, 104.0],
+          "r": 1.0,
+          "start": [1.0, 104.0],
+          "end": [6.123233995736766e-17, 105.0],
+          "mid": [0.7071067811865476, 104.70710678118655]
+        },
+        {
+          "handle": "93",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [0.0, 104.0, 0.0, 106.0]
+        },
+        {
+          "handle": "94",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [0.0, 104.0, 0.5],
+            [1.0, 104.0, 0.0],
+            [1.0, 105.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [5.0, 104.0, 7.0, 104.0]
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [6.0, 105.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [5.0, 104.0],
+          "r": 1.0,
+          "start": [6.0, 104.0],
+          "end": [5.0, 105.0],
+          "mid": [5.707106781186548, 104.70710678118655]
+        },
+        {
+          "handle": "93",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [5.0, 104.0, 5.0, 106.0]
+        },
+        {
+          "handle": "94",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [5.0, 104.0, 0.5],
+            [6.0, 104.0, 0.0],
+            [6.0, 105.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [10.0, 104.0, 12.0, 104.0]
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [11.0, 105.0, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [10.0, 104.0],
+          "r": 1.0,
+          "start": [11.0, 104.0],
+          "end": [10.0, 105.0],
+          "mid": [10.707106781186548, 104.70710678118655]
+        },
+        {
+          "handle": "93",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [10.0, 104.0, 10.0, 106.0]
+        },
+        {
+          "handle": "94",
+          "insert": "AA",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [10.0, 104.0, 0.5],
+            [11.0, 104.0, 0.0],
+            [11.0, 105.0, 0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "90",
+          "insert": "AC",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [-60.0, 60.0, -61.93185165257814, 60.51763809020504]
+        },
+        {
+          "handle": "91",
+          "insert": "AC",
+          "tol": 1e-7,
+          "kind": "CIRCLE",
+          "geom": [-60.707106781186546, 61.224744871391586, 0.5]
+        },
+        {
+          "handle": "92",
+          "insert": "AC",
+          "tol": 1e-7,
+          "kind": "ARC",
+          "c": [-60.0, 60.0],
+          "r": 1.0,
+          "start": [-60.965925826289066, 60.25881904510252],
+          "end": [-59.74118095489748, 60.965925826289066],
+          "mid": [-60.5, 60.86602540378444]
+        },
+        {
+          "handle": "93",
+          "insert": "AC",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [-60.0, 60.0, -59.48236190979496, 61.93185165257814]
+        },
+        {
+          "handle": "94",
+          "insert": "AC",
+          "tol": 1e-7,
+          "kind": "POLY",
+          "pts": [
+            [-60.0, 60.0, -0.5],
+            [-60.965925826289066, 60.25881904510252, -0.0],
+            [-60.707106781186546, 61.224744871391586, -0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "BA",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [-10.0, 300.0, 4.0]
+        },
+        {
+          "handle": "BB",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ARC",
+          "c": [-30.0, 300.0],
+          "r": 5.0,
+          "start": [-34.92403876506104, 300.86824088833464],
+          "end": [-29.13175911166535, 304.924038765061],
+          "mid": [-32.86788218175523, 304.09576022144495]
+        },
+        {
+          "handle": "BC",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [-40.0, 300.0, -0.4],
+            [-50.0, 300.0, -0.0],
+            [-50.0, 310.0, -0.0]
+          ],
+          "closed": false
+        },
+        {
+          "handle": "D6",
+          "insert": "D2",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [-0.06933752452815352, 400.10400628679224, -2.9815135547105918, 404.4722703320659]
+        },
+        {
+          "handle": "D7",
+          "insert": "D2",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [29.930662475471845, 420.10400628679224, 27.018486445289398, 424.4722703320659]
+        },
+        {
+          "handle": "DC",
+          "insert": "D2",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [-2.7735009811261313, 404.1602514716892, 27.22649901887386, 424.1602514716892]
+        },
+        {
+          "handle": "E7",
+          "insert": "E1",
+          "tol": 1e-7,
+          "kind": "LINE",
+          "geom": [65.83363094478902, 415.833630944789, 66.61144840409422, 416.6114484040942]
+        }
+      ],
+      "texts": [
+        {
+          "handle": "95",
+          "insert": "A6",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [113.12435565298213, 205.26794919243113],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "A6",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [90.10769515458674, 193.13397459621555],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "A6",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [104.0, 193.07179676972447],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "A8",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [0.0, 52.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AA",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [0.0, 102.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AA",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [5.0, 102.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AA",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [10.0, 102.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AA",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [0.0, 106.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AA",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [5.0, 106.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AA",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [10.0, 106.0],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "95",
+          "insert": "AC",
+          "tol": 1e-7,
+          "text": "L",
+          "anchor": [-59.48236190979496, 61.93185165257814],
+          "hAlign": 0,
+          "vAlign": 0
+        },
+        {
+          "handle": "B8",
+          "insert": "B6",
+          "tol": 1e-9,
+          "text": "V-200",
+          "anchor": [200.0, 3.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 1.0,
+          "rotation": 0.0,
+          "widthSign": 1,
+          "hidden": false
+        },
+        {
+          "handle": "B9",
+          "insert": "B6",
+          "tol": 1e-9,
+          "text": "secret",
+          "anchor": [200.0, -3.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 1.0,
+          "rotation": 0.0,
+          "widthSign": 1,
+          "hidden": true
+        },
+        {
+          "handle": "BD",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "OCS",
+          "anchor": [-60.0, 300.0],
+          "hAlign": 0,
+          "vAlign": 0
+        }
+      ],
+      "hatches": [],
+      "splines": [],
+      "ellipsePoints": [
+        {
+          "handle": "91",
+          "insert": "AE",
+          "c": [52.0, 51.0],
+          "points": [
+            [53.0, 51.0],
+            [52.707106781186546, 51.35355339059328],
+            [52.0, 51.5],
+            [51.292893218813454, 51.35355339059328],
+            [51.0, 51.0],
+            [51.292893218813454, 50.64644660940672],
+            [52.0, 50.5],
+            [52.707106781186546, 50.64644660940672]
+          ],
+          "tol": 1e-9
+        },
+        {
+          "handle": "92",
+          "insert": "AE",
+          "c": [50.0, 50.0],
+          "points": [
+            [52.0, 50.0],
+            [51.84775906502257, 50.38268343236509],
+            [51.41421356237309, 50.707106781186546],
+            [50.76536686473018, 50.923879532511286],
+            [50.0, 51.0]
+          ],
+          "tol": 1e-9,
+          "arc": true
+        },
+        {
+          "handle": "BE",
+          "insert": null,
+          "c": [-6.598057157886217, -0.4640762105149565],
+          "points": [
+            [-14.598057157886217, 5.535923789485043],
+            [-15.09802415631314, -3.464032208417523],
+            [-7.0980241563131425, -9.464032208417521],
+            [1.4019428421137827, -6.464076210514957],
+            [1.901909840540709, 2.5358797873876053],
+            [-6.098090159459294, 8.535879787387609]
+          ],
+          "tol": 1e-9
+        }
+      ],
+      "props": [
+        {
+          "handle": "90",
+          "insert": "A8",
+          "color": 255,
+          "layer": "WALLS",
+          "lineweight": 50,
+          "flags": 2
+        },
+        {
+          "handle": "91",
+          "insert": "A8",
+          "color": 255,
+          "layer": "WALLS"
+        },
+        {
+          "handle": "92",
+          "insert": "A8",
+          "color": 255,
+          "layer": "WALLS"
+        },
+        {
+          "handle": "93",
+          "insert": "A8",
+          "color": 16711680
+        },
+        {
+          "handle": "90",
+          "insert": "AA",
+          "color": 16711935,
+          "layer": "0",
+          "count": 6
+        },
+        {
+          "handle": "91",
+          "insert": "AA",
+          "color": 16777215,
+          "layer": "0",
+          "count": 6
+        },
+        {
+          "handle": "9B",
+          "insert": "A6",
+          "color": 16711680,
+          "layer": "EQUIP",
+          "linetype": "DASHED",
+          "count": 2
+        },
+        {
+          "handle": "90",
+          "insert": "A6",
+          "layer": "EQUIP",
+          "count": 3
+        },
+        {
+          "handle": "91",
+          "insert": "A6",
+          "color": 65280,
+          "layer": "EQUIP",
+          "count": 3
+        },
+        {
+          "handle": "A5",
+          "insert": "A6",
+          "color": 65280,
+          "layer": "EQUIP",
+          "count": 1
+        }
+      ],
+      "colorCounts": [
+        {
+          "handle": "90",
+          "insert": "A6",
+          "colors": {
+            "ff0000": 2,
+            "ff00": 1
+          }
+        }
+      ],
+      "version": "AC1024",
+      "insunits": 4,
+      "layouts": ["Model", "Layout1", "Sheet2"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "WALLS": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 255,
+          "lineweight": 50
+        },
+        "EQUIP": {
+          "off": false,
+          "frozen": false,
+          "linetype": "DASHED",
+          "plot": true,
+          "color": 65280,
+          "lineweight": -3
+        },
+        "ANNO": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16776960,
+          "lineweight": -3
+        }
+      },
+      "counts": {
+        "INSERT": 7,
+        "ATTRIB": 2,
+        "CIRCLE": 2,
+        "ARC": 1,
+        "LWPOLYLINE": 1,
+        "TEXT": 1,
+        "DIMENSION": 2
+      },
+      "skipped": {
+        "MESH": 1,
+        "3DSOLID": 1,
+        "WIPEOUT": 1,
+        "INSERT": 1
+      },
+      "inserts": 9,
+      "layoutCounts": {
+        "Layout1": {
+          "LINE": 1,
+          "TEXT": 1
+        },
+        "Sheet2": {
+          "CIRCLE": 1,
+          "LWPOLYLINE": 1,
+          "TEXT": 1
+        }
+      },
+      "layoutSkipped": {
+        "Layout1": {},
+        "Sheet2": {}
+      },
+      "warningsContain": ["CYC_A", "MESH", "WIPEOUT", "3DSOLID"],
+      "binary": false
+    },
+    {
+      "file": "r2018_plotplan.dxf",
+      "entities": [
+        {
+          "handle": "93",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600000.0, 2499990.0, 600000.0, 2500210.0],
+          "color": 8421504,
+          "layer": "GRID",
+          "linetype": "CENTER"
+        },
+        {
+          "handle": "99",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600150.0, 2499990.0, 600150.0, 2500210.0],
+          "color": 8421504,
+          "layer": "GRID",
+          "linetype": "CENTER"
+        },
+        {
+          "handle": "A9",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [599990.0, 2500200.0, 600310.0, 2500200.0]
+        },
+        {
+          "handle": "AB",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600123.456, 2500087.125, 0.75],
+          "color": 65535,
+          "layer": "EQUIPMENT"
+        },
+        {
+          "handle": "AD",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600126.789, 2500087.125, 0.75],
+          "color": 65535,
+          "layer": "EQUIPMENT"
+        },
+        {
+          "handle": "AF",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600130.0625, 2500087.125, 0.75],
+          "color": 65535,
+          "layer": "EQUIPMENT"
+        },
+        {
+          "handle": "B1",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600200.0, 2500150.0, 15.0],
+          "color": 16711935
+        },
+        {
+          "handle": "B3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600250.0, 2500150.0, 20.0],
+          "color": 16711935
+        },
+        {
+          "handle": "B5",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600175.05, 2500120.0, 600279.95, 2500120.0],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B6",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600280.0, 2500120.05, 600280.0, 2500179.95],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B7",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600279.95, 2500180.0, 600175.05, 2500180.0],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B8",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600175.0, 2500179.95, 600175.0, 2500120.05],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B9",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [600180.0, 2500125.0, 0.0],
+            [600220.0, 2500125.0, 0.41421356237],
+            [600225.0, 2500130.0, 0.0],
+            [600225.0, 2500170.0, 0.41421356237],
+            [600220.0, 2500175.0, 0.0],
+            [600180.0, 2500175.0, 0.0]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "BB",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [599995.0, 2500100.0, 0.0],
+            [600150.0, 2500100.0, 0.2],
+            [600160.0, 2500110.0, 0.0],
+            [600300.0, 2500110.0, 0.0]
+          ],
+          "closed": false,
+          "color": 12632256,
+          "linetype": "DASHED"
+        },
+        {
+          "handle": "C2",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600000.0, 2499995.0, 600010.0, 2499995.0],
+          "color": 660510,
+          "lineweight": 50,
+          "layer": "TRUECOLOR"
+        },
+        {
+          "handle": "C3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600000.0, 2499994.0, 600010.0, 2499994.0],
+          "color": 66051,
+          "lineweight": 13
+        }
+      ],
+      "texts": [
+        {
+          "handle": "96",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "E 600050",
+          "anchor": [600050.0, 2499988.0],
+          "hAlign": 2,
+          "vAlign": 2,
+          "height": 2.5,
+          "rotation": 1.5707963267948966,
+          "widthSign": 1
+        },
+        {
+          "handle": "A6",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "N 2500100",
+          "anchor": [599988.0, 2500100.0],
+          "hAlign": 2,
+          "vAlign": 2,
+          "height": 2.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "AC",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "P-101",
+          "anchor": [600123.456, 2500085.625],
+          "hAlign": 1,
+          "vAlign": 3,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "AE",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "P-102",
+          "anchor": [600126.789, 2500085.625],
+          "hAlign": 1,
+          "vAlign": 3,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B0",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "P-103",
+          "anchor": [600130.0625, 2500085.625],
+          "hAlign": 1,
+          "vAlign": 3,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "BD",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [600060.5, 2500030.25],
+          "hAlign": 1,
+          "vAlign": 2,
+          "height": 3.0,
+          "rotation": 0.0
+        },
+        {
+          "handle": "BE",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [600060.5, 2500020.0],
+          "hAlign": 1,
+          "vAlign": 1,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "BF",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Ø600 PIPE 45° ±0.010",
+          "anchor": [600100.0, 2500010.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 1.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        }
+      ],
+      "hatches": [
+        {
+          "handle": "C0",
+          "insert": null,
+          "rings": 1,
+          "pattern": true,
+          "segments": 8,
+          "length": 190.27928774420923
+        },
+        {
+          "handle": "C1",
+          "insert": null,
+          "rings": 1,
+          "pattern": false,
+          "segments": 0,
+          "length": 0
+        }
+      ],
+      "splines": [],
+      "ellipsePoints": [],
+      "props": [
+        {
+          "handle": "BD",
+          "insert": null,
+          "color": 16711680,
+          "layer": "HAZARD"
+        }
+      ],
+      "version": "AC1032",
+      "insunits": 6,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "GRID": {
+          "off": false,
+          "frozen": false,
+          "linetype": "CENTER",
+          "plot": true,
+          "color": 8421504,
+          "lineweight": -3
+        },
+        "GRID_TEXT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "EQUIPMENT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 65535,
+          "lineweight": -3
+        },
+        "TANKS": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16711935,
+          "lineweight": -3
+        },
+        "BUND": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16744192,
+          "lineweight": -3
+        },
+        "ROADS": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 12632256,
+          "lineweight": -3
+        },
+        "HAZARD": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16711680,
+          "lineweight": -3
+        },
+        "ANNOTATION": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16776960,
+          "lineweight": -3
+        },
+        "TRUECOLOR": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 660510,
+          "lineweight": 50
+        }
+      },
+      "counts": {
+        "LINE": 18,
+        "TEXT": 17,
+        "CIRCLE": 7,
+        "LWPOLYLINE": 4,
+        "MTEXT": 1,
+        "HATCH": 2
+      },
+      "skipped": {},
+      "extentsContain": [599990.0, 2499990.0, 600310.0, 2500210.0],
+      "extentsWithin": [599940.0, 2499940.0, 600320.0, 2500220.0],
+      "layoutCounts": {
+        "Layout1": {
+          "LWPOLYLINE": 1,
+          "LINE": 1,
+          "TEXT": 1,
+          "MTEXT": 1
+        }
+      },
+      "binary": false
+    },
+    {
+      "file": "r2018_plotplan_binary.dxf",
+      "entities": [
+        {
+          "handle": "93",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600000.0, 2499990.0, 600000.0, 2500210.0],
+          "color": 8421504,
+          "layer": "GRID",
+          "linetype": "CENTER"
+        },
+        {
+          "handle": "99",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600150.0, 2499990.0, 600150.0, 2500210.0],
+          "color": 8421504,
+          "layer": "GRID",
+          "linetype": "CENTER"
+        },
+        {
+          "handle": "A9",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [599990.0, 2500200.0, 600310.0, 2500200.0]
+        },
+        {
+          "handle": "AB",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600123.456, 2500087.125, 0.75],
+          "color": 65535,
+          "layer": "EQUIPMENT"
+        },
+        {
+          "handle": "AD",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600126.789, 2500087.125, 0.75],
+          "color": 65535,
+          "layer": "EQUIPMENT"
+        },
+        {
+          "handle": "AF",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600130.0625, 2500087.125, 0.75],
+          "color": 65535,
+          "layer": "EQUIPMENT"
+        },
+        {
+          "handle": "B1",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600200.0, 2500150.0, 15.0],
+          "color": 16711935
+        },
+        {
+          "handle": "B3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [600250.0, 2500150.0, 20.0],
+          "color": 16711935
+        },
+        {
+          "handle": "B5",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600175.05, 2500120.0, 600279.95, 2500120.0],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B6",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600280.0, 2500120.05, 600280.0, 2500179.95],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B7",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600279.95, 2500180.0, 600175.05, 2500180.0],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B8",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600175.0, 2500179.95, 600175.0, 2500120.05],
+          "color": 16744192,
+          "layer": "BUND"
+        },
+        {
+          "handle": "B9",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [600180.0, 2500125.0, 0.0],
+            [600220.0, 2500125.0, 0.41421356237],
+            [600225.0, 2500130.0, 0.0],
+            [600225.0, 2500170.0, 0.41421356237],
+            [600220.0, 2500175.0, 0.0],
+            [600180.0, 2500175.0, 0.0]
+          ],
+          "closed": true
+        },
+        {
+          "handle": "BB",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "POLY",
+          "pts": [
+            [599995.0, 2500100.0, 0.0],
+            [600150.0, 2500100.0, 0.2],
+            [600160.0, 2500110.0, 0.0],
+            [600300.0, 2500110.0, 0.0]
+          ],
+          "closed": false,
+          "color": 12632256,
+          "linetype": "DASHED"
+        },
+        {
+          "handle": "C2",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600000.0, 2499995.0, 600010.0, 2499995.0],
+          "color": 660510,
+          "lineweight": 50,
+          "layer": "TRUECOLOR"
+        },
+        {
+          "handle": "C3",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "LINE",
+          "geom": [600000.0, 2499994.0, 600010.0, 2499994.0],
+          "color": 66051,
+          "lineweight": 13
+        }
+      ],
+      "texts": [
+        {
+          "handle": "96",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "E 600050",
+          "anchor": [600050.0, 2499988.0],
+          "hAlign": 2,
+          "vAlign": 2,
+          "height": 2.5,
+          "rotation": 1.5707963267948966,
+          "widthSign": 1
+        },
+        {
+          "handle": "A6",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "N 2500100",
+          "anchor": [599988.0, 2500100.0],
+          "hAlign": 2,
+          "vAlign": 2,
+          "height": 2.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "AC",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "P-101",
+          "anchor": [600123.456, 2500085.625],
+          "hAlign": 1,
+          "vAlign": 3,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "AE",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "P-102",
+          "anchor": [600126.789, 2500085.625],
+          "hAlign": 1,
+          "vAlign": 3,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "B0",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "P-103",
+          "anchor": [600130.0625, 2500085.625],
+          "hAlign": 1,
+          "vAlign": 3,
+          "height": 0.5,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "BD",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [600060.5, 2500030.25],
+          "hAlign": 1,
+          "vAlign": 2,
+          "height": 3.0,
+          "rotation": 0.0
+        },
+        {
+          "handle": "BE",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "منطقة الخطر",
+          "anchor": [600060.5, 2500020.0],
+          "hAlign": 1,
+          "vAlign": 1,
+          "height": 2.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        },
+        {
+          "handle": "BF",
+          "insert": null,
+          "tol": 1e-9,
+          "text": "Ø600 PIPE 45° ±0.010",
+          "anchor": [600100.0, 2500010.0],
+          "hAlign": 0,
+          "vAlign": 0,
+          "height": 1.0,
+          "rotation": 0.0,
+          "widthSign": 1
+        }
+      ],
+      "hatches": [
+        {
+          "handle": "C0",
+          "insert": null,
+          "rings": 1,
+          "pattern": true,
+          "segments": 8,
+          "length": 190.27928774420923
+        },
+        {
+          "handle": "C1",
+          "insert": null,
+          "rings": 1,
+          "pattern": false,
+          "segments": 0,
+          "length": 0
+        }
+      ],
+      "splines": [],
+      "ellipsePoints": [],
+      "props": [
+        {
+          "handle": "BD",
+          "insert": null,
+          "color": 16711680,
+          "layer": "HAZARD"
+        }
+      ],
+      "version": "AC1032",
+      "insunits": 6,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "GRID": {
+          "off": false,
+          "frozen": false,
+          "linetype": "CENTER",
+          "plot": true,
+          "color": 8421504,
+          "lineweight": -3
+        },
+        "GRID_TEXT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "EQUIPMENT": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 65535,
+          "lineweight": -3
+        },
+        "TANKS": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16711935,
+          "lineweight": -3
+        },
+        "BUND": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16744192,
+          "lineweight": -3
+        },
+        "ROADS": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 12632256,
+          "lineweight": -3
+        },
+        "HAZARD": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16711680,
+          "lineweight": -3
+        },
+        "ANNOTATION": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16776960,
+          "lineweight": -3
+        },
+        "TRUECOLOR": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 660510,
+          "lineweight": 50
+        }
+      },
+      "counts": {
+        "LINE": 18,
+        "TEXT": 17,
+        "CIRCLE": 7,
+        "LWPOLYLINE": 4,
+        "MTEXT": 1,
+        "HATCH": 2
+      },
+      "skipped": {},
+      "extentsContain": [599990.0, 2499990.0, 600310.0, 2500210.0],
+      "extentsWithin": [599940.0, 2499940.0, 600320.0, 2500220.0],
+      "layoutCounts": {
+        "Layout1": {
+          "LWPOLYLINE": 1,
+          "LINE": 1,
+          "TEXT": 1,
+          "MTEXT": 1
+        }
+      },
+      "binary": true,
+      "sameAs": "r2018_plotplan.dxf"
+    },
+    {
+      "file": "mm_flange.dxf",
+      "entities": [
+        {
+          "handle": "8C",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [0.0, 0.0, 150.0]
+        },
+        {
+          "handle": "8D",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [0.0, 0.0, 60.3]
+        },
+        {
+          "handle": "8F",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [77.78174593052023, 77.78174593052022, 11.0]
+        },
+        {
+          "handle": "96",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "CIRCLE",
+          "geom": [0.0, 0.0, 110.0],
+          "color": 16711680,
+          "linetype": "CENTER"
+        },
+        {
+          "handle": "97",
+          "insert": null,
+          "tol": 1e-9,
+          "kind": "ARC",
+          "c": [0.0, 0.0],
+          "r": 130.0,
+          "start": [-122.16004070216809, -44.46261863233693],
+          "end": [122.16004070216809, -44.46261863233692],
+          "mid": [-2.3880612583373385e-14, -130.0]
+        }
+      ],
+      "texts": [],
+      "hatches": [],
+      "splines": [],
+      "ellipsePoints": [],
+      "props": [],
+      "version": "AC1027",
+      "insunits": 4,
+      "layouts": ["Model", "Layout1"],
+      "layers": {
+        "0": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "Defpoints": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": false,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "OUTLINE": {
+          "off": false,
+          "frozen": false,
+          "linetype": "Continuous",
+          "plot": true,
+          "color": 16777215,
+          "lineweight": -3
+        },
+        "CENTER": {
+          "off": false,
+          "frozen": false,
+          "linetype": "CENTER",
+          "plot": true,
+          "color": 16711680,
+          "lineweight": -3
+        }
+      },
+      "counts": {
+        "CIRCLE": 11,
+        "ARC": 1,
+        "DIMENSION": 2
+      },
+      "skipped": {},
+      "binary": false
+    },
+    {
+      "file": "malformed.dxf",
+      "error": {
+        "line": 5703,
+        "contains": "8x"
+      }
+    }
+  ]
+}

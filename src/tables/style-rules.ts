@@ -453,10 +453,12 @@ export function compileStyleRules(rules: StyleRule[], columns: string[]): Compil
       for (const c of rule.categories ?? []) {
         const key = categoryKey(c.value);
         if (map.has(key)) continue;
+        const dash = c.dash ?? rule.dash;
+        const fillOpacity = c.fillOpacity ?? rule.fillOpacity;
         map.set(key, {
           color: c.color,
-          ...(rule.dash ? { dash: rule.dash } : {}),
-          ...(rule.fillOpacity !== undefined ? { fillOpacity: rule.fillOpacity } : {}),
+          ...(dash ? { dash } : {}),
+          ...(fillOpacity !== undefined ? { fillOpacity } : {}),
           ...(c.hidden ? { hidden: true } : {}),
           legendKey: categoryLegendKey(rule.id, c.value),
         });
@@ -477,12 +479,16 @@ export function compileStyleRules(rules: StyleRule[], columns: string[]): Compil
     } else {
       const breaks = [...(rule.breaks ?? [])].sort((a, b) => a.upTo - b.upTo);
       if (breaks.length === 0) continue;
-      const styles: RuleStyle[] = breaks.map((b) => ({
-        color: b.color,
-        ...(rule.dash ? { dash: rule.dash } : {}),
-        ...(rule.fillOpacity !== undefined ? { fillOpacity: rule.fillOpacity } : {}),
-        legendKey: breakLegendKey(rule.id, (rule.breaks ?? []).indexOf(b)),
-      }));
+      const styles: RuleStyle[] = breaks.map((b) => {
+        const dash = b.dash ?? rule.dash;
+        const fillOpacity = b.fillOpacity ?? rule.fillOpacity;
+        return {
+          color: b.color,
+          ...(dash ? { dash } : {}),
+          ...(fillOpacity !== undefined ? { fillOpacity } : {}),
+          legendKey: breakLegendKey(rule.id, (rule.breaks ?? []).indexOf(b)),
+        };
+      });
       compiled.push((row) => {
         const i = classify(toNumber(row[idx]), breaks);
         return i < 0 ? null : styles[i];

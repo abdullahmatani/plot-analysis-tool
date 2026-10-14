@@ -105,5 +105,8 @@ export function detectFileType(bytes: Uint8Array, fileName = ''): Detected {
     return result('unknown', 'Legacy Office file (.xls/.doc) — save as .xlsx or .csv');
   if (looksLikeAsciiDxf(bytes)) return result('dxf', 'ASCII DXF', 'ascii');
   if (looksLikeText(bytes)) return result('csv', 'Text table');
+  // UTF-16 text with a BOM (Excel "Unicode Text" TSV): NUL bytes are expected, so check the BOM.
+  if ((bytes[0] === 0xff && bytes[1] === 0xfe) || (bytes[0] === 0xfe && bytes[1] === 0xff))
+    return result('csv', 'Text table (UTF-16)');
   return result('unknown', 'Unrecognised file');
 }

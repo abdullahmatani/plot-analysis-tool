@@ -203,9 +203,19 @@ export interface StyleRule {
   id: string;
   kind: 'categorical' | 'graduated';
   column: string;
-  /** Categorical: value → colour. Graduated: class breaks (ascending upper bounds) with colours. */
-  categories?: { value: string; color: string; label?: string; hidden?: boolean }[];
-  breaks?: { upTo: number; color: string; label?: string }[];
+  /**
+   * Categorical: value → colour. Graduated: class breaks (ascending upper bounds) with colours.
+   * `dash` / `fillOpacity` on a category or class override the rule-wide values (row 67).
+   */
+  categories?: {
+    value: string;
+    color: string;
+    label?: string;
+    hidden?: boolean;
+    dash?: DashStyle;
+    fillOpacity?: number;
+  }[];
+  breaks?: { upTo: number; color: string; label?: string; dash?: DashStyle; fillOpacity?: number }[];
   ramp?: string;
   dash?: DashStyle;
   fillOpacity?: number;
@@ -248,6 +258,26 @@ export interface ContourDataset {
   order: number;
   legendGroup?: string;
   source?: { fileName: string; importedAt: string; sheet?: string };
+  /** Contour label text style (row 70). Defaults: 2.5 mm paper, ring colour, halo, visible. */
+  labelStyle?: ContourLabelStyle;
+  /** Envelope outline style and legend label (row 74). Defaults: size-column colour, 2× width. */
+  envelopeStyle?: {
+    strokeWidth?: number;
+    dash?: DashStyle;
+    fillOpacity?: number;
+    legendLabel?: string;
+    /** Show only the envelope, not the individual rings. */
+    hideRings?: boolean;
+  };
+}
+
+export interface ContourLabelStyle {
+  visible: boolean;
+  /** Paper millimetres. */
+  size: number;
+  /** Fixed label colour; undefined = the ring's colour. */
+  color?: string;
+  halo: boolean;
 }
 
 export interface LegendEntryOverride {

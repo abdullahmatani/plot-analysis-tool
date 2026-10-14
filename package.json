@@ -21,6 +21,7 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test --project=chromium",
     "e2e:perf": "playwright test --project=perf",
+    "perf:reference": "node scripts/perf-reference.mjs",
     "e2e:faults": "playwright test --project=faults",
     "bundle": "node scripts/make-bundle.mjs",
     "licences": "node scripts/gen-licences.mjs",

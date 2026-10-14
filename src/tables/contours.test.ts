@@ -275,11 +275,13 @@ describe('computeContours performance (NFR-5)', () => {
       `computeContours 5000×3: ${base.toFixed(1)} ms; relabel ${rebind.toFixed(1)} ms; ` +
         `size/mode/unit change ${resize.toFixed(1)} ms; with filter ${filter.toFixed(1)} ms`,
     );
-    // NFR-5 target is 100 ms; 250 ms leaves headroom for slow CI machines.
-    expect(base).toBeLessThan(250);
-    expect(rebind).toBeLessThan(250);
-    expect(resize).toBeLessThan(250);
-    expect(filter).toBeLessThan(250);
+    // NFR-5 target is 100 ms, enforced on the reference machine (PAT_PERF_STRICT=1); elsewhere 250 ms
+    // leaves headroom for slow CI machines.
+    const budget = process.env.PAT_PERF_STRICT ? 100 : 250;
+    expect(base).toBeLessThan(budget);
+    expect(rebind).toBeLessThan(budget);
+    expect(resize).toBeLessThan(budget);
+    expect(filter).toBeLessThan(budget);
   });
 
   it('validation of 5 000 rows is fast too', () => {

@@ -186,6 +186,8 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
     currentSession()?.drafts.clear(DRAFT.key);
     close();
   };
+  // Closing the dialog (✕, Esc, Cancel) discards its draft; a crash or reload keeps it (row 93).
+  useEffect(() => () => currentSession()?.drafts.clear(DRAFT.key), []);
 
   const matches = useMemo(
     () => (result ? matchTemplates(templates, columns) : []),

@@ -49,6 +49,17 @@ interface GridRow {
 }
 
 const ROW_H = 26;
+const GRID_KEYS = new Set([
+  'ArrowDown',
+  'ArrowUp',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'Enter',
+  'F2',
+  'Delete',
+]);
 
 function compareCells(x: unknown, y: unknown): number {
   const bx = x === null || x === undefined || x === '';
@@ -98,6 +109,7 @@ export function DataGrid({ ds }: { ds: ContourDataset }) {
     columns,
     state: { sorting, globalFilter: search },
     onSortingChange: setSorting,
+    sortDescFirst: false,
     globalFilterFn: containsText,
     getColumnCanGlobalFilter: () => true,
     getCoreRowModel: getCoreRowModel(),
@@ -160,7 +172,9 @@ export function DataGrid({ ds }: { ds: ContourDataset }) {
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (editing) return;
+    // Shortcuts with Ctrl/⌘/Alt (undo, redo, palette…) and keys the grid does not use pass through.
+    if (editing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!GRID_KEYS.has(e.key) && e.key.length !== 1) return;
     e.stopPropagation();
     const nCols = ds.table.columns.length;
     const move = (dr: number, dc2: number) => {

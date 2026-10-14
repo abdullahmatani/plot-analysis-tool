@@ -184,10 +184,13 @@ function labelInk(color: string, lightBg: boolean): string {
   const m = /^#([0-9a-f]{6})$/i.exec(color);
   if (!m) return color;
   const n = parseInt(m[1], 16);
-  const lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
-  if (!lightBg && lum < 0.18) return '#e5e7eb';
-  if (lightBg && lum > 0.9) return '#111827';
-  return color;
+  const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  const lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+  if (lightBg) return lum > 0.85 ? '#111827' : color;
+  // Dark canvas: mix towards white so saturated mid-tones stay legible (the halo is dark).
+  const k = lum < 0.18 ? 0.75 : 0.4;
+  const mix = rgb.map((c) => Math.round(c + (255 - c) * k));
+  return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
 }
 
 function drawHighlight(g: CanvasRenderingContext2D, f: FrameInfo, p: Project) {

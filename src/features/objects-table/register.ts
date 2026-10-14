@@ -3,6 +3,7 @@ import { TableProperties } from 'lucide-react';
 import { registerCommands } from '@/app/commands';
 import { dataPanels } from '@/components/inspector/panels';
 import { useUiStore } from '@/store/ui';
+import { useViewStore } from '@/store/view';
 
 import { ObjectsTable } from './ObjectsTable';
 
@@ -11,6 +12,9 @@ import { ObjectsTable } from './ObjectsTable';
 if (!dataPanels.includes(ObjectsTable)) dataPanels.push(ObjectsTable);
 
 export function register() {
+  // Test hook: the canvas selection the table is synchronised with.
+  (window as unknown as { __patSelection?: () => string[] }).__patSelection = () =>
+    useViewStore.getState().selection;
   return registerCommands([
     {
       id: 'data.objectsTable',

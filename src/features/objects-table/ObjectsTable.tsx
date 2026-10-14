@@ -30,6 +30,7 @@ import { objectRows, objectsBounds, type ObjectRow } from './rows';
  */
 
 const ROW_H = 26;
+const TABLE_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter', ' ', 'Escape']);
 const ALL = '__all__';
 
 function cmp(a: unknown, b: unknown): number {
@@ -103,6 +104,7 @@ export function ObjectsTable() {
     columns,
     state: { sorting, globalFilter: search, columnFilters },
     onSortingChange: setSorting,
+    sortDescFirst: false,
     globalFilterFn: (row, _id, value: string) =>
       row.original.search.includes(String(value).toLowerCase().trim()),
     getColumnCanGlobalFilter: () => true,
@@ -170,6 +172,8 @@ export function ObjectsTable() {
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Ctrl/⌘ shortcuts (select all, undo…) and Delete keep working on the synchronised selection.
+    if (e.ctrlKey || e.metaKey || e.altKey || !TABLE_KEYS.has(e.key)) return;
     e.stopPropagation();
     const go = (k: number) => {
       const t = Math.max(0, Math.min(view.length - 1, k));
@@ -304,15 +308,17 @@ export function ObjectsTable() {
                           <button
                             type="button"
                             className={cn(
-                              'hover:text-foreground inline-flex items-center gap-0.5',
-                              numeric && 'flex-row-reverse',
+                              'hover:text-foreground inline-flex items-center gap-1',
+                              numeric && 'w-full justify-end',
                             )}
                             onClick={h.column.getToggleSortingHandler()}
                           >
-                            {String(h.column.columnDef.header)}
-                            {numeric && (
-                              <span className="text-muted-foreground font-normal"> ({unitOf[h.id]})</span>
-                            )}
+                            <span>
+                              {String(h.column.columnDef.header)}
+                              {numeric && (
+                                <span className="text-muted-foreground font-normal"> ({unitOf[h.id]})</span>
+                              )}
+                            </span>
                             {s === 'asc' ? (
                               <ArrowUp className="size-3" />
                             ) : s === 'desc' ? (

@@ -539,8 +539,12 @@ function IssuesTab({ ds, onShowRow }: { ds: ContourDataset; onShowRow: () => voi
       <div className="flex flex-wrap gap-1.5" data-testid="validation-summary">
         <Badge variant="success">{counts.valid} valid</Badge>
         <Badge variant={counts.invalid ? 'warning' : 'outline'}>{counts.invalid} skipped</Badge>
-        <Badge variant="outline">{counts.errors} errors</Badge>
-        <Badge variant="outline">{counts.warnings} warnings</Badge>
+        <Badge variant="outline">
+          {counts.errors} {counts.errors === 1 ? 'error' : 'errors'}
+        </Badge>
+        <Badge variant="outline">
+          {counts.warnings} {counts.warnings === 1 ? 'warning' : 'warnings'}
+        </Badge>
         {filtered > 0 && <Badge variant="outline">{filtered} filtered out</Badge>}
       </div>
       {dc.unmatchedAnchors.length > 0 && (

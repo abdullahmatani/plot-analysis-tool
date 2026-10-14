@@ -87,6 +87,20 @@ for (const file of walk(dist)) {
   }
 }
 
+// Row 25 / D-1: the GPL-3.0 DWG reader (LibreDWG) must ship only in its own worker chunk and wasm.
+const GPL_SIGNATURES = [/dwg_read_file/, /dwg_getall_/];
+const GPL_ALLOWED = [/(^|\/)libredwg\.worker-[\w-]+\.js$/, /(^|\/)libredwg-web-[\w-]+\.wasm$/];
+let gplChunks = 0;
+for (const file of walk(dist)) {
+  if (!/\.(js|mjs|html)$/.test(file)) continue;
+  const rel = path.relative(dist, file);
+  const text = readFileSync(file, 'utf8');
+  if (!GPL_SIGNATURES.some((re) => re.test(text))) continue;
+  if (GPL_ALLOWED.some((re) => re.test(rel))) gplChunks++;
+  else problems.push(`${rel}: contains GPL-3.0 LibreDWG code outside its isolated worker chunk (row 25)`);
+}
+if (!gplChunks) problems.push('libredwg worker chunk not found (DWG import missing from the build?)');
+
 if (problems.length) {
   console.error(
     `check-dist: ${problems.length} external URL reference(s) found:\n  ${[...new Set(problems)].join('\n  ')}`,
@@ -94,5 +108,5 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored).`,
+  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk.`,
 );

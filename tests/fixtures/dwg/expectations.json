@@ -1,0 +1,6489 @@
+{
+ "generated": "2026-10-14",
+ "files": [
+  {
+   "file": "example_2018.dwg",
+   "note": "AutoCAD 2018 sample: blocks with attributes, dimensions, hatch pattern, splines, MTEXT, 3D entities, paper-space layouts",
+   "reference": "AutoCAD DXF export of the same drawing (example_2018.dxf), parsed by src/import/dxf",
+   "version": "AC1032",
+   "insunits": 4,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 2",
+     "color": 16776960,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 3",
+     "color": 65535,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Defpoints",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    },
+    {
+     "name": "*ADSK_SYSTEM_LIGHTS",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LINE": 8,
+    "LWPOLYLINE": 11,
+    "ARC": 2,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 1,
+    "ATTDEF": 2,
+    "MTEXT": 1,
+    "TEXT": 2,
+    "INSERT": 10,
+    "ATTRIB": 2,
+    "HATCH": 1,
+    "3DFACE": 2,
+    "DIMENSION": 9,
+    "POLYLINE": 1,
+    "SOLID": 1
+   },
+   "skipped": {
+    "XLINE": 1,
+    "RAY": 1,
+    "WIPEOUT": 2,
+    "3DSOLID": 1,
+    "TOLERANCE": 1,
+    "ACAD_TABLE": 1,
+    "MULTILEADER": 1,
+    "MLINE": 1,
+    "REGION": 2,
+    "ARC_DIMENSION": 1,
+    "POLYLINE (polyface mesh)": 1,
+    "LIGHT": 1
+   },
+   "storeCount": 1519,
+   "storeTypes": {
+    "LINE": 38,
+    "LWPOLYLINE": 11,
+    "ARC": 3,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 126,
+    "TEXT": 4,
+    "MTEXT": 10,
+    "ATTRIB": 2,
+    "CIRCLE": 8,
+    "HATCH": 1298,
+    "3DFACE": 2,
+    "SOLID": 13,
+    "POLYLINE": 1
+   },
+   "inBlock": 187,
+   "derived": 1297,
+   "inserts": 19,
+   "extents": [
+    -2680430.0681091985,
+    -1672547.1795475576,
+    731426.8775168755,
+    1094412.8177514465
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "8B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        370.8586116534307,
+        730.6303035220437,
+        450.0397564202603,
+        619.219273076899
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8D",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        7,
+        571.6812651496753,
+        1289.727758628673,
+        0,
+        950.4337964778983,
+        1016.513309439171,
+        0,
+        797.0517376842868,
+        941.8483272855899,
+        0,
+        600.4080708725392,
+        989.0051576564304,
+        0,
+        478.4890027274623,
+        1142.264860760166,
+        0,
+        918.970809952963,
+        1130.475653167456,
+        0,
+        571.6812651496753,
+        1289.727758628673,
+        0
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8E",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "90",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        1061.049489167742,
+        1142.369513054377,
+        830.6389483702103,
+        4.623770471193484,
+        2.0471994875150337
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "170",
+     "type": "ELLIPSE",
+     "occurrences": [
+      {
+       "kind": 4,
+       "geom": [
+        3532.16682102557,
+        2904.260916516109,
+        -1220.865643219909,
+        355.8017603696389,
+        0.5120328285529597,
+        0,
+        6.283185307179586
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "177",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        3385.39238329175,
+        3206.071452770084
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "178",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        0,
+        0,
+        2.5,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "ATRIBUTO"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "179",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        6909.323543582498,
+        4954.117753698214,
+        50,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1465.765284540372,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "Teksto granda nur por testi.\nAlia linio.\nAlia pli."
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "17B",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        5881.252623040076,
+        1296.904699727624,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "teksto simpla"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "18B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        3913.6873392210546,
+        6894.32349636867,
+        4040.860820276823,
+        6157.305577036386
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        -562191.2703493047,
+        -1672547.1795475578,
+        731426.8775168755,
+        -1085950.4859364303
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "18C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        4040.860820276823,
+        6157.305577036386,
+        3404.9933024557176,
+        6233.548812830417
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        731426.8775168755,
+        -1085950.4859364303,
+        -741961.6934590824,
+        375807.83559850766
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "192",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        3352.919670555355,
+        5847.99500585132,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro de la teksto en bloko"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "1BB",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BC",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BD",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "24F",
+     "type": "HATCH",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 4
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "250",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        8445.647190576812,
+        104.6775475821341,
+        8025.993874877313,
+        -346.8962774037645
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D6",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -2199.208270715069,
+        10997.25178700468,
+        0,
+        -1219.899084674718,
+        12535.43474431358,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D7",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0,
+        -473.7587524534901,
+        10344.68927305872,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "386",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        622.8621358549244,
+        10028.76735134761,
+        0,
+        623.6623947804059,
+        10028.53490759822,
+        0,
+        622.564934069494,
+        10026.25035269647,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "387",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        1041.171480482805,
+        11468.92561556908,
+        0,
+        1041.971739408287,
+        11468.69317181969,
+        0,
+        1042.268941193717,
+        11471.21017047083,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "388",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        830.4162903178994,
+        10749.31137095713,
+        2.5,
+        1.2881140174800059,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "1504,68"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "398",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        5929.403601723592,
+        3203.807283161913,
+        806.6011875207088,
+        4.131293495034893,
+        1.1652649269650808
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "41A",
+     "type": "POLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        1945.931684777708,
+        4029.762227574174,
+        0,
+        2263.008982973159,
+        4198.776713909552,
+        0,
+        4263.008982973159,
+        5198.776713909552,
+        0,
+        3869.533843413767,
+        4177.649923262783,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "42B",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        4405.9126971561,
+        4179.733256596116,
+        2.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "4177,65"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "449",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        490.6216519543077,
+        4118.242743387161,
+        487.1948908877114,
+        2.496587579625575,
+        4.3712803271165654
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4EF",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        8858.216434189482,
+        4156.523078895603,
+        0,
+        9365.54011130218,
+        4241.030348923501,
+        0,
+        8815.93948451335,
+        3818.494106224847,
+        0,
+        9471.232520617397,
+        3924.128166899507,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "757",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        -320368.7698629209,
+        972635.9097041729,
+        184349.2018676835,
+        5.433976509909762,
+        1.766494090559283,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [
+    {
+     "handle": "16E",
+     "points": [
+      [
+       -1160.70828949499,
+       1466.29959801825
+      ],
+      [
+       -1084.8247225116372,
+       1360.2015324565023
+      ],
+      [
+       -794.2686155251181,
+       1190.816382385141
+      ],
+      [
+       -931.4962791307373,
+       1065.9944519842038
+      ],
+      [
+       -1256.4748124512175,
+       1018.6716394458375
+      ],
+      [
+       -1339.7342729967488,
+       1123.2818267086757
+      ],
+      [
+       -1229.3947057598714,
+       1674.563090697212
+      ],
+      [
+       -1258.4773783589947,
+       1873.8273985890175
+      ],
+      [
+       -1446.5048888520419,
+       1892.761217745011
+      ],
+      [
+       -1526.5191496271632,
+       1792.1941608441887
+      ],
+      [
+       -1449.4712142059793,
+       1443.7454597647288
+      ]
+     ]
+    },
+    {
+     "handle": "894",
+     "points": [
+      [
+       -2514.288789172104,
+       1304.403225798
+      ],
+      [
+       -2495.1103688514513,
+       1628.9993912037921
+      ],
+      [
+       -2438.435252031751,
+       1789.6203925401028
+      ],
+      [
+       -2365.3778682294715,
+       1875.164254069921
+      ],
+      [
+       -2122.1955258702174,
+       1999.227123328168
+      ],
+      [
+       -1980.0584285844536,
+       2088.5839765459086
+      ],
+      [
+       -1918.3823687788613,
+       2203.293271965063
+      ],
+      [
+       -1839.1742659178383,
+       2343.210560319126
+      ],
+      [
+       -1576.3221330800484,
+       2583.7931839403595
+      ],
+      [
+       -1499.7964464934457,
+       2672.3124677530463
+      ],
+      [
+       -1541.918454872604,
+       2698.772966376651
+      ]
+     ]
+    }
+   ],
+   "patternSegments": {
+    "24F": 1297
+   },
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    }
+   }
+  },
+  {
+   "file": "example_2013.dwg",
+   "note": "same drawing saved as AutoCAD 2013",
+   "reference": "AutoCAD DXF export of the same drawing (example_2013.dxf), parsed by src/import/dxf",
+   "version": "AC1027",
+   "insunits": 4,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 2",
+     "color": 16776960,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 3",
+     "color": 65535,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Defpoints",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    },
+    {
+     "name": "*ADSK_SYSTEM_LIGHTS",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LINE": 8,
+    "LWPOLYLINE": 11,
+    "ARC": 2,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 1,
+    "ATTDEF": 2,
+    "MTEXT": 1,
+    "TEXT": 2,
+    "INSERT": 10,
+    "ATTRIB": 2,
+    "HATCH": 1,
+    "3DFACE": 2,
+    "DIMENSION": 9,
+    "POLYLINE": 1,
+    "SOLID": 1
+   },
+   "skipped": {
+    "XLINE": 1,
+    "RAY": 1,
+    "WIPEOUT": 2,
+    "3DSOLID": 1,
+    "TOLERANCE": 1,
+    "ACAD_TABLE": 1,
+    "MULTILEADER": 1,
+    "MLINE": 1,
+    "REGION": 2,
+    "ARC_DIMENSION": 1,
+    "POLYLINE (polyface mesh)": 1,
+    "LIGHT": 1
+   },
+   "storeCount": 1519,
+   "storeTypes": {
+    "LINE": 38,
+    "LWPOLYLINE": 11,
+    "ARC": 3,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 126,
+    "TEXT": 4,
+    "MTEXT": 10,
+    "ATTRIB": 2,
+    "CIRCLE": 8,
+    "HATCH": 1298,
+    "3DFACE": 2,
+    "SOLID": 13,
+    "POLYLINE": 1
+   },
+   "inBlock": 187,
+   "derived": 1297,
+   "inserts": 19,
+   "extents": [
+    -2680430.0681091985,
+    -1672547.1795475576,
+    731426.8775168755,
+    1094412.8177514465
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "8B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        370.8586116534307,
+        730.6303035220437,
+        450.0397564202603,
+        619.219273076899
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8D",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        7,
+        571.6812651496753,
+        1289.727758628673,
+        0,
+        950.4337964778983,
+        1016.513309439171,
+        0,
+        797.0517376842868,
+        941.8483272855899,
+        0,
+        600.4080708725392,
+        989.0051576564304,
+        0,
+        478.4890027274623,
+        1142.264860760166,
+        0,
+        918.970809952963,
+        1130.475653167456,
+        0,
+        571.6812651496753,
+        1289.727758628673,
+        0
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8E",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "90",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        1061.049489167742,
+        1142.369513054377,
+        830.6389483702103,
+        4.623770471193484,
+        2.0471994875150337
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "170",
+     "type": "ELLIPSE",
+     "occurrences": [
+      {
+       "kind": 4,
+       "geom": [
+        3532.16682102557,
+        2904.260916516109,
+        -1220.865643219909,
+        355.8017603696389,
+        0.5120328285529597,
+        0,
+        6.283185307179586
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "177",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        3385.39238329175,
+        3206.071452770084
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "178",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        0,
+        0,
+        2.5,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "ATRIBUTO"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "179",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        6909.323543582498,
+        4954.117753698214,
+        50,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1465.765284540372,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "Teksto granda nur por testi.\nAlia linio.\nAlia pli."
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "17B",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        5881.252623040076,
+        1296.904699727624,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "teksto simpla"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "18B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        3913.6873392210546,
+        6894.32349636867,
+        4040.860820276823,
+        6157.305577036386
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        -562191.2703493047,
+        -1672547.1795475578,
+        731426.8775168755,
+        -1085950.4859364303
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "18C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        4040.860820276823,
+        6157.305577036386,
+        3404.9933024557176,
+        6233.548812830417
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        731426.8775168755,
+        -1085950.4859364303,
+        -741961.6934590824,
+        375807.83559850766
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "192",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        3352.919670555355,
+        5847.99500585132,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro de la teksto en bloko"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "1BB",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BC",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BD",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "24F",
+     "type": "HATCH",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 4
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "250",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        8445.647190576812,
+        104.6775475821341,
+        8025.993874877313,
+        -346.8962774037645
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D6",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -2199.208270715069,
+        10997.25178700468,
+        0,
+        -1219.899084674718,
+        12535.43474431358,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D7",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0,
+        -473.7587524534901,
+        10344.68927305872,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "386",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        622.8621358549244,
+        10028.76735134761,
+        0,
+        623.6623947804059,
+        10028.53490759822,
+        0,
+        622.564934069494,
+        10026.25035269647,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "387",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        1041.171480482805,
+        11468.92561556908,
+        0,
+        1041.971739408287,
+        11468.69317181969,
+        0,
+        1042.268941193717,
+        11471.21017047083,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "388",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        830.4162903178994,
+        10749.31137095713,
+        2.5,
+        1.2881140174800059,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "1504,68"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "398",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        5929.403601723592,
+        3203.807283161913,
+        806.6011875207088,
+        4.131293495034893,
+        1.1652649269650808
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "41A",
+     "type": "POLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        1945.931684777708,
+        4029.762227574174,
+        0,
+        2263.008982973159,
+        4198.776713909552,
+        0,
+        4263.008982973159,
+        5198.776713909552,
+        0,
+        3869.533843413767,
+        4177.649923262783,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "42B",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        4405.9126971561,
+        4179.733256596116,
+        2.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "4177,65"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "449",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        490.6216519543077,
+        4118.242743387161,
+        487.1948908877114,
+        2.496587579625575,
+        4.3712803271165654
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4EF",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        8858.216434189482,
+        4156.523078895603,
+        0,
+        9365.54011130218,
+        4241.030348923501,
+        0,
+        8815.93948451335,
+        3818.494106224847,
+        0,
+        9471.232520617397,
+        3924.128166899507,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "757",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        -320368.7698629209,
+        972635.9097041729,
+        184349.2018676835,
+        5.433976509909762,
+        1.766494090559283,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [
+    {
+     "handle": "16E",
+     "points": [
+      [
+       -1160.70828949499,
+       1466.29959801825
+      ],
+      [
+       -1084.8247225116372,
+       1360.2015324565023
+      ],
+      [
+       -794.2686155251181,
+       1190.816382385141
+      ],
+      [
+       -931.4962791307373,
+       1065.9944519842038
+      ],
+      [
+       -1256.4748124512175,
+       1018.6716394458375
+      ],
+      [
+       -1339.7342729967488,
+       1123.2818267086757
+      ],
+      [
+       -1229.3947057598714,
+       1674.563090697212
+      ],
+      [
+       -1258.4773783589947,
+       1873.8273985890175
+      ],
+      [
+       -1446.5048888520419,
+       1892.761217745011
+      ],
+      [
+       -1526.5191496271632,
+       1792.1941608441887
+      ],
+      [
+       -1449.4712142059793,
+       1443.7454597647288
+      ]
+     ]
+    },
+    {
+     "handle": "894",
+     "points": [
+      [
+       -2514.288789172104,
+       1304.403225798
+      ],
+      [
+       -2495.1103688514513,
+       1628.9993912037921
+      ],
+      [
+       -2438.435252031751,
+       1789.6203925401028
+      ],
+      [
+       -2365.3778682294715,
+       1875.164254069921
+      ],
+      [
+       -2122.1955258702174,
+       1999.227123328168
+      ],
+      [
+       -1980.0584285844536,
+       2088.5839765459086
+      ],
+      [
+       -1918.3823687788613,
+       2203.293271965063
+      ],
+      [
+       -1839.1742659178383,
+       2343.210560319126
+      ],
+      [
+       -1576.3221330800484,
+       2583.7931839403595
+      ],
+      [
+       -1499.7964464934457,
+       2672.3124677530463
+      ],
+      [
+       -1541.918454872604,
+       2698.772966376651
+      ]
+     ]
+    }
+   ],
+   "patternSegments": {
+    "24F": 1297
+   },
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    }
+   }
+  },
+  {
+   "file": "example_2007.dwg",
+   "note": "same drawing saved as AutoCAD 2007 (table graphics resolved)",
+   "reference": "AutoCAD DXF export of the same drawing (example_2007.dxf), parsed by src/import/dxf",
+   "version": "AC1021",
+   "insunits": 4,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 2",
+     "color": 16776960,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 3",
+     "color": 65535,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Defpoints",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    },
+    {
+     "name": "*ADSK_SYSTEM_LIGHTS",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LINE": 8,
+    "LWPOLYLINE": 11,
+    "ARC": 2,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 1,
+    "ATTDEF": 2,
+    "MTEXT": 1,
+    "TEXT": 2,
+    "INSERT": 10,
+    "ATTRIB": 2,
+    "HATCH": 1,
+    "3DFACE": 2,
+    "DIMENSION": 9,
+    "POLYLINE": 1,
+    "SOLID": 1,
+    "ACAD_TABLE": 1
+   },
+   "skipped": {
+    "XLINE": 1,
+    "RAY": 1,
+    "WIPEOUT": 2,
+    "3DSOLID": 1,
+    "TOLERANCE": 1,
+    "MULTILEADER": 1,
+    "MLINE": 1,
+    "REGION": 2,
+    "ARC_DIMENSION": 1,
+    "POLYLINE (polyface mesh)": 1,
+    "LIGHT": 1
+   },
+   "storeCount": 1558,
+   "storeTypes": {
+    "LINE": 70,
+    "LWPOLYLINE": 11,
+    "ARC": 3,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 126,
+    "TEXT": 4,
+    "MTEXT": 17,
+    "ATTRIB": 2,
+    "CIRCLE": 8,
+    "HATCH": 1298,
+    "3DFACE": 2,
+    "SOLID": 13,
+    "POLYLINE": 1
+   },
+   "inBlock": 226,
+   "derived": 1297,
+   "inserts": 20,
+   "extents": [
+    -2680430.0681091985,
+    -1672547.1795475576,
+    731426.8775168755,
+    1094412.8177514465
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "8B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        370.8586116534307,
+        730.6303035220437,
+        450.0397564202603,
+        619.219273076899
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8D",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        7,
+        571.6812651496753,
+        1289.727758628673,
+        0,
+        950.4337964778983,
+        1016.513309439171,
+        0,
+        797.0517376842868,
+        941.8483272855899,
+        0,
+        600.4080708725392,
+        989.0051576564304,
+        0,
+        478.4890027274623,
+        1142.264860760166,
+        0,
+        918.970809952963,
+        1130.475653167456,
+        0,
+        571.6812651496753,
+        1289.727758628673,
+        0
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8E",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "90",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        1061.049489167742,
+        1142.369513054377,
+        830.6389483702103,
+        4.623770471193484,
+        2.0471994875150337
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "170",
+     "type": "ELLIPSE",
+     "occurrences": [
+      {
+       "kind": 4,
+       "geom": [
+        3532.16682102557,
+        2904.260916516109,
+        -1220.865643219909,
+        355.8017603696389,
+        0.5120328285529597,
+        0,
+        6.283185307179586
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "177",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        3385.39238329175,
+        3206.071452770084
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "178",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        0,
+        0,
+        2.5,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "ATRIBUTO"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "179",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        6909.323543582498,
+        4954.117753698214,
+        50,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1465.765284540372,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "Teksto granda nur por testi.\nAlia linio.\nAlia pli."
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "17B",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        5881.252623040076,
+        1296.904699727624,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "teksto simpla"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "18B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        3913.6873392210546,
+        6894.32349636867,
+        4040.860820276823,
+        6157.305577036386
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        -562191.2703493047,
+        -1672547.1795475578,
+        731426.8775168755,
+        -1085950.4859364303
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "18C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        4040.860820276823,
+        6157.305577036386,
+        3404.9933024557176,
+        6233.548812830417
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        731426.8775168755,
+        -1085950.4859364303,
+        -741961.6934590824,
+        375807.83559850766
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "192",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        3352.919670555355,
+        5847.99500585132,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro de la teksto en bloko"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "1BB",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BC",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BD",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "24F",
+     "type": "HATCH",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 4
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "250",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        8445.647190576812,
+        104.6775475821341,
+        8025.993874877313,
+        -346.8962774037645
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D6",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -2199.208270715069,
+        10997.25178700468,
+        0,
+        -1219.899084674718,
+        12535.43474431358,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D7",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0,
+        -473.7587524534901,
+        10344.68927305872,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "386",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        622.8621358549244,
+        10028.76735134761,
+        0,
+        623.6623947804059,
+        10028.53490759822,
+        0,
+        622.564934069494,
+        10026.25035269647,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "387",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        1041.171480482805,
+        11468.92561556908,
+        0,
+        1041.971739408287,
+        11468.69317181969,
+        0,
+        1042.268941193717,
+        11471.21017047083,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "388",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        830.4162903178994,
+        10749.31137095713,
+        2.5,
+        1.2881140174800059,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "1504,68"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "398",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        5929.403601723592,
+        3203.807283161913,
+        806.6011875207088,
+        4.131293495034893,
+        1.1652649269650808
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "41A",
+     "type": "POLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        1945.931684777708,
+        4029.762227574174,
+        0,
+        2263.008982973159,
+        4198.776713909552,
+        0,
+        4263.008982973159,
+        5198.776713909552,
+        0,
+        3869.533843413767,
+        4177.649923262783,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "42B",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        4405.9126971561,
+        4179.733256596116,
+        2.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "4177,65"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "449",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        490.6216519543077,
+        4118.242743387161,
+        487.1948908877114,
+        2.496587579625575,
+        4.3712803271165654
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4EF",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        8858.216434189482,
+        4156.523078895603,
+        0,
+        9365.54011130218,
+        4241.030348923501,
+        0,
+        8815.93948451335,
+        3818.494106224847,
+        0,
+        9471.232520617397,
+        3924.128166899507,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "757",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        -320368.7698629209,
+        972635.9097041729,
+        184349.2018676835,
+        5.433976509909762,
+        1.766494090559283,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [
+    {
+     "handle": "16E",
+     "points": [
+      [
+       -1160.70828949499,
+       1466.29959801825
+      ],
+      [
+       -1084.8247225116372,
+       1360.2015324565023
+      ],
+      [
+       -794.2686155251181,
+       1190.816382385141
+      ],
+      [
+       -931.4962791307373,
+       1065.9944519842038
+      ],
+      [
+       -1256.4748124512175,
+       1018.6716394458375
+      ],
+      [
+       -1339.7342729967488,
+       1123.2818267086757
+      ],
+      [
+       -1229.3947057598714,
+       1674.563090697212
+      ],
+      [
+       -1258.4773783589947,
+       1873.8273985890175
+      ],
+      [
+       -1446.5048888520419,
+       1892.761217745011
+      ],
+      [
+       -1526.5191496271632,
+       1792.1941608441887
+      ],
+      [
+       -1449.4712142059793,
+       1443.7454597647288
+      ]
+     ]
+    },
+    {
+     "handle": "894",
+     "points": [
+      [
+       -2514.288789172104,
+       1304.403225798
+      ],
+      [
+       -2495.1103688514513,
+       1628.9993912037921
+      ],
+      [
+       -2438.435252031751,
+       1789.6203925401028
+      ],
+      [
+       -2365.3778682294715,
+       1875.164254069921
+      ],
+      [
+       -2122.1955258702174,
+       1999.227123328168
+      ],
+      [
+       -1980.0584285844536,
+       2088.5839765459086
+      ],
+      [
+       -1918.3823687788613,
+       2203.293271965063
+      ],
+      [
+       -1839.1742659178383,
+       2343.210560319126
+      ],
+      [
+       -1576.3221330800484,
+       2583.7931839403595
+      ],
+      [
+       -1499.7964464934457,
+       2672.3124677530463
+      ],
+      [
+       -1541.918454872604,
+       2698.772966376651
+      ]
+     ]
+    }
+   ],
+   "patternSegments": {
+    "24F": 1297
+   },
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    }
+   }
+  },
+  {
+   "file": "example_2004.dwg",
+   "note": "same drawing saved as AutoCAD 2004 (table graphics resolved)",
+   "reference": "AutoCAD DXF export of the same drawing (example_2004.dxf), parsed by src/import/dxf",
+   "version": "AC1018",
+   "insunits": 4,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 2",
+     "color": 16776960,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 3",
+     "color": 65535,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Defpoints",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    },
+    {
+     "name": "ADSK_SYSTEM_LIGHTS",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": true,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LINE": 8,
+    "LWPOLYLINE": 11,
+    "ARC": 2,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 1,
+    "ATTDEF": 2,
+    "MTEXT": 1,
+    "TEXT": 2,
+    "INSERT": 10,
+    "ATTRIB": 2,
+    "HATCH": 1,
+    "3DFACE": 2,
+    "DIMENSION": 9,
+    "POLYLINE": 1,
+    "SOLID": 1,
+    "ACAD_TABLE": 1
+   },
+   "skipped": {
+    "XLINE": 1,
+    "RAY": 1,
+    "WIPEOUT": 2,
+    "3DSOLID": 1,
+    "TOLERANCE": 1,
+    "MULTILEADER": 1,
+    "MLINE": 1,
+    "REGION": 2,
+    "ARC_DIMENSION": 1,
+    "POLYLINE (polyface mesh)": 1,
+    "LIGHT": 1
+   },
+   "storeCount": 1558,
+   "storeTypes": {
+    "LINE": 70,
+    "LWPOLYLINE": 11,
+    "ARC": 3,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 126,
+    "TEXT": 4,
+    "MTEXT": 17,
+    "ATTRIB": 2,
+    "CIRCLE": 8,
+    "HATCH": 1298,
+    "3DFACE": 2,
+    "SOLID": 13,
+    "POLYLINE": 1
+   },
+   "inBlock": 226,
+   "derived": 1297,
+   "inserts": 20,
+   "extents": [
+    -2680430.0681091985,
+    -1672547.1795475576,
+    731426.8775168755,
+    1094412.8177514465
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "8B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        370.8586116534307,
+        730.6303035220437,
+        450.0397564202603,
+        619.219273076899
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8D",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        7,
+        571.6812651496753,
+        1289.727758628673,
+        0,
+        950.4337964778983,
+        1016.513309439171,
+        0,
+        797.0517376842868,
+        941.8483272855899,
+        0,
+        600.4080708725392,
+        989.0051576564304,
+        0,
+        478.4890027274623,
+        1142.264860760166,
+        0,
+        918.970809952963,
+        1130.475653167456,
+        0,
+        571.6812651496753,
+        1289.727758628673,
+        0
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8E",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "90",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        1061.049489167742,
+        1142.369513054377,
+        830.6389483702103,
+        4.623770471193484,
+        2.0471994875150337
+       ],
+       "color": 16776960,
+       "layer": "Tavolo 2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "170",
+     "type": "ELLIPSE",
+     "occurrences": [
+      {
+       "kind": 4,
+       "geom": [
+        3532.16682102557,
+        2904.260916516109,
+        -1220.865643219909,
+        355.8017603696389,
+        0.5120328285529597,
+        0,
+        6.283185307179586
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "177",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        3385.39238329175,
+        3206.071452770084
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "178",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        0,
+        0,
+        2.5,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "ATRIBUTO"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "179",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        6909.323543582498,
+        4954.117753698214,
+        50,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1465.765284540372,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "Teksto granda nur por testi.\nAlia linio.\nAlia pli."
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "17B",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        5881.252623040076,
+        1296.904699727624,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "teksto simpla"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "18B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        3913.6873392210546,
+        6894.32349636867,
+        4040.860820276823,
+        6157.305577036386
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        -562191.2703493047,
+        -1672547.1795475578,
+        731426.8775168755,
+        -1085950.4859364303
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "18C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        4040.860820276823,
+        6157.305577036386,
+        3404.9933024557176,
+        6233.548812830417
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        731426.8775168755,
+        -1085950.4859364303,
+        -741961.6934590824,
+        375807.83559850766
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "192",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        3352.919670555355,
+        5847.99500585132,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro de la teksto en bloko"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "1BB",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BC",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BD",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "24F",
+     "type": "HATCH",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 4
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "250",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        8445.647190576812,
+        104.6775475821341,
+        8025.993874877313,
+        -346.8962774037645
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D6",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -2199.208270715069,
+        10997.25178700468,
+        0,
+        -1219.899084674718,
+        12535.43474431358,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D7",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0,
+        -473.7587524534901,
+        10344.68927305872,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "386",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        622.8621358549244,
+        10028.76735134761,
+        0,
+        623.6623947804059,
+        10028.53490759822,
+        0,
+        622.564934069494,
+        10026.25035269647,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "387",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        1041.171480482805,
+        11468.92561556908,
+        0,
+        1041.971739408287,
+        11468.69317181969,
+        0,
+        1042.268941193717,
+        11471.21017047083,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "388",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        830.4162903178994,
+        10749.31137095713,
+        2.5,
+        1.2881140174800059,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "1504,68"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "398",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        5929.403601723592,
+        3203.807283161913,
+        806.6011875207088,
+        4.131293495034893,
+        1.1652649269650808
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "41A",
+     "type": "POLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        1945.931684777708,
+        4029.762227574174,
+        0,
+        2263.008982973159,
+        4198.776713909552,
+        0,
+        4263.008982973159,
+        5198.776713909552,
+        0,
+        3869.533843413767,
+        4177.649923262783,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "42B",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        4405.9126971561,
+        4179.733256596116,
+        2.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "4177,65"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "449",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        490.6216519543077,
+        4118.242743387161,
+        487.1948908877114,
+        2.496587579625575,
+        4.3712803271165654
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4EF",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        8858.216434189482,
+        4156.523078895603,
+        0,
+        9365.54011130218,
+        4241.030348923501,
+        0,
+        8815.93948451335,
+        3818.494106224847,
+        0,
+        9471.232520617397,
+        3924.128166899507,
+        0
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "757",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        -320368.7698629209,
+        972635.9097041729,
+        184349.2018676835,
+        5.433976509909762,
+        1.766494090559283,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "Tavolo 3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [
+    {
+     "handle": "16E",
+     "points": [
+      [
+       -1160.70828949499,
+       1466.29959801825
+      ],
+      [
+       -1084.8247225116372,
+       1360.2015324565023
+      ],
+      [
+       -794.2686155251181,
+       1190.816382385141
+      ],
+      [
+       -931.4962791307373,
+       1065.9944519842038
+      ],
+      [
+       -1256.4748124512175,
+       1018.6716394458375
+      ],
+      [
+       -1339.7342729967488,
+       1123.2818267086757
+      ],
+      [
+       -1229.3947057598714,
+       1674.563090697212
+      ],
+      [
+       -1258.4773783589947,
+       1873.8273985890175
+      ],
+      [
+       -1446.5048888520419,
+       1892.761217745011
+      ],
+      [
+       -1526.5191496271632,
+       1792.1941608441887
+      ],
+      [
+       -1449.4712142059793,
+       1443.7454597647288
+      ]
+     ]
+    },
+    {
+     "handle": "894",
+     "points": [
+      [
+       -2514.288789172104,
+       1304.403225798
+      ],
+      [
+       -2495.1103688514513,
+       1628.9993912037921
+      ],
+      [
+       -2438.435252031751,
+       1789.6203925401028
+      ],
+      [
+       -2365.3778682294715,
+       1875.164254069921
+      ],
+      [
+       -2122.1955258702174,
+       1999.227123328168
+      ],
+      [
+       -1980.0584285844536,
+       2088.5839765459086
+      ],
+      [
+       -1918.3823687788613,
+       2203.293271965063
+      ],
+      [
+       -1839.1742659178383,
+       2343.210560319126
+      ],
+      [
+       -1576.3221330800484,
+       2583.7931839403595
+      ],
+      [
+       -1499.7964464934457,
+       2672.3124677530463
+      ],
+      [
+       -1541.918454872604,
+       2698.772966376651
+      ]
+     ]
+    }
+   ],
+   "patternSegments": {
+    "24F": 1297
+   },
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    }
+   }
+  },
+  {
+   "file": "sample_2000.dwg",
+   "note": "small AutoCAD 2000 drawing",
+   "reference": "regression values (no reference DXF)",
+   "version": "AC1015",
+   "insunits": 4,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Tavolo 1",
+     "color": 16776960,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "CIRCLE": 1,
+    "TEXT": 1,
+    "LWPOLYLINE": 1,
+    "LINE": 3
+   },
+   "skipped": {},
+   "storeCount": 6,
+   "storeTypes": {
+    "CIRCLE": 1,
+    "TEXT": 1,
+    "LWPOLYLINE": 1,
+    "LINE": 3
+   },
+   "inBlock": 0,
+   "derived": 0,
+   "inserts": 0,
+   "extents": [
+    -50.3187372547813,
+    -85.30424087608696,
+    219.6812627452187,
+    194.69575912391304
+   ],
+   "readerErrors": false,
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {}
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {}
+    }
+   }
+  },
+  {
+   "file": "2000_entities-2d.dwg",
+   "note": "basic 2D entities, blocks, attribute, dimension, shape",
+   "reference": "AutoCAD DXF export of the same drawing (2000_entities-2d.dxf), parsed by src/import/dxf",
+   "version": "AC1015",
+   "insunits": 1,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Defpoints",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "POINT": 1,
+    "LINE": 1,
+    "ARC": 1,
+    "CIRCLE": 1,
+    "TEXT": 1,
+    "TRACE": 1,
+    "INSERT": 2,
+    "SOLID": 1,
+    "ATTRIB": 1,
+    "LWPOLYLINE": 1,
+    "DIMENSION": 1,
+    "ATTDEF": 1
+   },
+   "skipped": {
+    "SHAPE": 1
+   },
+   "storeCount": 19,
+   "storeTypes": {
+    "POINT": 4,
+    "LINE": 5,
+    "ARC": 1,
+    "CIRCLE": 1,
+    "TEXT": 2,
+    "TRACE": 1,
+    "SOLID": 3,
+    "ATTRIB": 1,
+    "LWPOLYLINE": 1
+   },
+   "inBlock": 10,
+   "derived": 0,
+   "inserts": 3,
+   "extents": [
+    0.9292893218813453,
+    0,
+    9.351961524227066,
+    9.127279220613577
+   ],
+   "readerErrors": false,
+   "entities": [
+    {
+     "handle": "2B",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        1,
+        2
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        2,
+        3,
+        3,
+        4
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        5,
+        5,
+        1,
+        4.71238898038469,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2E",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        3,
+        1,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2F",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        1,
+        4,
+        0.75,
+        0,
+        1,
+        0,
+        0,
+        0,
+        2,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "FOO"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "30",
+     "type": "TRACE",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        0.9292893218813452,
+        5.070710678118654,
+        0,
+        1.070710678118654,
+        4.929289321881345,
+        0,
+        2.070710678118654,
+        5.929289321881345,
+        0,
+        1.929289321881345,
+        6.070710678118654,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "34",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        6,
+        1,
+        6.18301270189222,
+        1.6830127018922192
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 0.5,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "3A",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        7,
+        1,
+        0,
+        8,
+        2,
+        0,
+        8,
+        4,
+        0,
+        7,
+        3,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "3B",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        9,
+        5,
+        0.2,
+        1.0471975511965976,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "ATTR1"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "42",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        3,
+        1,
+        0.1,
+        1.5707963267948963,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "4"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "44",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        3,
+        5,
+        7,
+        0,
+        6,
+        8,
+        0,
+        7,
+        7,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "48",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        6.044194173824159,
+        8.04419417382416,
+        7.127279220613578,
+        9.127279220613577
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4B",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        7.148492424049172,
+        8.893933982822016,
+        0,
+        7.106066017177981,
+        8.851507575950825,
+        0,
+        7,
+        8.999999999999998,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4C",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        7.893933982822016,
+        8.148492424049174,
+        0,
+        7.851507575950824,
+        8.10606601717798,
+        0,
+        7.999999999999999,
+        7.999999999999999,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4D",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        6,
+        8
+       ],
+       "color": 16777215,
+       "layer": "Defpoints",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4E",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        6.999999999999998,
+        6.999999999999999
+       ],
+       "color": 16777215,
+       "layer": "Defpoints",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [],
+   "patternSegments": {},
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {}
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {}
+    }
+   }
+  },
+  {
+   "file": "2010_gh209_1.dwg",
+   "note": "blocks with attributes, $INSUNITS = metres",
+   "reference": "AutoCAD DXF export of the same drawing (2010_gh209_1.dxf), parsed by src/import/dxf",
+   "version": "AC1024",
+   "insunits": 6,
+   "layouts": [
+    "Model",
+    "Layout1"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Border",
+     "color": 16711935,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Work",
+     "color": 255,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Symbol_Work",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Symbol_Border",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LWPOLYLINE": 2,
+    "TEXT": 2,
+    "INSERT": 3,
+    "ATTRIB": 3
+   },
+   "skipped": {},
+   "storeCount": 10,
+   "storeTypes": {
+    "LWPOLYLINE": 2,
+    "TEXT": 2,
+    "CIRCLE": 3,
+    "ATTRIB": 3
+   },
+   "inBlock": 6,
+   "derived": 0,
+   "inserts": 3,
+   "extents": [
+    6.2883033542833005,
+    10.090758354837908,
+    8.527817496658429,
+    14.5766413405489
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "6C",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        5,
+        6.2883033542833,
+        10.54406365932311,
+        0,
+        6.2883033542833,
+        13.85766443527857,
+        0,
+        8.527817496658429,
+        13.85766443527857,
+        0,
+        8.527817496658429,
+        10.54406365932311,
+        0,
+        6.2883033542833,
+        10.54406365932311,
+        0
+       ],
+       "color": 16711935,
+       "layer": "Border",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "70",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        6.518544029884722,
+        14.28010884022756,
+        0.2965325003213381,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "CLOSED"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "71",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        2,
+        6.831634245734093,
+        13.27194380827355,
+        0,
+        8.048384637030935,
+        11.02145659654628,
+        0
+       ],
+       "color": 255,
+       "layer": "Work",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "77",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        7.735766444340328,
+        13.13437582669563,
+        0.0197507466387868
+       ],
+       "color": 16777215,
+       "layer": "Symbol_Work",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        7.311108518693789,
+        12.38511383281905,
+        0.0197507466387868
+       ],
+       "color": 16777215,
+       "layer": "Symbol_Work",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "7B",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        7.735766444340328,
+        13.13437582669563,
+        0.053645209607379,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "Symbol_Work",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "888"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "7E",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        7.311108518693789,
+        12.38511383281905,
+        0.053645209607379,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "Symbol_Work",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "456"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "84",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        7.439021248058509,
+        13.85766443527857,
+        0.0197507466387868
+       ],
+       "color": 16777215,
+       "layer": "Symbol_Border",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "89",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        7.29258602602124,
+        10.17971810493431,
+        0.2965325003213381,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "1"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [],
+   "patternSegments": {},
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {}
+    }
+   }
+  },
+  {
+   "file": "2013_gh109_1.dwg",
+   "note": "Chinese layer names, LTSCALE 1000, dimensions, custom (proxy) objects, paper-space layouts",
+   "reference": "AutoCAD DXF export of the same drawing (2013_gh109_1.dxf), parsed by src/import/dxf",
+   "version": "AC1027",
+   "insunits": 0,
+   "layouts": [
+    "Model",
+    "layout1",
+    "布局2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "ASHADE",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "Defpoints",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    },
+    {
+     "name": "PUB_HATCH",
+     "color": 8421504,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "WALL",
+     "color": 12632256,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "DOTE",
+     "color": 16711680,
+     "linetype": "DOTE",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "3T_BAR",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "3T_GLASS",
+     "color": 255,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "WINDOW_TEXT",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "3T_WOOD",
+     "color": 16752511,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "_TCH_KEY",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "WINDOW",
+     "color": 65535,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "COLUMN",
+     "color": 12632256,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "SURFACE",
+     "color": 16711935,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "AXIS",
+     "color": 65280,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "AXIS_TEXT",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "PUB_DIM",
+     "color": 65280,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "PUB_TEXT",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "SPACE_HATCH",
+     "color": 8421504,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "SPACE",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "DIM_SYMB",
+     "color": 65280,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "STAIR",
+     "color": 16776960,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "HANDRAIL",
+     "color": 65280,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "RAIL",
+     "color": 5400485,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "洁具",
+     "color": 8553090,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "_TCH_MASK",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "PUB_WALL",
+     "color": 12632256,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    },
+    {
+     "name": "DASH",
+     "pattern": [
+      0.25,
+      -0.1
+     ]
+    },
+    {
+     "name": "DOTE",
+     "pattern": [
+      2,
+      -0.2,
+      0.02,
+      -0.2
+     ]
+    }
+   ],
+   "counts": {
+    "LINE": 4,
+    "DIMENSION": 14,
+    "HATCH": 1,
+    "MTEXT": 3,
+    "TEXT": 1,
+    "INSERT": 1
+   },
+   "skipped": {
+    "ACAD_PROXY_ENTITY": 25
+   },
+   "storeCount": 166,
+   "storeTypes": {
+    "LINE": 47,
+    "LWPOLYLINE": 28,
+    "MTEXT": 17,
+    "POINT": 42,
+    "HATCH": 31,
+    "TEXT": 1
+   },
+   "inBlock": 127,
+   "derived": 30,
+   "inserts": 15,
+   "extents": [
+    -1296.3818798261345,
+    -2325.2275133931107,
+    25577.149549373746,
+    12338.03335533048
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "365",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        0,
+        -1000,
+        0,
+        8614.28335533048
+       ],
+       "color": 16711680,
+       "layer": "DOTE",
+       "lineweight": -3,
+       "linetype": "DOTE",
+       "ltscale": 1000,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "366",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        24370.3568885086,
+        -999.9999999999982,
+        24370.3568885086,
+        9027.483808284322
+       ],
+       "color": 16711680,
+       "layer": "DOTE",
+       "lineweight": -3,
+       "linetype": "DOTE",
+       "ltscale": 1000,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "85C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        18111.00374372617,
+        -419.9999999999981,
+        18111.00374372617,
+        -2325.227513393111
+       ],
+       "color": 65280,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "85D",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        19011.00374372619,
+        -419.9999999999981,
+        19011.00374372619,
+        -2325.227513393111
+       ],
+       "color": 65280,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "16F",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        2,
+        18161.00374372617,
+        -2025.2275133931112,
+        0,
+        18061.00374372617,
+        -2125.227513393111,
+        0
+       ],
+       "color": 65280,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 100000,
+       "flags": 2
+      },
+      {
+       "kind": 5,
+       "geom": [
+        2,
+        18961.00374372619,
+        -2125.227513393111,
+        0,
+        19061.00374372619,
+        -2025.2275133931112,
+        0
+       ],
+       "color": 65280,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 100000,
+       "flags": 2
+      },
+      {
+       "kind": 5,
+       "geom": [
+        2,
+        9309.79054037021,
+        -2025.2275133931112,
+        0,
+        9209.79054037021,
+        -2125.227513393111,
+        0
+       ],
+       "color": 65280,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 100000,
+       "flags": 2
+      },
+      {
+       "kind": 5,
+       "geom": [
+        2,
+        10109.79054037023,
+        -2125.227513393111,
+        0,
+        10209.79054037023,
+        -2025.2275133931112,
+        0
+       ],
+       "color": 65280,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 100000,
+       "flags": 2
+      }
+     ],
+     "total": 28
+    },
+    {
+     "handle": "861",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        18561.00374372618,
+        -1800.22751339311,
+        297.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 2,
+       "text": "900"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "862",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        18111.00374372617,
+        -119.9999999999981
+       ],
+       "color": 65280,
+       "layer": "Defpoints",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "863",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        19011.00374372619,
+        -119.9999999999981
+       ],
+       "color": 65280,
+       "layer": "Defpoints",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "5DE",
+     "type": "HATCH",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        9,
+        2679.99999999999,
+        4277.483808284318,
+        0,
+        1509.999999999993,
+        4277.483808284318,
+        0,
+        1509.999999999993,
+        4217.483808284317,
+        0,
+        1289.999999999993,
+        4217.483808284318,
+        0,
+        1289.999999999993,
+        4277.483808284318,
+        0,
+        120,
+        4277.483808284319,
+        0,
+        119.9999999999997,
+        3088.12749668576,
+        0,
+        120.0000000000002,
+        120,
+        0,
+        2679.999999999985,
+        119.9999999999997,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 4
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "9AE",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        11955.02910438043,
+        5316.119697925923,
+        482.2695035460993,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1208.797703478555,
+        1
+       ],
+       "color": 16777215,
+       "layer": "SPACE",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 0,
+       "text": "房间"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "9AF",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        11744.60357246553,
+        4632.600194379824,
+        297.5,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1250,
+        1
+       ],
+       "color": 16777215,
+       "layer": "SPACE",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 0,
+       "text": "185.39"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "9E2",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        9709.79054037022,
+        -1800.22751339311,
+        297.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "PUB_DIM",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 2,
+       "text": "900"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "A02",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        10446.93730486135,
+        2316.253655965973,
+        1412.59015008909,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1000,
+       "flags": 0,
+       "text": "隔日1"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [],
+   "patternSegments": {
+    "5DE": 30
+   },
+   "layoutChecks": {
+    "layout1": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 2
+     }
+    },
+    "布局2": {
+     "storeCount": 0,
+     "skipped": {}
+    }
+   }
+  },
+  {
+   "file": "2004_HatchG.dwg",
+   "note": "gradient hatch (rendered solid) and true colour",
+   "reference": "regression values (no reference DXF)",
+   "version": "AC1018",
+   "insunits": 1,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LWPOLYLINE": 2,
+    "HATCH": 2
+   },
+   "skipped": {},
+   "storeCount": 4,
+   "storeTypes": {
+    "LWPOLYLINE": 2,
+    "HATCH": 2
+   },
+   "inBlock": 0,
+   "derived": 0,
+   "inserts": 0,
+   "extents": [
+    6.923665483029354,
+    13.737320761260037,
+    23.30507581063037,
+    20.18297447033713
+   ],
+   "readerErrors": false,
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {}
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {}
+    }
+   }
+  },
+  {
+   "file": "2018_Leader.dwg",
+   "note": "LEADER, MULTILEADER, images",
+   "reference": "regression values (no reference DXF)",
+   "version": "AC1032",
+   "insunits": 1,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "Continuous",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    },
+    {
+     "name": "ACAD_ISO02W100",
+     "pattern": [
+      12,
+      -3
+     ]
+    }
+   ],
+   "counts": {
+    "LEADER": 1,
+    "MTEXT": 1,
+    "LINE": 1,
+    "LWPOLYLINE": 1
+   },
+   "skipped": {
+    "MULTILEADER": 1,
+    "IMAGE": 5
+   },
+   "storeCount": 4,
+   "storeTypes": {
+    "LEADER": 1,
+    "MTEXT": 1,
+    "LINE": 1,
+    "LWPOLYLINE": 1
+   },
+   "inBlock": 0,
+   "derived": 0,
+   "inserts": 0,
+   "extents": [
+    9.574467973499225,
+    2.198224883789748,
+    33.06590806222298,
+    12.84399576363243
+   ],
+   "readerErrors": false,
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {}
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {}
+    }
+   }
+  },
+  {
+   "file": "r14_v.dwg",
+   "note": "Release 14",
+   "reference": "regression values (no reference DXF)",
+   "version": "AC1014",
+   "insunits": 0,
+   "layouts": [
+    "Model"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "R-DOOR-ANNO",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "R-DOOR-DETL",
+     "color": 65280,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "R-DOOR-OTLN",
+     "color": 16711680,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "R-DOOR-PATT",
+     "color": 255,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LINE": 16,
+    "TEXT": 1
+   },
+   "skipped": {},
+   "storeCount": 17,
+   "storeTypes": {
+    "LINE": 16,
+    "TEXT": 1
+   },
+   "inBlock": 0,
+   "derived": 0,
+   "inserts": 0,
+   "extents": [
+    -12.018216983411701,
+    -62.183448727816234,
+    25.388027108989487,
+    45.38725399173312
+   ],
+   "readerErrors": false,
+   "layoutChecks": {}
+  },
+  {
+   "file": "r11_entities-2d.dwg",
+   "note": "Release 11/12 (limited support in LibreDWG)",
+   "reference": "regression values (no reference DXF)",
+   "version": "AC1009",
+   "insunits": 0,
+   "layouts": [
+    "Model"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "DEFPOINTS",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "POINT": 1,
+    "LINE": 2,
+    "ARC": 1,
+    "CIRCLE": 1,
+    "TEXT": 1,
+    "TRACE": 1,
+    "SOLID": 1,
+    "ATTDEF": 2,
+    "POLYLINE": 1
+   },
+   "skipped": {
+    "INSERT": 2,
+    "SHAPE": 1,
+    "DIMENSION": 1
+   },
+   "storeCount": 11,
+   "storeTypes": {
+    "POINT": 1,
+    "LINE": 2,
+    "ARC": 1,
+    "CIRCLE": 1,
+    "TEXT": 3,
+    "TRACE": 1,
+    "SOLID": 1,
+    "POLYLINE": 1
+   },
+   "inBlock": 0,
+   "derived": 0,
+   "inserts": 0,
+   "extents": [
+    0.8267949192431123,
+    0,
+    9.351961524227066,
+    8
+   ],
+   "readerErrors": false,
+   "layoutChecks": {}
+  },
+  {
+   "file": "example_r14.dwg",
+   "note": "Release 14 file on which LibreDWG crashes (WebAssembly trap)",
+   "version": "AC1014",
+   "error": "reader-crashed"
+  }
+ ]
+}

@@ -202,10 +202,6 @@ export function layoutLegend(
       y += h + 1.4 * ui;
     }
   });
-  if (!model.groups.length) {
-    rows.push({ kind: 'group', lines: ['(no entries)'], y });
-    y += itemSize * 1.2 + 1.4 * ui;
-  }
   if (calibration?.length) {
     y += 0.6 * ui;
     rows.push({ kind: 'rule', y });

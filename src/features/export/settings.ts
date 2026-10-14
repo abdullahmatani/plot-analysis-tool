@@ -57,9 +57,14 @@ export function profileSettings(p: ExportProfile): ExportSettings {
   return structuredClone(rest);
 }
 
+/** Region actually used: PDF is always the sheet; PNG/SVG can be the sheet, the view or a window. */
+export function effectiveRegion(s: Pick<ExportSettings, 'format' | 'region'>): ExportSettings['region'] {
+  return s.format === 'png' || s.format === 'svg' ? s.region : 'sheet';
+}
+
 /** Settings with the live project sheet layout (the dialog edits `project.sheet` directly). */
 export function withSheet(s: ExportSettings, sheet: SheetLayout): ExportSettings {
-  return { ...s, sheet };
+  return { ...s, sheet, region: effectiveRegion(s) };
 }
 
 /** File name (without extension) for an export. */

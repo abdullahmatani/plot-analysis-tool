@@ -10,6 +10,7 @@ import { useUiStore } from '@/store/ui';
 import { useModelsStore } from '@/underlay/models';
 import type { DraftRecord } from '@/persistence/db';
 
+import { disposePreviewWorker } from './client';
 import { ExportDialog, type ExportDialogPayload } from './ExportDialog';
 import { collectContours } from './inputs';
 import {
@@ -194,6 +195,10 @@ export function register() {
   registerProfileCommands();
   const unSub = useProjectStore.subscribe((s, prev) => {
     if (s.history?.project.exportProfiles !== prev.history?.project.exportProfiles) registerProfileCommands();
+    if (s.history?.project.id !== prev.history?.project.id) {
+      disposePreviewWorker();
+      cache = null;
+    }
   });
   // A crash while the dialog was open: keep its options as the last-used ones (C7).
   const onDrafts = (e: Event) => {

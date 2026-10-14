@@ -14,6 +14,7 @@ import type { DoneMessage, FromWorker, JobMessage, PreviewInfo, ToWorker } from 
 import { RasterCancelled, renderScenePng, renderSceneToCanvas, type TileRequest } from './raster';
 import { buildProjectScene, computeLayout, type ProjectSceneResult } from './scene/project-scene';
 import type { DrawingSceneInput, ProjectSceneInput } from './scene/types';
+import { effectiveRegion } from './settings';
 import { exportCsv, exportXlsx } from './tabular';
 
 /**
@@ -125,7 +126,7 @@ async function run(m: JobMessage): Promise<void> {
   }
   const input: ProjectSceneInput = {
     project: m.project,
-    settings: m.settings,
+    settings: m.kind === 'preview' ? m.settings : { ...m.settings, region: effectiveRegion(m.settings) },
     drawings: resolveDrawings(m),
     contours: m.contours,
     view: m.view,

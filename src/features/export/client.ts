@@ -243,6 +243,12 @@ export function previewWorker(): ExportClient {
   return previewClient;
 }
 
+/** Drops the preview worker and its drawing cache (e.g. when the project changes). */
+export function disposePreviewWorker() {
+  previewClient?.dispose();
+  previewClient = null;
+}
+
 /** Runs one file export in a fresh worker (cancel terminates it). */
 export function exportJob(
   project: Project,

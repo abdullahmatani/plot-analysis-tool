@@ -1,6 +1,6 @@
-import { apply, invert, multiply, scale as scaleM } from '@/core/affine';
+import { multiply } from '@/core/affine';
 import type { Affine2D, Calibration, CalibrationReference, Drawing, Pt, Units } from '@/core/types';
-import { METRES_PER, METRES_PER_PT } from '@/core/units';
+import { METRES_PER_PT } from '@/core/units';
 import {
   fitAffine,
   fitDistanceScale,
@@ -272,21 +272,7 @@ export function sharedCoordinates(
 
 // --------------------------------------------------------------------------------------- helpers
 
-/** Drawing-unit point of a world point for a placement (inverse map). */
-export function toDrawing(placement: Affine2D, world: Pt): Pt {
-  return apply(invert(placement), world);
-}
-
-export function toWorld(placement: Affine2D, drawing: Pt): Pt {
-  return apply(placement, drawing);
-}
-
 /** Uniform metres-per-unit of a transform (geometric mean of the axis scales). */
 export function metresPerUnit(m: Affine2D): number {
   return Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2]));
-}
-
-/** Transform for a CAD unit choice (used by the units override preview). */
-export function unitTransform(unit: Units): Affine2D {
-  return scaleM(METRES_PER[unit]);
 }

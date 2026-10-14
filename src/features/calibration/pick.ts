@@ -95,10 +95,6 @@ export function cancelPick() {
   setTool('select');
 }
 
-export function isPicking(): boolean {
-  return request !== null;
-}
-
 /** Snap glyph like the snap overlay's (the snap overlay is idle while this tool snaps itself). */
 export function drawSnapGlyph(g: CanvasRenderingContext2D, s: Pt, mode: string) {
   const r = 6;

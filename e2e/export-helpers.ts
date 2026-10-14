@@ -67,7 +67,7 @@ export async function addObjects(page: Page, objects: TestObject[]) {
           let l = d.layers.find((x) => x.name === o.layer);
           if (!l) {
             l = {
-              ...structuredClone(template),
+              ...JSON.parse(JSON.stringify(template)),
               id: `lyr_${o.layer}`,
               name: o.layer,
             } as unknown as { id: string; name: string };

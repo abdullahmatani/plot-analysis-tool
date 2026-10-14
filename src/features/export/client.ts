@@ -92,8 +92,12 @@ function renderTile(req: TileRequestMessage): Promise<ImageBitmap | null> {
     canvas.width = req.width;
     canvas.height = req.height;
     const oc = await ocConfigFor(req.drawingId, req.hiddenLayers);
+    // Pass the context (alpha) rather than the canvas: pdf.js would create an opaque context and the
+    // area outside the page content would cover what is drawn underneath.
+    const ctx = canvas.getContext('2d', { alpha: true })!;
     await page.render({
-      canvas,
+      canvas: null,
+      canvasContext: ctx,
       viewport,
       transform: X,
       background: 'rgba(0,0,0,0)',

@@ -258,6 +258,34 @@ test('PDF underlay at true scale: the exported PDF measures world distances (row
       Math.abs(p.maxY - p.minY - 1.6 * PT_PER_MM) < 0.05,
   );
   expect(bar, 'scale bar 100 mm').toBeTruthy();
+
+  // Raster outputs draw the PDF page with pdf.js: PNG shows the page content (not an opaque block)
+  // and SVG embeds a raster stand-in of the page.
+  await chooseFormat(page, 'png');
+  await page.getByTestId('export-dpi').fill('40');
+  const png = await runExport(page);
+  const stats = await page.evaluate(async (b64) => {
+    const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const bmp = await createImageBitmap(new Blob([bin], { type: 'image/png' }));
+    const c = new OffscreenCanvas(bmp.width, bmp.height);
+    const ctx = c.getContext('2d')!;
+    ctx.drawImage(bmp, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height).data;
+    let black = 0;
+    let blue = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i] < 40 && d[i + 1] < 40 && d[i + 2] < 40) black++;
+      if (d[i + 2] > 120 && d[i] < 90 && d[i + 1] < 90) blue++; // the source page's tank outlines
+    }
+    const n = d.length / 4;
+    return { black: black / n, blue };
+  }, png.bytes.toString('base64'));
+  expect(stats.black).toBeLessThan(0.05);
+  expect(stats.blue).toBeGreaterThan(50);
+  await chooseFormat(page, 'svg');
+  await waitPreview(page);
+  const svg = (await runExport(page)).bytes.toString('utf8');
+  expect(svg).toMatch(/<image[^>]+data:image\/png;base64,/);
 });
 
 test('layout preview matches the PNG export exactly (row 76)', async ({ page }) => {

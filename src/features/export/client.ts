@@ -139,7 +139,8 @@ export class ExportClient {
 
   private async onMessage(w: Worker, m: FromWorker) {
     if (m.type === 'tile-request') {
-      const bitmap = await renderTile(m);
+      // Superseded or cancelled job: answer at once instead of rendering the page.
+      const bitmap = this.pending.has(m.id) ? await renderTile(m) : null;
       if (this.worker !== w) {
         bitmap?.close();
         return;

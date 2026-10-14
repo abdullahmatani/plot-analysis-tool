@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 
 import type { Geometry, Pt } from '@/core/types';
 import { transformGeometry } from '@/geometry/convert';
+import { distanceToGeometry } from '@/geometry/hit';
 import { radiusOf } from '@/geometry/measure';
 import { traceGeometry } from '@/render/draw-geometry';
 import { getProject } from '@/store/project';
@@ -22,6 +23,7 @@ import { getModel } from '@/underlay/models';
 import { drawingPlacement, pickUnderlay } from '@/underlay/pick';
 
 import { createPickTool, type PickToolSpec } from '@/features/draw/pick-tool';
+import { geomBounds } from '@/features/objects/geometry-cache';
 import { pickObject } from '@/features/objects/pick';
 import { coordinateAxes, displayOf } from '@/features/units/format';
 
@@ -207,21 +209,50 @@ function pickSpec(s: MeasureSpec): PickToolSpec {
 
 // --------------------------------------------------------------------- object / entity pickers
 
-/** Exact world geometry of the analysis object or underlay entity under the cursor. */
-export function geometryUnder(world: Pt, f: FrameInfo): { geometry: Geometry; label: string } | null {
+const TOL_PX = 6;
+
+/**
+ * Exact world geometry of the analysis object or underlay entity whose outline is nearest the cursor
+ * (within 6 px); a filled object containing the cursor is the fallback. `accept` filters candidates
+ * (e.g. circular shapes for the radius tool).
+ */
+export function geometryUnder(
+  world: Pt,
+  f: FrameInfo,
+  accept: (g: Geometry) => boolean = () => true,
+): { geometry: Geometry; label: string } | null {
   const p = getProject();
   if (!p) return null;
-  const o = pickObject(p, world, f.scale, 6);
-  if (o) return { geometry: o.geometry, label: o.name };
-  const [hit] = pickUnderlay(p.drawings, world, f.scale, 6, { limit: 1 });
-  if (!hit) return null;
-  const d = p.drawings.find((x) => x.id === hit.drawingId);
-  const store = getModel(hit.drawingId)?.result?.store;
-  if (!d || !store) return null;
-  const g = entityToGeometry(store, hit.index);
-  if (!g || g.type === 'point') return null;
-  return { geometry: transformGeometry(g, drawingPlacement(d), p.chordTolerance), label: d.name };
+  const tol = TOL_PX / f.scale;
+  const hidden = new Set(p.layers.filter((l) => !l.visible).map((l) => l.id));
+  let best: { geometry: Geometry; label: string; d: number } | null = null;
+  for (const o of p.objects) {
+    if (hidden.has(o.layerId) || o.geometry.type === 'point') continue;
+    const b = geomBounds(o.geometry);
+    if (world.x < b.minX - tol || world.x > b.maxX + tol || world.y < b.minY - tol || world.y > b.maxY + tol)
+      continue;
+    const d = distanceToGeometry(world, o.geometry);
+    if (d <= tol && (!best || d < best.d) && accept(o.geometry))
+      best = { geometry: o.geometry, label: o.name, d };
+  }
+  for (const hit of pickUnderlay(p.drawings, world, f.scale, TOL_PX, { limit: 12 })) {
+    const d = hit.distPx / f.scale;
+    if (best && d >= best.d) break;
+    const drawing = p.drawings.find((x) => x.id === hit.drawingId);
+    const store = getModel(hit.drawingId)?.result?.store;
+    const g = drawing && store ? entityToGeometry(store, hit.index) : null;
+    if (!drawing || !g || g.type === 'point') continue;
+    const wg = transformGeometry(g, drawingPlacement(drawing), p.chordTolerance);
+    if (!accept(wg)) continue;
+    best = { geometry: wg, label: drawing.name, d };
+    break;
+  }
+  if (best) return { geometry: best.geometry, label: best.label };
+  const o = pickObject(p, world, f.scale, TOL_PX);
+  return o && accept(o.geometry) ? { geometry: o.geometry, label: o.name } : null;
 }
+
+const circular = (g: Geometry) => radiusOf(g) !== null;
 
 function objectTool(id: string, title: string, forceRadius: boolean): Tool {
   let hover: Geometry | null = null;
@@ -238,20 +269,20 @@ function objectTool(id: string, title: string, forceRadius: boolean): Tool {
       useMeasureStore.getState().setLive(null);
     },
     pointerMove(e, ctx) {
-      hover = geometryUnder(e.world, ctx.frame())?.geometry ?? null;
+      hover = geometryUnder(e.world, ctx.frame(), forceRadius ? circular : undefined)?.geometry ?? null;
     },
     pointerDown(e, ctx) {
       if (e.button !== 0) return;
-      const hit = geometryUnder(e.world, ctx.frame());
+      const hit = geometryUnder(e.world, ctx.frame(), forceRadius ? circular : undefined);
       if (!hit) {
-        toast.info('Nothing to measure here.');
+        if (forceRadius)
+          toast.info('No circle or arc here.', {
+            description: 'Click on the outline of a circular entity or object.',
+          });
+        else toast.info('Nothing to measure here.');
         return;
       }
       const g = hit.geometry;
-      if (forceRadius && radiusOf(g) === null) {
-        toast.info('That is not a circle or arc.', { description: 'Pick a circular entity or object.' });
-        return;
-      }
       finishMeasurement({ mode: forceRadius ? 'radius' : modeForGeometry(g), geometry: g });
       refreshHint();
     },

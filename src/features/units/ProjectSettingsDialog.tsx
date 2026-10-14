@@ -170,14 +170,16 @@ export function ProjectSettingsDialog({
             <Compass className="size-4" /> Coordinates and north
           </h4>
           <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="ps-plant" className="text-xs font-normal">
-              Show plant coordinates (E/N) in the cursor readout
-              <span className="text-muted-foreground block">
+            <div className="grid gap-0.5">
+              <Label htmlFor="ps-plant" className="text-xs font-normal">
+                Show plant coordinates (E/N) in the cursor readout
+              </Label>
+              <span className="text-muted-foreground text-xs">
                 {plant
                   ? 'A drawing is calibrated with plant coordinates.'
                   : 'Applies once a drawing is calibrated with plant coordinates.'}
               </span>
-            </Label>
+            </div>
             <Switch
               id="ps-plant"
               checked={display.plantCoords}

@@ -162,8 +162,15 @@ export class PdfTileManager {
       t.lastUsed = now;
       tiles.push({ key: t.key, x: t.x, y: t.y, w: t.w, h: t.h, image: t.image });
     }
+    // `update` runs on every canvas frame; re-reporting an unchanged tile set would request another
+    // frame each time (a render loop that kept the main thread busy while a PDF was shown).
+    const sig = `${this.generation}|${tiles.map((t) => t.key).join(',')}`;
+    if (sig === this.lastEmitted) return;
+    this.lastEmitted = sig;
     this.onTiles(tiles);
   }
+
+  private lastEmitted = '';
 
   private async pump(): Promise<void> {
     if (this.active || this.disposed) return;

@@ -1,0 +1,12 @@
+Tag,Scenario,X,Y,Radius (m)
+P-101,Valid row,100,200,30
+P-102,Missing X,,200,25
+P-103,Non-numeric Y,110,abc,25
+P-104,Negative radius,120,220,-5
+P-105,Non-numeric radius,130,230,twelve
+P-106,Zero radius,140,240,0
+P-107,Outside extent,5000,5000,20
+P-999,Unknown anchor,150,250,15
+,Missing anchor name,160,260,10
+P-110,Not reached,170,270,N/R
+P-111,Valid row,180,280,12

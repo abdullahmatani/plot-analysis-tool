@@ -50,7 +50,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('free text accepts Arabic and multi-line text (rows 41, 48)', async ({ page }) => {
-  await page.keyboard.press('t');
+  await page.keyboard.press('x');
   await typeOnCanvas(page, '10,10');
   const box = page.getByRole('dialog').getByLabel('Text');
   await box.fill('خزان الوقود T-101\nسعة ٥٠٠٠ م³');
@@ -64,7 +64,7 @@ test('free text accepts Arabic and multi-line text (rows 41, 48)', async ({ page
 });
 
 test('leader callout keeps its arrow point and text position (row 41)', async ({ page }) => {
-  await page.keyboard.press('Shift+T');
+  await page.keyboard.press('Shift+X');
   await typeOnCanvas(page, '0,0');
   await typeOnCanvas(page, '12,6');
   await page.getByRole('dialog').getByLabel('Text').fill('Pump P-101');
@@ -79,7 +79,7 @@ test('leader callout keeps its arrow point and text position (row 41)', async ({
 });
 
 test('tags number per layer and deleting one offers renumbering (row 41)', async ({ page }) => {
-  await page.keyboard.press('b');
+  await page.keyboard.press('n');
   for (const at of ['0,0', '30,0', '60,0']) {
     await typeOnCanvas(page, at);
     await page.keyboard.press('Enter');

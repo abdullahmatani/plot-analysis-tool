@@ -127,10 +127,12 @@ export function StorageDialog({ open, onOpenChange }: { open: boolean; onOpenCha
               });
               if (!ok) return;
               await closeSession(false);
+              // The private file system first: it holds the backup copy, which would otherwise
+              // restore the projects into the emptied database at the next start.
+              await clearOpfs();
               const db = getDb();
               db.close();
               await db.delete();
-              await clearOpfs();
               try {
                 for (const k of Object.keys(localStorage))
                   if (k.startsWith('pat') || k.startsWith('react-resizable-panels'))

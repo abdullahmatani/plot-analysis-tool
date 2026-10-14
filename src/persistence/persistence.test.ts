@@ -366,6 +366,7 @@ function fakeWriter(opts: { failFirst?: number } = {}) {
   let fails = opts.failFirst ?? 0;
   const listeners = new Map<string, { fn: (m: JournalWorkerMessage) => void; onCrash: () => void }>();
   const pending = new Map<string, JournalRecord[]>();
+  const rotations: string[] = [];
   const commit = async (projectId: string) => {
     const batch = pending.get(projectId) ?? [];
     if (!batch.length) return;
@@ -390,12 +391,14 @@ function fakeWriter(opts: { failFirst?: number } = {}) {
       setTimeout(() => void commit(rec.projectId), 5);
     },
     flush: (projectId) => void commit(projectId),
+    rotate: (projectId) => void rotations.push(projectId),
+    drop: () => {},
     listen(projectId, fn, onCrash) {
       listeners.set(projectId, { fn, onCrash });
       return () => listeners.delete(projectId);
     },
   };
-  return { writer, crash: (projectId: string) => listeners.get(projectId)?.onCrash() };
+  return { writer, rotations, crash: (projectId: string) => listeners.get(projectId)?.onCrash() };
 }
 
 describe('journal written off the main thread (row 90, NFR-9)', () => {

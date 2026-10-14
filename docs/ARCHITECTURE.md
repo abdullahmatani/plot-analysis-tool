@@ -30,6 +30,14 @@ Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y n
   Every multi-step tool saves an in-progress **draft** (`session.drafts.set`) within 1 s
   (C7, row 93). High-impact operations call `currentSession()?.beforeHighImpact(label)` first
   (automatic restore point, row 96).
+- **Journal path.** Records go to the journal worker (`src/workers/journal.worker.ts`), which
+  writes them to IndexedDB in 100 ms batches and then appends them to the project's **backup
+  copy** in the Origin Private File System (`src/persistence/mirror-*.ts`). Chromium deletes an
+  origin's whole IndexedDB database if it finds it damaged on opening, which a crash in the middle
+  of a write can cause; at start-up `checkMirror()` rebuilds every project from the backup when the
+  database turns out to be new. Drawing files are stored in the private file system too, so they
+  survive with it. Anything that deletes projects must also remove their backup (`deleteProject`
+  does, and "Clear local data" empties the private file system first).
 - **Geometry is float64 world metres.** Never round stored geometry. Display formatting uses
   `src/core/units.ts` (`formatNumber`, `formatLength`, `parseLength`, area factors).
 - **GPL isolation (D-1):** `@mlightcad/libredwg-web` is only imported from the DWG worker.

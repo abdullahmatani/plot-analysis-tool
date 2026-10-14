@@ -5,6 +5,7 @@ import type { Project } from '@/core/types';
 
 import { collectGarbage } from './blobs';
 import { getDb, type ProjectMeta } from './db';
+import { journalWriter } from './journal-client';
 import { serializeSnapshot } from './serialize';
 import { writeSnapshot } from './snapshots';
 
@@ -35,6 +36,7 @@ export async function storeNewProject(
   const meta = metaFor(project, 0);
   await db.projects.put(meta);
   await writeSnapshot(project.id, 0, 'checkpoint', serialized);
+  journalWriter()?.rotate(project.id); // backup copy (mirror-writer.ts)
   return meta;
 }
 
@@ -66,6 +68,7 @@ export async function deleteProject(id: string): Promise<void> {
     await db.drafts.where('projectId').equals(id).delete();
     await db.fileLinks.delete(id);
   });
+  journalWriter()?.drop(id);
   await collectGarbage();
 }
 

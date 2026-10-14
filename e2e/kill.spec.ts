@@ -14,6 +14,8 @@ import { guardEgress, killBrowser } from './fixtures';
  *   - no edit committed more than 1 s before the kill is lost (NFR-9),
  *   - recovered edits are an exact, in-order prefix of the committed sequence (nothing interleaved),
  *   - the linked project file is always a complete, readable project (never corrupted).
+ * Chromium sometimes deletes the whole IndexedDB database after such a kill; the app then rebuilds
+ * the project from its backup copy, and the same checks apply (counted as `restoredFromBackup`).
  * KILL_POINTS sets the number of kill-points (default 100).
  */
 
@@ -43,7 +45,14 @@ test('autosave survives 100 random kill-points with zero lost edits beyond NFR-9
   const confirmed: Edit[] = []; // every edit reported by the page, in commit order
   let killAt = 0;
   let projectReady = false;
-  const stats = { editing: 0, snapshot: 0, 'file-write': 0, recovered: 0, maxRecoveryMs: 0 };
+  const stats = {
+    editing: 0,
+    snapshot: 0,
+    'file-write': 0,
+    recovered: 0,
+    restoredFromBackup: 0,
+    maxRecoveryMs: 0,
+  };
 
   for (let iter = 0; iter < KILL_POINTS; iter++) {
     const context: BrowserContext = await chromium.launchPersistentContext(userDataDir, {
@@ -73,6 +82,8 @@ test('autosave survives 100 random kill-points with zero lost edits beyond NFR-9
       const dialog = page.getByTestId('recovery-dialog');
       const recent = page.getByTestId('recent-projects').getByRole('button').first();
       await expect(dialog.or(recent)).toBeVisible();
+      // The browser deleted its database after the crash; the app rebuilt it from the backup copy.
+      if (await page.getByText(/restored from (its|their) backup cop/).count()) stats.restoredFromBackup++;
       if (await dialog.isVisible()) {
         await page.getByTestId('recovery-apply').click();
         stats.recovered++;

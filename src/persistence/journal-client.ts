@@ -9,6 +9,10 @@ export type JournalWorkerMessage =
 export interface JournalWriter {
   record(rec: JournalRecord, meta?: JournalMeta): void;
   flush(projectId: string): void;
+  /** Starts a new base for the project's backup copy (after a checkpoint, or for a new project). */
+  rotate(projectId: string): void;
+  /** Removes a deleted project's backup copy. */
+  drop(projectId: string): void;
   /** Listens to one project's acknowledgements and errors; `onCrash` when the worker dies. */
   listen(projectId: string, fn: (m: JournalWorkerMessage) => void, onCrash: () => void): () => void;
 }
@@ -44,6 +48,8 @@ export function journalWriter(): JournalWriter | null {
   shared = {
     record: (rec, meta) => worker.postMessage({ type: 'record', rec, meta }),
     flush: (projectId) => worker.postMessage({ type: 'flush', projectId }),
+    rotate: (projectId) => worker.postMessage({ type: 'rotate', projectId }),
+    drop: (projectId) => worker.postMessage({ type: 'drop', projectId }),
     listen(projectId, fn, onCrash) {
       let set = listeners.get(projectId);
       if (!set) listeners.set(projectId, (set = new Set()));

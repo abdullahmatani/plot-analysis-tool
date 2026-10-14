@@ -4,6 +4,7 @@ import {
   createProject,
   expect,
   firstPage,
+  killBrowser,
   launchPersistent,
   layerNames,
   openApp,
@@ -11,6 +12,10 @@ import {
   waitSaved,
 } from './fixtures';
 import type { Page } from '@playwright/test';
+import { rmSync } from 'node:fs';
+import path from 'node:path';
+
+import { importDrawing } from './drawing-helpers';
 
 async function openFirstRecent(page: Page) {
   await page.getByTestId('recent-projects').getByRole('button').first().click();
@@ -115,6 +120,45 @@ test.describe('autosave', () => {
         await expect(page2.getByTestId('workspace')).toBeVisible();
         expect(await layerNames(page2)).toEqual(['Analysis', 'C0', 'C1', 'C2']);
       });
+      expect(after.violations).toEqual([]);
+    } finally {
+      await after.context.close();
+    }
+  });
+
+  test('projects survive the browser deleting its local database after a crash (C7)', async ({ baseURL }) => {
+    // Chromium deletes an origin's whole IndexedDB database when it finds the store damaged on
+    // opening, which a crash in the middle of a write can cause. Simulated here by deleting it.
+    const before = await launchPersistent(baseURL!);
+    const page = await firstPage(before.context);
+    await openApp(page);
+    await createProject(page, 'Survivor');
+    await importDrawing(page, path.resolve('tests/fixtures/dxf/r12_entities.dxf'));
+    for (let i = 0; i < 3; i++) await commitEdit(page, 'Add layer', `S${i}`);
+    await waitSaved(page);
+    await page.waitForTimeout(1000); // NFR-9: edits saved more than 1 s before the loss
+    expect(before.violations).toEqual([]);
+    expect(killBrowser(before.userDataDir)).toBeGreaterThan(0);
+    await before.context.close().catch(() => {});
+    rmSync(path.join(before.userDataDir, 'Default', 'IndexedDB'), { recursive: true, force: true });
+
+    const after = await launchPersistent(baseURL!, before.userDataDir);
+    try {
+      const page2 = await firstPage(after.context);
+      await openApp(page2);
+      await expect(page2.getByText('Project “Survivor” was restored from its backup copy')).toBeVisible();
+      await openFirstRecent(page2);
+      expect(await layerNames(page2)).toEqual(['Analysis', 'S0', 'S1', 'S2']);
+      // The drawing's source file was kept outside the database and loads again.
+      await expect
+        .poll(() =>
+          page2.evaluate(() =>
+            (window as unknown as { __pat: { models(): { status: string }[] } }).__pat
+              .models()
+              .map((m) => m.status),
+          ),
+        )
+        .toEqual(['ready']);
       expect(after.violations).toEqual([]);
     } finally {
       await after.context.close();

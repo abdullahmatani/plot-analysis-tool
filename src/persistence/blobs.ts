@@ -4,12 +4,12 @@ import { nowIso } from '@/core/ids';
 import { getDb, type BlobRecord } from './db';
 
 /**
- * Source drawing storage (row 99): each file is stored once per SHA-256. Files above
- * OPFS_THRESHOLD go to the Origin Private File System when available (better for large binaries);
- * smaller ones (or all, when OPFS is unavailable) are stored as Blobs in IndexedDB.
+ * Source drawing storage (row 99): each file is stored once per SHA-256, in the Origin Private File
+ * System when available (better for large binaries, and it survives the browser deleting the
+ * IndexedDB database, see mirror.ts); otherwise as Blobs in IndexedDB.
  */
 
-export const OPFS_THRESHOLD = 8 * 1024 * 1024;
+export const OPFS_THRESHOLD = 0;
 
 async function opfsDir(): Promise<FileSystemDirectoryHandle | null> {
   try {

@@ -403,7 +403,9 @@ export class AutosaveEngine {
     })();
     this.snapshotting = task;
     try {
-      return await task;
+      const rec = await task;
+      if (rec && kind === 'checkpoint') this.writer?.rotate(this.host.projectId);
+      return rec;
     } catch (e) {
       if (isQuotaError(e))
         this.emit({

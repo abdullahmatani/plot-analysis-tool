@@ -57,8 +57,9 @@ Every input file is parsed **in a Web Worker**: DXF, DWG, PDF, CSV, TSV, XLSX, a
 
 ## 5. Local data
 
-- Projects, the journal, snapshots and drafts are stored in IndexedDB (and in OPFS for large
-  source files) in this browser profile only. The Storage dialog lists and deletes them.
+- Projects, the journal, snapshots and drafts are stored in IndexedDB, and source drawings and each
+  project's backup copy in the Origin Private File System, in this browser profile only. The Storage
+  dialog lists and deletes them ("Clear local data" empties both).
 - Saving to a file uses the File System Access API: the user picks the file, and permission is
   per-handle and revocable. Browsers without it fall back to downloads.
 - The service worker serves only same-origin precached assets (Workbox, `registerType: 'prompt'`).

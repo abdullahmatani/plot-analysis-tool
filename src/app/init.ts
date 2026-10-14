@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 
 import { getDb } from '@/persistence/db';
+import { checkMirror } from '@/persistence/mirror';
 import { pendingRecovery } from '@/persistence/recovery';
 import { probeIndexedDb } from '@/persistence/storage';
 import { useAppStore, type RecoveryCandidate } from '@/store/app';
@@ -16,6 +17,7 @@ export async function initApp() {
   installGlobalErrorReporting();
   const available = await probeIndexedDb();
   useAppStore.getState().set({ storageUnavailable: !available });
+  if (available) await restoreLostProjects();
   const crashed = await sessionTracker.start();
   if (available) {
     await refreshRecents();
@@ -55,6 +57,29 @@ export async function initApp() {
   });
   registerServiceWorker();
   useAppStore.getState().set({ ready: true });
+}
+
+/**
+ * Chromium can delete the whole local database after a crash in the middle of a write. Projects are
+ * then rebuilt from the backup copy kept in the private file system (mirror.ts).
+ */
+async function restoreLostProjects() {
+  try {
+    const restored = await checkMirror();
+    if (!restored.length) return;
+    toast.warning(
+      restored.length === 1
+        ? `Project “${restored[0]}” was restored from its backup copy`
+        : `${restored.length} projects were restored from their backup copies`,
+      {
+        description:
+          'The browser lost this app’s local database, which can happen after a crash. Every saved edit was recovered; restore points and app settings from before the loss are not included.',
+        duration: 30000,
+      },
+    );
+  } catch (e) {
+    console.warn('backup check failed', e);
+  }
 }
 
 /** Row 12: unexpected errors surface as readable notifications instead of failing silently. */

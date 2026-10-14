@@ -221,7 +221,7 @@ test.describe('autosave', () => {
     // Quota is enforced for on-disk profiles; Chrome reads the overridden quota when the origin's
     // storage is first opened, so the override is applied before navigating. Service workers are
     // blocked so the precache does not consume the tiny quota.
-    const { context, violations } = await launchPersistent(baseURL!, undefined, { serviceWorkers: 'block' });
+    const { context, violations } = await launchPersistent(baseURL!);
     const page = context.pages()[0] ?? (await context.newPage());
     await page.goto('about:blank');
     const cdp = await context.newCDPSession(page);

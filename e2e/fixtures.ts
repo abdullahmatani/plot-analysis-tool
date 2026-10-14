@@ -59,6 +59,8 @@ export async function createProject(page: Page, name = 'E2E project') {
   await input.fill(name);
   await page.getByTestId('create-project').click();
   await expect(page.getByTestId('workspace')).toBeVisible();
+  // Wait until the dialog has finished closing, so it cannot take focus or match locators later.
+  await expect(input).toBeHidden();
 }
 
 /** Commits an edit through the app's command store (same path as every UI tool). */
@@ -92,7 +94,7 @@ export async function launchPersistent(
 ) {
   const context = await chromium.launchPersistentContext(userDataDir, {
     baseURL,
-    serviceWorkers: opts.serviceWorkers ?? 'allow',
+    serviceWorkers: opts.serviceWorkers ?? 'block', // as in playwright.config.ts; PWA tests opt in
   });
   const violations = await guardEgress(context, baseURL);
   return { context, userDataDir, violations };

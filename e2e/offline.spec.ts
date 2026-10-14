@@ -1,6 +1,8 @@
 import { createProject, expect, openApp, test } from './fixtures';
 
 test.describe('offline PWA (row 6)', () => {
+  test.use({ serviceWorkers: 'allow' });
+
   // Chromium only: Playwright cannot route navigations through a service worker while offline in
   // Firefox/WebKit (NS_ERROR_OFFLINE / internal error), so offline start-up is verified on the
   // primary browsers (row 83).

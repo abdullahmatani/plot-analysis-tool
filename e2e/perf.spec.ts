@@ -167,7 +167,7 @@ test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ p
 });
 
 test('NFR-1: offline cold start from cache ≤ 3 s', async ({ baseURL }) => {
-  const { context, violations } = await launchPersistent(baseURL!);
+  const { context, violations } = await launchPersistent(baseURL!, undefined, { serviceWorkers: 'allow' });
   try {
     const page = await context.newPage();
     await openApp(page);
@@ -247,7 +247,8 @@ test('NFR-10: autosave adds no main-thread block > 16 ms while editing; recovery
   results['nfr10.autosaveMaxSyncMs'] = timing.maxSyncMs;
   results['nfr10.autosaveTotalSyncMs'] = timing.totalSyncMs;
   for (const [k, v] of Object.entries(timing.maxByKind)) results[`nfr10.max.${k}`] = v;
-  expect(timing.samples).toBeGreaterThan(60);
+  // Every edit is sampled; journal writes and checkpoints run in workers, so they add none.
+  expect(timing.samples).toBeGreaterThanOrEqual(60);
   expect(timing.maxSyncMs).toBeLessThanOrEqual(16 * (STRICT ? 1 : 2));
   // Recovery to an editable state: reload (crash recovery is covered by e2e/kill.spec.ts, which
   // records the same metric under SIGKILL) and time until the project is editable again.

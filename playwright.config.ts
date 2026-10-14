@@ -19,7 +19,11 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
-    serviceWorkers: 'allow',
+    // Each test starts with a fresh profile, so the service worker would precache the whole app
+    // during the test and announce "Ready to work offline" at an unpredictable moment, moving the
+    // toast stack over the controls being clicked. Tests of the PWA itself opt in (offline.spec.ts;
+    // the fault-injection and performance suites use their own persistent profiles).
+    serviceWorkers: 'block',
   },
   webServer: {
     command: `npx vite preview --port ${PORT} --strictPort`,

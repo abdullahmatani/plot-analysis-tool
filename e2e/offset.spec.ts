@@ -34,6 +34,7 @@ type W = {
   __pat: {
     project(): { objects: Obj[]; chordTolerance: number } | null;
     store(): { history: { undo: { label: string }[] } };
+    view(): { selection: string[] };
   };
   __patCanvas: {
     overlayCanvas: HTMLCanvasElement;
@@ -87,11 +88,19 @@ async function zoomExtents(page: Page) {
   await page.waitForTimeout(100);
 }
 
-/** Offsets the current selection through the dialog. */
-async function offset(page: Page, distance: string, opts: { merge?: boolean; join?: string } = {}) {
+/**
+ * Offsets the current selection through the dialog. A successful offset closes the dialog; the
+ * helper waits for that, so later clicks never land on the closing dialog's overlay.
+ */
+async function offset(
+  page: Page,
+  distance: string,
+  opts: { merge?: boolean; join?: string; refused?: boolean } = {},
+) {
+  const dialog = page.getByTestId('offset-dialog');
+  await expect(dialog).toBeHidden(); // the previous offset's dialog has finished closing
   await page.getByTestId('canvas').focus();
   await page.keyboard.press('o');
-  const dialog = page.getByTestId('offset-dialog');
   await expect(dialog).toBeVisible();
   await page.getByTestId('offset-distance').fill(distance);
   if (opts.join) {
@@ -100,6 +109,7 @@ async function offset(page: Page, distance: string, opts: { merge?: boolean; joi
   }
   if (opts.merge) await dialog.getByLabel('Merge overlapping results into one envelope').check();
   await page.getByTestId('offset-apply').click();
+  if (!opts.refused) await expect(dialog).toBeHidden();
 }
 
 /** Area of a closed bulge polyline (shoelace + circular segments). */
@@ -140,8 +150,10 @@ test('circle offset is exact; contraction to r ≤ 0 is rejected with a message 
   await canvasFocus(page);
   const edge = await at(page, 612345.125 + 12.5, 2534210.5);
   await page.mouse.click(edge.x, edge.y);
-  await expect(page.getByTestId('selection-properties')).toContainText('Circle 1');
-  await offset(page, '-12.5');
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as W).__pat.view().selection))
+    .toEqual([src.id]);
+  await offset(page, '-12.5', { refused: true });
   await expect(page.getByText('Contraction removes the circle (r ≤ 0)').first()).toBeVisible();
   expect(await objects(page)).toHaveLength(2);
 });

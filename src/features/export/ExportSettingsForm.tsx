@@ -99,7 +99,10 @@ export function ExportSettingsForm({
   const fmt = options.format;
   const graphic = isGraphic(fmt);
   const region = fmt === 'pdf' ? 'sheet' : options.region;
-  const showSheet = graphic ? region !== 'view' : fmt === 'dxf';
+  const showSheet = graphic || fmt === 'dxf';
+  const onSheet = graphic && region === 'sheet';
+  const showScale = onSheet || fmt === 'dxf' || (graphic && region === 'window');
+  const showPaper = onSheet || (graphic && region === 'window');
   const setS = (patch: Partial<SheetLayout>, label: string, key?: string) => void setSheet(patch, label, key);
   const scaleValue =
     sheet.scale === null ? 'fit' : STANDARD_SCALES.includes(sheet.scale) ? String(sheet.scale) : 'custom';
@@ -334,50 +337,52 @@ export function ExportSettingsForm({
       </Section>
 
       {showSheet && (
-        <Section title="Sheet" testId="export-sheet">
-          <Row label="Paper">
-            <div className="flex gap-1">
-              <Select
-                value={sheet.paper}
-                disabled={readOnly}
-                onValueChange={(v) => setS({ paper: v as PaperSize }, 'Sheet paper size')}
-              >
-                <SelectTrigger size="sm" className="w-28" aria-label="Paper size" data-testid="sheet-paper">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAPER_SIZES.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p === 'custom' ? 'Custom' : p}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {sheet.paper !== 'custom' && (
+        <Section title={onSheet ? 'Sheet' : fmt === 'dxf' ? 'Scale' : 'Map'} testId="export-sheet">
+          {showPaper && (
+            <Row label="Paper">
+              <div className="flex gap-1">
                 <Select
-                  value={sheet.orientation}
+                  value={sheet.paper}
                   disabled={readOnly}
-                  onValueChange={(v) =>
-                    setS({ orientation: v as SheetLayout['orientation'] }, 'Sheet orientation')
-                  }
+                  onValueChange={(v) => setS({ paper: v as PaperSize }, 'Sheet paper size')}
                 >
-                  <SelectTrigger
-                    size="sm"
-                    className="w-28"
-                    aria-label="Orientation"
-                    data-testid="sheet-orientation"
-                  >
+                  <SelectTrigger size="sm" className="w-28" aria-label="Paper size" data-testid="sheet-paper">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="landscape">Landscape</SelectItem>
-                    <SelectItem value="portrait">Portrait</SelectItem>
+                    {PAPER_SIZES.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p === 'custom' ? 'Custom' : p}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-              )}
-            </div>
-          </Row>
-          {sheet.paper === 'custom' && (
+                {sheet.paper !== 'custom' && (
+                  <Select
+                    value={sheet.orientation}
+                    disabled={readOnly}
+                    onValueChange={(v) =>
+                      setS({ orientation: v as SheetLayout['orientation'] }, 'Sheet orientation')
+                    }
+                  >
+                    <SelectTrigger
+                      size="sm"
+                      className="w-28"
+                      aria-label="Orientation"
+                      data-testid="sheet-orientation"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="landscape">Landscape</SelectItem>
+                      <SelectItem value="portrait">Portrait</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </Row>
+          )}
+          {showPaper && sheet.paper === 'custom' && (
             <Row label="Size (mm)">
               <div className="flex gap-1">
                 <NumberInput
@@ -399,57 +404,66 @@ export function ExportSettingsForm({
               </div>
             </Row>
           )}
-          <Row label="Margins">
-            <NumberInput
-              ariaLabel="Margins (mm)"
-              value={sheet.marginsMm}
-              min={0}
-              max={100}
-              suffix="mm"
-              disabled={readOnly}
-              onCommit={(v) => setS({ marginsMm: v }, 'Sheet margins')}
-            />
-          </Row>
-          <Row label="Scale">
-            <div className="flex items-center gap-1">
-              <Select
-                value={scaleValue}
+          {onSheet && (
+            <Row label="Margins">
+              <NumberInput
+                ariaLabel="Margins (mm)"
+                value={sheet.marginsMm}
+                min={0}
+                max={100}
+                suffix="mm"
                 disabled={readOnly}
-                onValueChange={(v) => {
-                  if (v === 'fit') fitSheetToContent();
-                  else if (v !== 'custom') setS({ scale: Number(v) }, 'Sheet scale');
-                }}
-              >
-                <SelectTrigger size="sm" className="w-28" aria-label="Print scale" data-testid="sheet-scale">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fit">Fit</SelectItem>
-                  {STANDARD_SCALES.filter((s) => s >= 10).map((s) => (
-                    <SelectItem key={s} value={String(s)}>
-                      1:{s}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-muted-foreground text-xs">1:</span>
-              <CommitInput
-                ariaLabel="Scale denominator"
-                className="w-20"
-                disabled={readOnly}
-                placeholder="fit"
-                value={sheet.scale === null ? '' : String(sheet.scale)}
-                onCommit={(v) => {
-                  if (!v.trim()) return void fitSheetToContent();
-                  const n = Number(v.replace(/\s/g, ''));
-                  if (!(n > 0) || !Number.isFinite(n)) return false;
-                  setS({ scale: n }, 'Sheet scale');
-                }}
+                onCommit={(v) => setS({ marginsMm: v }, 'Sheet margins')}
               />
-            </div>
-          </Row>
-          {fmt !== 'dxf' && (
+            </Row>
+          )}
+          {showScale && (
+            <Row label="Scale">
+              <div className="flex items-center gap-1">
+                <Select
+                  value={scaleValue}
+                  disabled={readOnly}
+                  onValueChange={(v) => {
+                    if (v === 'fit') fitSheetToContent();
+                    else if (v !== 'custom') setS({ scale: Number(v) }, 'Sheet scale');
+                  }}
+                >
+                  <SelectTrigger
+                    size="sm"
+                    className="w-28"
+                    aria-label="Print scale"
+                    data-testid="sheet-scale"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fit">Fit</SelectItem>
+                    {STANDARD_SCALES.filter((s) => s >= 10).map((s) => (
+                      <SelectItem key={s} value={String(s)}>
+                        1:{s}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground text-xs">1:</span>
+                <CommitInput
+                  ariaLabel="Scale denominator"
+                  className="w-20"
+                  disabled={readOnly}
+                  placeholder="fit"
+                  value={sheet.scale === null ? '' : String(sheet.scale)}
+                  onCommit={(v) => {
+                    if (!v.trim()) return void fitSheetToContent();
+                    const n = Number(v.replace(/\s/g, ''));
+                    if (!(n > 0) || !Number.isFinite(n)) return false;
+                    setS({ scale: n }, 'Sheet scale');
+                  }}
+                />
+              </div>
+            </Row>
+          )}
+          {onSheet && (
             <>
               <Row label="Rotation">
                 <NumberInput
@@ -490,7 +504,11 @@ export function ExportSettingsForm({
                   {formatNumber(sheet.viewCentre.y, project.display.precision)}
                 </p>
               )}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            </>
+          )}
+          {graphic && (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {onSheet && (
                 <Toggle
                   id="sheet-title-block"
                   label="Title block"
@@ -498,6 +516,8 @@ export function ExportSettingsForm({
                   disabled={readOnly}
                   onChange={(v) => setS({ showTitleBlock: v }, 'Sheet title block')}
                 />
+              )}
+              {onSheet && (
                 <Toggle
                   id="sheet-legend"
                   label="Legend"
@@ -505,22 +525,22 @@ export function ExportSettingsForm({
                   disabled={readOnly}
                   onChange={(v) => setS({ showLegend: v }, 'Sheet legend')}
                 />
-                <Toggle
-                  id="sheet-scale-bar"
-                  label="Scale bar"
-                  checked={sheet.showScaleBar}
-                  disabled={readOnly}
-                  onChange={(v) => setS({ showScaleBar: v }, 'Sheet scale bar')}
-                />
-                <Toggle
-                  id="sheet-north"
-                  label="North arrow"
-                  checked={sheet.showNorthArrow}
-                  disabled={readOnly}
-                  onChange={(v) => setS({ showNorthArrow: v }, 'Sheet north arrow')}
-                />
-              </div>
-            </>
+              )}
+              <Toggle
+                id="sheet-scale-bar"
+                label="Scale bar"
+                checked={sheet.showScaleBar}
+                disabled={readOnly}
+                onChange={(v) => setS({ showScaleBar: v }, 'Sheet scale bar')}
+              />
+              <Toggle
+                id="sheet-north"
+                label="North arrow"
+                checked={sheet.showNorthArrow}
+                disabled={readOnly}
+                onChange={(v) => setS({ showNorthArrow: v }, 'Sheet north arrow')}
+              />
+            </div>
           )}
         </Section>
       )}

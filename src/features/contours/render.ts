@@ -25,10 +25,20 @@ import { useContoursUi } from './store';
  * objects; everything is recomputed from the dataset (memoised), so re-binding never flickers.
  */
 
-const MAX_LABELS = 1500;
+const MAX_LABELS = 800;
+/**
+ * Level of detail: translucent fills of thousands of overlapping rings cost far more to rasterise
+ * than outlines and add nothing readable, so above this many visible rings only outlines are drawn.
+ */
+const MAX_FILLED_RINGS = 2000;
+/** Rings smaller than this on screen get no label. */
+const MIN_LABEL_RING_PX = 4;
 
-/** Adds a ring outline to the current path. Circles use arc() (the view is a similarity). */
-function pathGeometry(g: CanvasRenderingContext2D, geom: Geometry, f: FrameInfo) {
+/**
+ * Adds a ring outline to a path (a Path2D or the context's current path). Circles use arc() (the
+ * view is a similarity); other shapes are traced in screen space.
+ */
+function pathGeometry(g: CanvasPath, geom: Geometry, f: FrameInfo) {
   if (geom.type === 'circle') {
     const rPx = geom.r * f.scale;
     if (rPx < 1e5) {
@@ -38,69 +48,74 @@ function pathGeometry(g: CanvasRenderingContext2D, geom: Geometry, f: FrameInfo)
       return;
     }
   }
-  traceGeometry(g, geom, f.toScreen, f.scale);
+  // traceGeometry only uses path methods (moveTo/lineTo/closePath), which Path2D shares.
+  traceGeometry(g as CanvasRenderingContext2D, geom, f.toScreen, f.scale);
 }
 
-class StyleState {
-  private fill = '';
-  private stroke = '';
-  private width = -1;
-  private dash = '';
-  constructor(private g: CanvasRenderingContext2D) {}
-  setFill(c: string) {
-    if (c !== this.fill) this.g.fillStyle = this.fill = c;
-  }
-  setStroke(st: ContourStyle, widthScale = 1) {
-    const c = hexToRgba(st.stroke, 1);
-    if (c !== this.stroke) this.g.strokeStyle = this.stroke = c;
-    const w = Math.max(1, st.strokeWidth * PX_PER_MM * widthScale);
-    if (w !== this.width) this.g.lineWidth = this.width = w;
-    const key = `${st.dash}|${st.strokeWidth}`;
-    if (key !== this.dash) {
-      this.dash = key;
-      this.g.setLineDash(dashMm(st.dash, st.strokeWidth).map((v) => v * PX_PER_MM));
-    }
-  }
+function applyStroke(g: CanvasRenderingContext2D, st: ContourStyle) {
+  g.strokeStyle = hexToRgba(st.stroke, 1);
+  g.lineWidth = Math.max(1, st.strokeWidth * PX_PER_MM);
+  g.setLineDash(dashMm(st.dash, st.strokeWidth).map((v) => v * PX_PER_MM));
 }
 
 function visibleArea(f: FrameInfo): Bounds {
   return expand(visibleWorldBounds(f.view, f.width, f.height), 20 / f.scale);
 }
 
+/**
+ * Rings are batched per style (styles are shared objects per dataset): one Path2D per ring set or
+ * style-rule class, filled once (overlapping rings of a set do not darken each other) and stroked
+ * once. This keeps 15 000 rings at a handful of draw calls.
+ */
 function drawRings(g: CanvasRenderingContext2D, f: FrameInfo, p: Project) {
   const vis = visibleArea(f);
-  const st = new StyleState(g);
   g.lineCap = 'round';
   g.lineJoin = 'round';
-  for (const ds of visibleDatasets(p)) {
-    const dc = datasetContours(p, ds);
-    if (!ringsHiddenByEnvelope(ds)) {
-      for (const r of dc.rings) {
+  const sets = visibleDatasets(p).map((ds) => {
+    const batches = new Map<ContourStyle, Path2D>();
+    let n = 0;
+    if (!ringsHiddenByEnvelope(ds))
+      for (const r of datasetContours(p, ds).rings) {
         if (!intersects(r.bounds, vis)) continue;
-        g.beginPath();
-        pathGeometry(g, r.geometry, f);
-        if (r.style.fillOpacity > 0) {
-          st.setFill(hexToRgba(r.style.fill, r.style.fillOpacity));
-          g.fill();
-        }
-        st.setStroke(r.style);
-        g.stroke();
+        let path = batches.get(r.style);
+        if (!path) batches.set(r.style, (path = new Path2D()));
+        pathGeometry(path, r.geometry, f);
+        n++;
       }
+    return { ds, batches, n };
+  });
+  const fills = sets.reduce((t, x) => t + x.n, 0) <= MAX_FILLED_RINGS;
+  for (const { ds, batches } of sets) {
+    for (const [st, path] of batches) {
+      if (fills && st.fillOpacity > 0) {
+        g.fillStyle = hexToRgba(st.fill, st.fillOpacity);
+        g.fill(path);
+      }
+      applyStroke(g, st);
+      // Dense views: 1 px solid outlines (rasterised on the fast hairline path).
+      if (!fills) {
+        g.lineWidth = 1;
+        g.setLineDash([]);
+      }
+      g.stroke(path);
     }
     for (const env of datasetEnvelopes(p, ds)) {
       if (!env.geometry) continue;
-      g.beginPath();
-      pathGeometry(g, env.geometry, f);
+      const path = new Path2D();
+      pathGeometry(path, env.geometry, f);
       if (env.style.fillOpacity > 0) {
-        st.setFill(hexToRgba(env.style.fill, env.style.fillOpacity));
-        g.fill('evenodd');
+        g.fillStyle = hexToRgba(env.style.fill, env.style.fillOpacity);
+        g.fill(path, 'evenodd');
       }
-      st.setStroke(env.style);
-      g.stroke();
+      applyStroke(g, env.style);
+      g.stroke(path);
     }
   }
   g.setLineDash([]);
 }
+
+/** Label text widths per font, kept across frames (bounded). */
+const widthCache = new Map<string, number>();
 
 /** World "radius" of a ring towards its top (circle r, square half side, rectangle h/2 + r). */
 function topReach(r: ContourRing): number {
@@ -123,6 +138,7 @@ function drawLabels(g: CanvasRenderingContext2D, f: FrameInfo, p: Project) {
     minH = Math.min(minH, h);
     for (const r of dc.rings) {
       if (!r.label || !intersects(r.bounds, vis)) continue;
+      if (topReach(r) * f.scale < MIN_LABEL_RING_PX) continue;
       inputs.push({
         id: meta.length,
         text: r.label.replace(/\s*\n\s*/g, ' '),
@@ -141,8 +157,15 @@ function drawLabels(g: CanvasRenderingContext2D, f: FrameInfo, p: Project) {
     inputs,
     (text, h) => {
       const fs = font(h);
-      if (fs !== lastFont) g.font = lastFont = fs;
-      return g.measureText(text).width;
+      const key = `${fs}|${text}`;
+      let w = widthCache.get(key);
+      if (w === undefined) {
+        if (fs !== lastFont) g.font = lastFont = fs;
+        w = g.measureText(text).width;
+        if (widthCache.size > 50000) widthCache.clear();
+        widthCache.set(key, w);
+      }
+      return w;
     },
     { height: minH, viewport: vp, maxLabels: MAX_LABELS },
   );

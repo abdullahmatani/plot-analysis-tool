@@ -139,6 +139,11 @@ export class ProjectSession {
     }
     await this.file.load();
     await touchProject(this.projectId);
+    // Unfinished interactions (half-drawn shapes, open dialogs) can be resumed (row 93).
+    void this.drafts.list().then((drafts) => {
+      if (drafts.length)
+        setTimeout(() => window.dispatchEvent(new CustomEvent('pat:drafts', { detail: drafts })), 300);
+    });
     sessionTracker.setProject(this.projectId);
     const onHidden = () => {
       if (document.visibilityState === 'hidden') void this.lifecycleSave();

@@ -39,6 +39,13 @@ const INERT = [
   /^https:\/\/tinyurl\.com\/y2uuvskb$/, // Dexie
   /^http:\/\/bit\.ly\/2kdckMn$/, // Dexie
   /^https:\/\/bit\.ly\/wb-precache$/, // Workbox
+  /^http:\/\/www\.xfa\.org\/schema\//, // XFA XML namespaces (pdf.js)
+  // pdf.js URL helpers: dummy bases for `new URL(x, base)` parsing and a template literal, never fetched.
+  /^https:\/\/foo\.bar$/,
+  /^http:\/\/example\.com$/,
+  /^http:\/\/\$\{\w+\}$/,
+  // core-js URL feature-detection probes in the legacy pdf.js build (parsed, never fetched).
+  /^https:\/\/(a|x|a@b|a#б|тест|a\/c%20d\?a=1&c=3)$/,
 ];
 
 /** Chunks that contain third-party licence/notice texts (displayed, never fetched). */

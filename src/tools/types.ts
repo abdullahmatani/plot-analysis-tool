@@ -67,6 +67,8 @@ export interface Tool {
   render?(g: CanvasRenderingContext2D, f: FrameInfo): void;
   /** Numeric input typed while the tool is active (e.g. "15" or "30,20"). */
   typedInput?(value: string, ctx: ToolContext): boolean;
+  /** Extra characters that may start typed input (e.g. "d" for a diameter); default digits/@/-/+/Ø. */
+  typedStart?(key: string): boolean;
   /** Short prompt shown in the canvas hint bar. */
   hint?(): string;
 }

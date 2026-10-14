@@ -564,7 +564,10 @@ export class CanvasController {
       // Typed dimensions (e.g. "15", "30,20", "@10<45"): collected while a tool accepts input.
       if (tool?.typedInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const ui = useToolUi.getState();
-        if (/^[0-9.,@<\-+ a-zA-Zø°]$/.test(e.key) && (ui.typed || /[0-9.@\-+]/.test(e.key))) {
+        if (
+          /^[0-9.,@<\-+ a-zA-ZøØ°]$/.test(e.key) &&
+          (ui.typed || /[0-9.@\-+øØ]/.test(e.key) || tool.typedStart?.(e.key))
+        ) {
           ui.set({ typed: ui.typed + e.key });
           e.preventDefault();
           e.stopPropagation();

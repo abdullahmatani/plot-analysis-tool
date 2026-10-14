@@ -6,25 +6,8 @@ export type ThemePref = 'light' | 'dark' | 'system';
 export type CanvasBg = 'dark' | 'light';
 export type InspectorTab = 'properties' | 'layers' | 'data' | 'legend';
 
-export type DialogId =
-  | 'about'
-  | 'shortcuts'
-  | 'settings'
-  | 'history'
-  | 'export'
-  | 'import-table'
-  | 'calibrate'
-  | 'recovery'
-  | 'new-project'
-  | 'open-project'
-  | 'storage'
-  | 'help'
-  | 'import-report'
-  | 'pdf-pages'
-  | 'align'
-  | 'measure'
-  | 'labels'
-  | null;
+/** Dialog ids are open-ended so feature modules can register their own dialogs. */
+export type DialogId = string | null;
 
 interface Prefs {
   theme: ThemePref;

@@ -9,6 +9,7 @@ import { useViewStore } from '@/store/view';
 
 import { CalibrationBadge } from './CalibrationBadge';
 import { SaveStatusBadge } from './SaveStatusBadge';
+import { SnapMenu } from './SnapMenu';
 
 /** Status bar (§6.1): cursor coordinates, calibration state, snap toggle, zoom, save status. */
 export function StatusBar() {
@@ -57,6 +58,7 @@ export function StatusBar() {
           </TooltipTrigger>
           <TooltipContent>Object snap (F3)</TooltipContent>
         </Tooltip>
+        <SnapMenu />
         <Button
           variant="ghost"
           size="xs"

@@ -12,3 +12,4 @@ src/generated/licences.json
 public/pdfjs
 public/fonts
 .scratch
+.claude/

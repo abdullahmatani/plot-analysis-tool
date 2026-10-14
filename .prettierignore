@@ -11,3 +11,6 @@ tests/fixtures/**/*.pdf
 package-lock.json
 plot-analysis-tool-FDR.md
 tests/fixtures
+.claude
+src/generated
+public/fonts

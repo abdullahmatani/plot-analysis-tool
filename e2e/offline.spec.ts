@@ -9,7 +9,10 @@ test.describe('offline PWA (row 6)', () => {
     context,
     browserName,
   }) => {
-    test.skip(browserName !== 'chromium', 'Service-worker offline navigation is only automatable in Chromium.');
+    test.skip(
+      browserName !== 'chromium',
+      'Service-worker offline navigation is only automatable in Chromium.',
+    );
     await openApp(page);
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;

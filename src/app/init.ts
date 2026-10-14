@@ -13,6 +13,7 @@ import { registerServiceWorker } from './pwa';
 /** App start-up: storage probe, crash detection (row 95), recent projects, service worker. */
 export async function initApp() {
   installTestHooks();
+  installGlobalErrorReporting();
   const available = await probeIndexedDb();
   useAppStore.getState().set({ storageUnavailable: !available });
   const crashed = await sessionTracker.start();
@@ -54,4 +55,25 @@ export async function initApp() {
   });
   registerServiceWorker();
   useAppStore.getState().set({ ready: true });
+}
+
+/** Row 12: unexpected errors surface as readable notifications instead of failing silently. */
+function installGlobalErrorReporting() {
+  let last = '';
+  const report = (msg: string) => {
+    if (msg === last) return;
+    last = msg;
+    toast.error('Unexpected error', {
+      description: `${msg}. Your work is saved; if something looks wrong, reload the app.`,
+    });
+  };
+  window.addEventListener('unhandledrejection', (e) => {
+    const reason = e.reason as { name?: string; message?: string } | undefined;
+    if (reason?.name === 'AbortError') return;
+    report(reason?.message ?? String(e.reason));
+  });
+  window.addEventListener('error', (e) => {
+    if (!e.message || /ResizeObserver loop/.test(e.message)) return;
+    report(e.message);
+  });
 }

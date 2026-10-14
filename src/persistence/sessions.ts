@@ -1,73 +1,72 @@
 import { newId, nowIso } from '@/core/ids';
 
+import { getDb, type SessionRecord } from './db';
+
 /**
- * Unclean-shutdown detection (row 95). Each tab writes a session marker to localStorage (synchronous,
- * so it is reliable inside `pagehide`) and holds a Web Lock for its lifetime. On launch, markers that
- * are not marked clean and whose lock is no longer held belong to sessions that crashed, were
- * force-closed or lost power.
+ * Unclean-shutdown detection (row 95). Each tab records a session marker in IndexedDB (written with
+ * strict durability, so it survives a killed browser or power loss) and holds a Web Lock for its
+ * lifetime. On a normal close, `pagehide` sets a synchronous localStorage "clean" flag (and also
+ * updates the marker). On launch, markers whose lock is no longer held and that are not marked clean
+ * belong to sessions that crashed, were force-closed or lost power.
  */
 
-const PREFIX = 'pat:session:';
-const HEARTBEAT_MS = 5000;
-const STALE_MS = 20000;
-
-export interface SessionMarker {
-  id: string;
-  projectId: string | null;
-  startedAt: string;
-  beat: number;
-  clean: boolean;
-}
+const CLEAN_PREFIX = 'pat:clean:';
 
 export interface CrashedSession {
   id: string;
   projectId: string;
   startedAt: string;
-  lastBeat: number;
 }
 
-function read(key: string): SessionMarker | null {
+function cleanFlag(id: string): boolean {
   try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as SessionMarker) : null;
+    return localStorage.getItem(CLEAN_PREFIX + id) === '1';
   } catch {
-    return null;
+    return false;
   }
 }
 
-function write(m: SessionMarker) {
+function clearCleanFlag(id: string) {
   try {
-    localStorage.setItem(PREFIX + m.id, JSON.stringify(m));
+    localStorage.removeItem(CLEAN_PREFIX + id);
   } catch {
-    /* storage unavailable */
+    /* ignore */
   }
 }
 
 export class SessionTracker {
   readonly id = newId('ses');
-  private marker: SessionMarker;
-  private beatTimer: ReturnType<typeof setInterval> | null = null;
+  private marker: SessionRecord;
+  private write = Promise.resolve();
 
   constructor() {
-    this.marker = { id: this.id, projectId: null, startedAt: nowIso(), beat: Date.now(), clean: false };
+    this.marker = { id: this.id, projectId: null, startedAt: nowIso(), clean: false };
+  }
+
+  private persist() {
+    const rec = { ...this.marker };
+    this.write = this.write
+      .then(() =>
+        getDb()
+          .sessions.put(rec)
+          .then(() => undefined),
+      )
+      .catch(() => undefined);
   }
 
   /** Detects crashed sessions from previous runs, then registers this session. */
   async start(): Promise<CrashedSession[]> {
     const crashed = await findCrashedSessions(this.id);
-    write(this.marker);
     if (typeof navigator !== 'undefined' && navigator.locks) {
       void navigator.locks.request(`pat-session-${this.id}`, () => new Promise<void>(() => {}));
     }
-    this.beatTimer = setInterval(() => {
-      this.marker.beat = Date.now();
-      write(this.marker);
-    }, HEARTBEAT_MS);
+    this.persist();
     window.addEventListener('pagehide', () => this.markClean());
     window.addEventListener('pageshow', (e) => {
       if ((e as PageTransitionEvent).persisted) {
+        clearCleanFlag(this.id);
         this.marker.clean = false;
-        write(this.marker);
+        this.persist();
       }
     });
     return crashed;
@@ -76,26 +75,21 @@ export class SessionTracker {
   setProject(projectId: string | null) {
     this.marker.projectId = projectId;
     this.marker.clean = false;
-    write(this.marker);
+    this.persist();
   }
 
   markClean() {
-    this.marker.clean = true;
-    this.marker.beat = Date.now();
-    write(this.marker);
-  }
-
-  stop() {
-    if (this.beatTimer) clearInterval(this.beatTimer);
     try {
-      localStorage.removeItem(PREFIX + this.id);
+      localStorage.setItem(CLEAN_PREFIX + this.id, '1');
     } catch {
       /* ignore */
     }
+    this.marker.clean = true;
+    this.persist();
   }
 }
 
-async function heldSessionLocks(): Promise<Set<string> | null> {
+async function heldLocks(): Promise<Set<string> | null> {
   try {
     if (!navigator.locks?.query) return null;
     const snap = await navigator.locks.query();
@@ -107,25 +101,26 @@ async function heldSessionLocks(): Promise<Set<string> | null> {
 
 export async function findCrashedSessions(ownId: string): Promise<CrashedSession[]> {
   const out: CrashedSession[] = [];
-  let keys: string[] = [];
+  let markers: SessionRecord[];
   try {
-    keys = Object.keys(localStorage).filter((k) => k.startsWith(PREFIX));
+    markers = await getDb().sessions.toArray();
   } catch {
     return out;
   }
-  const held = await heldSessionLocks();
-  for (const key of keys) {
-    const m = read(key);
-    if (!m || m.id === ownId) continue;
-    const alive = held ? held.has(`pat-session-${m.id}`) : Date.now() - m.beat < STALE_MS;
+  const held = await heldLocks();
+  for (const m of markers) {
+    if (m.id === ownId) continue;
+    // Without Web Locks we cannot tell a live tab from a dead one; treat only clearly old markers as dead.
+    const alive = held ? held.has(`pat-session-${m.id}`) : Date.now() - Date.parse(m.startedAt) < 12 * 3600e3;
     if (alive) continue;
-    if (!m.clean && m.projectId)
-      out.push({ id: m.id, projectId: m.projectId, startedAt: m.startedAt, lastBeat: m.beat });
+    const clean = m.clean || cleanFlag(m.id);
+    if (!clean && m.projectId) out.push({ id: m.id, projectId: m.projectId, startedAt: m.startedAt });
     try {
-      localStorage.removeItem(key);
+      await getDb().sessions.delete(m.id);
     } catch {
       /* ignore */
     }
+    clearCleanFlag(m.id);
   }
   return out;
 }

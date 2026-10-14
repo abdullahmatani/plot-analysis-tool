@@ -90,6 +90,13 @@ export interface FileLinkRecord {
   lastWrittenAt?: string;
 }
 
+export interface SessionRecord {
+  id: string;
+  projectId: string | null;
+  startedAt: string;
+  clean: boolean;
+}
+
 export interface SettingRecord {
   key: string;
   value: unknown;
@@ -113,6 +120,7 @@ export class PatDb extends Dexie {
   recoveryBin!: Table<RecoveryBinRecord, string>;
   fileLinks!: Table<FileLinkRecord, string>;
   templates!: Table<TemplateRecord, string>;
+  sessions!: Table<SessionRecord, string>;
 
   constructor(name = 'plot-analysis-tool') {
     // Strict durability: committed transactions are flushed to disk before success is reported,
@@ -129,6 +137,8 @@ export class PatDb extends Dexie {
       fileLinks: 'projectId',
       templates: 'id, name',
     });
+    // v2: durable session markers for crash detection (row 95).
+    this.version(2).stores({ sessions: 'id' });
   }
 }
 

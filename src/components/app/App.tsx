@@ -10,6 +10,7 @@ import { useProjectStore } from '@/store/project';
 import { useUiStore } from '@/store/ui';
 
 import { Dialogs } from './Dialogs';
+import { ErrorBoundary } from './ErrorBoundary';
 import { StartScreen } from './StartScreen';
 import { Workspace } from './Workspace';
 
@@ -50,9 +51,11 @@ export function App() {
   return (
     <TooltipProvider>
       <div className="flex h-full flex-col" data-ready={ready ? 'true' : 'false'}>
-        {hasProject ? <Workspace /> : <StartScreen />}
+        <ErrorBoundary>{hasProject ? <Workspace /> : <StartScreen />}</ErrorBoundary>
       </div>
-      <Dialogs />
+      <ErrorBoundary>
+        <Dialogs />
+      </ErrorBoundary>
       <Toaster position="bottom-right" richColors closeButton />
     </TooltipProvider>
   );

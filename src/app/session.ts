@@ -360,6 +360,22 @@ export function installTestHooks() {
     project: () => useProjectStore.getState().history?.project ?? null,
     db: () => getDb(),
     store: () => useProjectStore.getState(),
+    /** Links the project to a file in the Origin Private File System (fault-injection tests of row 98). */
+    linkTestFile: async (name = 'linked.patproj') => {
+      const root = await navigator.storage.getDirectory();
+      const fh = await root.getFileHandle(name, { create: true });
+      await current?.file.link(fh, -1, true);
+      return true;
+    },
+    readTestFile: async (name = 'linked.patproj') => {
+      const root = await navigator.storage.getDirectory();
+      try {
+        const fh = await root.getFileHandle(name);
+        return Array.from(new Uint8Array(await (await fh.getFile()).arrayBuffer()));
+      } catch {
+        return null;
+      }
+    },
     /** Commits a "add layer" edit through the normal command path (used by fault-injection tests). */
     addLayer: (label: string, name: string) =>
       useProjectStore.getState().commit(label, (d) => {

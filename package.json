@@ -24,7 +24,8 @@
     "licences": "node scripts/gen-licences.mjs",
     "predev": "node scripts/gen-licences.mjs",
     "prebuild": "node scripts/gen-licences.mjs",
-    "pretypecheck": "node scripts/gen-licences.mjs"
+    "pretypecheck": "node scripts/gen-licences.mjs",
+    "test:bundle": "node scripts/test-bundle.mjs"
   },
   "dependencies": {
     "@countertype/clipper2-ts": "^1.5.4",

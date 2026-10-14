@@ -128,3 +128,11 @@
   unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
   font-display: swap;
 }
+
+/* Toast text colours darkened to meet WCAG 2.1 AA contrast (≥ 4.5:1) on sonner's tinted backgrounds (row 84). */
+html [data-sonner-toaster][data-sonner-theme='light'] {
+  --success-text: hsl(140, 100%, 22%);
+  --info-text: hsl(210, 92%, 35%);
+  --warning-text: hsl(31, 92%, 28%);
+  --error-text: hsl(360, 100%, 38%);
+}

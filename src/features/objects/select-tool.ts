@@ -207,6 +207,24 @@ export const objectSelectTool: Tool = {
       if (!sel.has(o.id) || sel.size > 50) continue;
       for (const gr of gripsOf(o.geometry)) {
         const s = f.toScreen(gr.pt);
+        if (gr.kind === 'insert') {
+          // Segment midpoint: drag to insert a vertex (row 53).
+          g.beginPath();
+          g.arc(s.x, s.y, GRIP_PX / 2 + 1.5, 0, Math.PI * 2);
+          g.fillStyle = 'rgba(255,255,255,0.85)';
+          g.fill();
+          g.strokeStyle = '#3b82f6';
+          g.stroke();
+          g.beginPath();
+          g.moveTo(s.x - 2.5, s.y);
+          g.lineTo(s.x + 2.5, s.y);
+          g.moveTo(s.x, s.y - 2.5);
+          g.lineTo(s.x, s.y + 2.5);
+          g.stroke();
+          g.fillStyle = '#3b82f6';
+          g.strokeStyle = '#ffffff';
+          continue;
+        }
         g.fillRect(s.x - GRIP_PX / 2 - 1, s.y - GRIP_PX / 2 - 1, GRIP_PX + 2, GRIP_PX + 2);
         g.strokeRect(s.x - GRIP_PX / 2 - 1, s.y - GRIP_PX / 2 - 1, GRIP_PX + 2, GRIP_PX + 2);
       }
@@ -253,6 +271,29 @@ export const objectSelectTool: Tool = {
     }
   },
 };
+
+/**
+ * Geometry of the objects currently being dragged (grip edit or move), so features can preview
+ * dependent geometry while dragging (live offsets, row 59).
+ */
+export function dragPreview(): { id: string; geometry: Geometry }[] {
+  const p = getProject();
+  if (!p) return [];
+  const m = mode;
+  if (m.k === 'grip') {
+    const o = p.objects.find((x) => x.id === m.id);
+    return o ? [{ id: o.id, geometry: applyGrip(o.geometry, m.grip, m.to) }] : [];
+  }
+  if (m.k === 'move' && !m.copy) {
+    const ids = new Set(m.ids);
+    const dx = m.to.x - m.from.x;
+    const dy = m.to.y - m.from.y;
+    return p.objects
+      .filter((o) => ids.has(o.id))
+      .map((o) => ({ id: o.id, geometry: translateGeometry(o.geometry, dx, dy) }));
+  }
+  return [];
+}
 
 export function registerSelectTool() {
   registerTool(objectSelectTool);

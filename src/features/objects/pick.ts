@@ -40,6 +40,8 @@ export function pickObject(p: Project, world: Pt, scale: number, tolPx = 6): Ana
     );
   let best: AnalysisObject | null = null;
   let bestD = Infinity;
+  // An outline under the cursor wins over the fill of a shape on top (e.g. a source under its offset).
+  let fillHit: AnalysisObject | null = null;
   for (const o of ordered) {
     const custom = kindHitTests[o.kind];
     if (custom) {
@@ -58,12 +60,12 @@ export function pickObject(p: Project, world: Pt, scale: number, tolPx = 6): Ana
       bestD = d;
       continue;
     }
-    if (!best && isClosedGeometry(o.geometry)) {
+    if (!fillHit && isClosedGeometry(o.geometry)) {
       const s = resolveStyle(p, o);
-      if (s.hatch !== 'none' && s.fillOpacity > 0 && pointInGeometry(world, o.geometry)) return o;
+      if (s.hatch !== 'none' && s.fillOpacity > 0 && pointInGeometry(world, o.geometry)) fillHit = o;
     }
   }
-  return best;
+  return best ?? fillHit;
 }
 
 /** Window (inside) or crossing (touching) rectangle selection. */

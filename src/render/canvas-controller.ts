@@ -23,7 +23,10 @@ export type OverlayDrawer = (g: CanvasRenderingContext2D, f: FrameInfo) => void;
 
 const overlays: { z: number; draw: OverlayDrawer }[] = [];
 
-/** Registers an overlay layer (analysis objects, contours, labels, snap glyphs…). Lower z draws first. */
+/**
+ * Registers an overlay layer (analysis objects, contours, labels, snap glyphs…). Lower z draws first.
+ * Layers with z ≥ 100 draw after the active tool's preview (e.g. the magnifier loupe).
+ */
 export function registerOverlay(z: number, draw: OverlayDrawer): () => void {
   const entry = { z, draw };
   overlays.push(entry);
@@ -279,21 +282,26 @@ export class CanvasController {
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     if (project) {
       this.drawUnderlayText(g, f, project);
-      for (const o of overlays) {
-        g.save();
-        try {
-          o.draw(g, f);
-        } catch (e) {
-          console.error('overlay error', e);
+      const drawOverlays = (afterTool: boolean) => {
+        for (const o of overlays) {
+          if (o.z >= 100 !== afterTool) continue;
+          g.save();
+          try {
+            o.draw(g, f);
+          } catch (e) {
+            console.error('overlay error', e);
+          }
+          g.restore();
         }
-        g.restore();
-      }
+      };
+      drawOverlays(false);
       const tool = activeTool();
       if (tool?.render) {
         g.save();
         tool.render(g, f);
         g.restore();
       }
+      drawOverlays(true);
     }
     this.frames++;
   }

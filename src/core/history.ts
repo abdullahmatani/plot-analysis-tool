@@ -52,16 +52,45 @@ function trim(stack: HistoryEntry[]): HistoryEntry[] {
   return stack.length > MAX_UNDO ? stack.slice(stack.length - MAX_UNDO) : stack;
 }
 
+/**
+ * Derived-data hook (row 59, parametric offsets). After the user's recipe has produced its result,
+ * every registered derivation runs on a draft of that result (`original(draft)` is the post-recipe
+ * project, `before` the project before the commit; unchanged objects keep their identity, so
+ * comparing references tells what the recipe changed). Its changes are appended to the same
+ * patches, so the derived update is part of the same undo step and journal entry and replays
+ * identically (undo/redo/recovery only apply patches and never re-run derivations). Derivations do
+ * not run when the recipe changed nothing.
+ */
+export type Derivation = (draft: Draft<Project>, before: Project) => void;
+
+const derivations: Derivation[] = [];
+
+export function registerDerivation(fn: Derivation): () => void {
+  derivations.push(fn);
+  return () => {
+    const i = derivations.indexOf(fn);
+    if (i >= 0) derivations.splice(i, 1);
+  };
+}
+
+function produceCommit(before: Project, recipe: Recipe): [Project, Patch[], Patch[]] {
+  const [project, patches, inverse] = produceWithPatches(before, recipe as (d: Draft<Project>) => void);
+  if (!derivations.length || patches.length === 0) return [project, patches, inverse];
+  const fns = [...derivations];
+  const [derived, dPatches, dInverse] = produceWithPatches(project, (d: Draft<Project>) => {
+    for (const fn of fns) fn(d, before);
+  });
+  if (dPatches.length === 0) return [project, patches, inverse];
+  return [derived, [...patches, ...dPatches], [...dInverse, ...inverse]];
+}
+
 export function commit(
   state: HistoryState,
   label: string,
   recipe: Recipe,
   opts: CommitOptions = {},
 ): CommitResult | null {
-  const [project, patches, inverse] = produceWithPatches(
-    state.project,
-    recipe as (d: Draft<Project>) => void,
-  );
+  const [project, patches, inverse] = produceCommit(state.project, recipe);
   if (patches.length === 0) return null;
   const now = nowIso();
   const top = state.undo[state.undo.length - 1];

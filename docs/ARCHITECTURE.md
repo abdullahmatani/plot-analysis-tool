@@ -74,6 +74,12 @@ instead of editing shared components:
 | `layerSections`                      | `@/components/inspector/LayersPanel`       | sections in the Layers tab                                                                 |
 | `dataPanels`, `legendPanels`         | `@/components/inspector/panels`            | Data / Legend tab content                                                                  |
 | `extraDialogs`                       | `@/components/app/extra-dialogs`           | dialogs opened with `useUiStore.getState().openDialog(id)`                                 |
+| `registerDerivation(fn)`             | `@/core/history`                           | derived data updated inside every commit, same undo step (live offsets)                    |
+| `gripExtensions`                     | `@/features/objects/grips`                 | extra select-tool grips (e.g. segment midpoint "+" grips that insert a vertex)             |
+
+Overlays with z ≥ 100 draw after the active tool's preview (the magnifier loupe uses z=100).
+`dragPreview()` (`@/features/objects/select-tool`) returns the geometry being dragged, for live
+previews of dependent geometry.
 
 Menus are `File, Edit, View, Draw, Trace, Offset, Data, Export, Help` (`MenuGroup`). Shortcut
 strings look like `Mod+Shift+N`, `Alt+[`, `F3`, single letters (`C`). Check `allCommands()` for

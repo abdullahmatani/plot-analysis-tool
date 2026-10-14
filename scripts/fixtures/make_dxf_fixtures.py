@@ -854,6 +854,112 @@ def make_mm(expectations: list):
 
 
 # --------------------------------------------------------------------------------------------
+# Fixture: R2018 tracing site (rows 49–53) at UTM coordinates, in metres
+
+
+def make_trace_site(expectations: list):
+    doc = ezdxf.new("R2018", setup=True)
+    doc.units = units.M
+    msp = doc.modelspace()
+    exp = Expect("r2018_trace_site.dxf")
+    X0, Y0 = 600000.0, 2500000.0
+    doc.layers.add("BUILDING", color=7)
+    doc.layers.add("BUND", color=30)
+    doc.layers.add("TANKS", color=6)
+    doc.layers.add("PAVING", color=8)
+    doc.layers.add("EQUIPMENT", color=4)
+
+    def P(x, y):
+        return (X0 + x, Y0 + y)
+
+    # Building A: L-shaped outline drawn as separate LINEs (some reversed) with exact shared
+    # endpoints, plus a partition wall from (30, 10) to (30, 40) that splits the bottom and top
+    # walls → junctions for chain tracing (Tab / Enter).
+    walls = [
+        ((10, 10), (30, 10)),
+        ((50, 10), (30, 10)),  # reversed
+        ((50, 10), (50, 25)),
+        ((35, 25), (50, 25)),  # reversed
+        ((35, 25), (35, 40)),
+        ((35, 40), (30, 40)),
+        ((10, 40), (30, 40)),  # reversed
+        ((10, 40), (10, 10)),
+        ((30, 10), (30, 40)),  # partition
+    ]
+    for a, b in walls:
+        e = msp.add_line(P(*a), P(*b), dxfattribs={"layer": "BUILDING"})
+        exp.ent(e, layer="BUILDING")
+
+    # Building B: rectangle of four LINEs with 5 cm gaps at every corner.
+    gap = 0.05
+    bx0, by0, bx1, by1 = 70.0, 10.0, 100.0, 30.0
+    for a, b in [
+        ((bx0 + gap, by0), (bx1 - gap, by0)),
+        ((bx1, by0 + gap), (bx1, by1 - gap)),
+        ((bx1 - gap, by1), (bx0 + gap, by1)),
+        ((bx0, by1 - gap), (bx0, by0 + gap)),
+    ]:
+        e = msp.add_line(P(*a), P(*b), dxfattribs={"layer": "BUILDING"})
+        exp.ent(e)
+
+    # Bund: separate LINEs with 5 cm gaps around a tank (circle with an exact centre and radius).
+    ux0, uy0, ux1, uy1 = 10.0, 60.0, 60.0, 100.0
+    for a, b in [
+        ((ux0 + gap, uy0), (ux1 - gap, uy0)),
+        ((ux1, uy0 + gap), (ux1, uy1 - gap)),
+        ((ux1 - gap, uy1), (ux0 + gap, uy1)),
+        ((ux0, uy1 - gap), (ux0, uy0 + gap)),
+    ]:
+        e = msp.add_line(P(*a), P(*b), dxfattribs={"layer": "BUND"})
+        exp.ent(e, layer="BUND")
+    e = msp.add_circle(P(35.125, 80.375), 12.5, dxfattribs={"layer": "TANKS"})
+    exp.ent(e, layer="TANKS")
+
+    # Solid hatch with an arc edge (hatch boundary pick).
+    h = msp.add_hatch(color=8, dxfattribs={"layer": "PAVING"})
+    h.paths.add_polyline_path([(*P(70, 60), 0), (*P(100, 60), 0), (*P(100, 75), 0.4), (*P(70, 75), 0)], is_closed=True)
+    exp.data["hatches"].append(hatch_expect(h))
+
+    # Closed LWPOLYLINE with rounded corners (bulges).
+    e = msp.add_lwpolyline(
+        [(*P(72, 90), 0, 0, 0), (*P(98, 90), 0, 0, 0.41421356237), (*P(100, 92), 0, 0, 0),
+         (*P(100, 103), 0, 0, 0.41421356237), (*P(98, 105), 0, 0, 0), (*P(72, 105), 0, 0, 0.41421356237),
+         (*P(70, 103), 0, 0, 0), (*P(70, 92), 0, 0, 0.41421356237)],
+        format="xyseb", close=True, dxfattribs={"layer": "PAVING"},
+    )
+    exp.ent(e)
+
+    # Ellipse (full) and an elliptic arc.
+    e = msp.add_ellipse(P(130, 20), major_axis=(10, 0, 0), ratio=0.5, dxfattribs={"layer": "EQUIPMENT"})
+    exp.ent(e)
+    e = msp.add_ellipse(P(130, 50), major_axis=(0, 8, 0), ratio=0.5, start_param=0, end_param=math.pi,
+                        dxfattribs={"layer": "EQUIPMENT"})
+    exp.ent(e)
+
+    # Block PUMP: skid outline (four LINEs) and a motor circle; inserted rotated and scaled.
+    blk = doc.blocks.new("PUMP")
+    for a, b in [((-2, -1), (2, -1)), ((2, -1), (2, 1)), ((2, 1), (-2, 1)), ((-2, 1), (-2, -1))]:
+        blk.add_line(a, b, dxfattribs={"layer": "0"})
+    blk.add_circle((0.5, 0), 0.75, dxfattribs={"layer": "0"})
+    ins = msp.add_blockref("PUMP", P(130, 85), dxfattribs={"layer": "EQUIPMENT", "rotation": 30, "xscale": 1.5, "yscale": 1.5})
+    exploded: list = []
+    expand_insert(ins, ins.dxf.handle, exploded)
+    for hnd, top, v in exploded:
+        exp.ent(v, insert=top, handle=hnd, tol=1e-7)
+
+    counts, skipped = split_counts({}, msp)
+    exp["version"] = "AC1032"
+    exp["insunits"] = 6
+    exp["layouts"] = ["Model", "Layout1"]
+    exp["layers"] = layer_table(doc)
+    exp["counts"] = counts
+    exp["skipped"] = skipped
+    exp["inserts"] = 1
+    save(doc, "r2018_trace_site.dxf", exp)
+    expectations.append(exp.data)
+
+
+# --------------------------------------------------------------------------------------------
 # Fixture: malformed DXF (invalid group code) → readable error with line number
 
 
@@ -878,12 +984,13 @@ def main() -> int:
     make_r2010(expectations)
     make_plot_plan(expectations)
     make_mm(expectations)
+    make_trace_site(expectations)
     make_malformed(expectations)
     exp_path = OUT / "expectations.json"
     exp_path.write_text(json.dumps({"ezdxf": ezdxf.__version__, "files": expectations}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     # Keep the JSON in the repository's Prettier style (best effort: needs node_modules).
     try:
-        subprocess.run(["npx", "prettier", "--write", str(exp_path)], cwd=ROOT, check=True, capture_output=True)
+        subprocess.run(["npx", "prettier", "--ignore-path", "", "--write", str(exp_path)], cwd=ROOT, check=True, capture_output=True)
     except (OSError, subprocess.CalledProcessError) as exc:
         print(f"note: prettier not run on expectations.json ({exc})")
     total = sum(p.stat().st_size for p in OUT.iterdir())

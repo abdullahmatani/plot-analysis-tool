@@ -310,6 +310,12 @@ export interface ExportProfile {
   includeLegend: boolean;
   dxfCoordinates: 'drawing' | 'world';
   dxfDrawingId?: string;
+  /** DXF labels: 'auto' = complex scripts (e.g. Arabic) as glyph outlines, other text as MTEXT. */
+  dxfText?: 'auto' | 'text' | 'outlines';
+  /** CSV: 'objects' (default) or a contour dataset id. */
+  csvTable?: string;
+  /** SVG: text as glyph outlines instead of `<text>` elements. */
+  svgTextAsPaths?: boolean;
 }
 
 export interface SavedView {

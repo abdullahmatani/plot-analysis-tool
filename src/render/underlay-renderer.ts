@@ -150,10 +150,20 @@ uniform float u_opacity;
 uniform float u_ghost;
 uniform float u_lightBg;
 uniform float u_invert;
+uniform float u_edge;
 out vec4 o;
 void main() {
   vec4 t = texture(u_tex, v_uv);
   vec3 c = t.rgb;
+  // Edge-contrast enhancement for scanned pages (row 54): unsharp mask plus a contrast stretch that
+  // darkens faint line work and whitens paper noise.
+  if (u_edge > 0.0) {
+    vec2 px = 1.0 / vec2(textureSize(u_tex, 0));
+    vec3 n = texture(u_tex, v_uv + vec2(px.x, 0.0)).rgb + texture(u_tex, v_uv - vec2(px.x, 0.0)).rgb
+           + texture(u_tex, v_uv + vec2(0.0, px.y)).rgb + texture(u_tex, v_uv - vec2(0.0, px.y)).rgb;
+    c = clamp(c + u_edge * (4.0 * c - n), 0.0, 1.0);
+    c = clamp((c - 0.55) * (1.0 + 1.5 * u_edge) + 0.55, 0.0, 1.0);
+  }
   // White paper on a dark canvas: invert luminance only, so hues (e.g. blue vs red lines) are kept.
   if (u_invert > 0.5) c = clamp(c + vec3(1.0 - 2.0 * dot(c, vec3(0.299, 0.587, 0.114))), 0.0, 1.0);
   if (u_ghost > 0.5) {
@@ -227,6 +237,8 @@ export class UnderlayRenderer {
   private drawings = new Map<string, GpuDrawing>();
   private uniformCache = new Map<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
   lineScale = 1;
+  /** Edge-contrast enhancement of raster tiles, 0 (off) … 1 (row 54). */
+  edgeContrast = 0;
 
   constructor(readonly canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl2', {
@@ -421,6 +433,7 @@ export class UnderlayRenderer {
         gl.uniform1f(this.u(this.texProg, 'u_ghost'), ds.ghost ? 1 : 0);
         gl.uniform1f(this.u(this.texProg, 'u_lightBg'), lightBg ? 1 : 0);
         gl.uniform1f(this.u(this.texProg, 'u_invert'), !lightBg && ds.invertOnDark ? 1 : 0);
+        gl.uniform1f(this.u(this.texProg, 'u_edge'), this.edgeContrast);
         for (const t of d.tiles) {
           const { m, t: tr } = batchClipTransform(view, cssW, cssH, ds.placement, t.x, t.y);
           gl.uniformMatrix2fv(this.u(this.texProg, 'u_m'), false, m);

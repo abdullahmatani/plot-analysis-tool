@@ -4,11 +4,22 @@ import { translateGeometry } from '@/geometry/convert';
 /** Grip editing (row 43): vertex, centre, radius and corner handles. */
 
 export interface Grip {
-  kind: 'vertex' | 'centre' | 'radius' | 'corner' | 'start' | 'end' | 'rx' | 'ry' | 'point';
+  kind: 'vertex' | 'centre' | 'radius' | 'corner' | 'start' | 'end' | 'rx' | 'ry' | 'point' | 'insert';
   pt: Pt;
   index?: number;
   ring?: number;
 }
+
+/**
+ * Extra grips contributed by feature modules, e.g. segment midpoint "+" grips that insert a vertex
+ * (row 53). `apply` returns null for grips it does not own.
+ */
+export interface GripExtension {
+  grips(g: Geometry): Grip[];
+  apply(g: Geometry, grip: Grip, to: Pt): Geometry | null;
+}
+
+export const gripExtensions: GripExtension[] = [];
 
 const rot = (p: Pt, a: number): Pt => ({
   x: p.x * Math.cos(a) - p.y * Math.sin(a),
@@ -16,6 +27,11 @@ const rot = (p: Pt, a: number): Pt => ({
 });
 
 export function gripsOf(g: Geometry): Grip[] {
+  const base = baseGrips(g);
+  return gripExtensions.length ? [...base, ...gripExtensions.flatMap((e) => e.grips(g))] : base;
+}
+
+function baseGrips(g: Geometry): Grip[] {
   switch (g.type) {
     case 'point':
       return [{ kind: 'point', pt: g.p }];
@@ -70,6 +86,10 @@ export function gripsOf(g: Geometry): Grip[] {
 }
 
 export function applyGrip(g: Geometry, grip: Grip, to: Pt): Geometry {
+  for (const e of gripExtensions) {
+    const r = e.apply(g, grip, to);
+    if (r) return r;
+  }
   switch (g.type) {
     case 'point':
       return { ...g, p: { ...to } };

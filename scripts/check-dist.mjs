@@ -122,10 +122,24 @@ for (const file of walk(dist)) {
   }
 }
 
+// Hosted mode (wrangler.jsonc): dist/_headers must send exactly the page's policy, as a header.
+const metaCsp = /http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(
+  readFileSync(path.join(dist, 'index.html'), 'utf8'),
+)?.[1];
+let headers = '';
+try {
+  headers = readFileSync(path.join(dist, '_headers'), 'utf8');
+} catch {
+  problems.push('_headers: missing (hosted mode would serve the app without its CSP header)');
+}
+if (!metaCsp) problems.push('index.html: Content-Security-Policy meta tag missing');
+else if (headers && !headers.includes(`  Content-Security-Policy: ${metaCsp}; frame-ancestors 'none'\n`))
+  problems.push('_headers: Content-Security-Policy differs from the policy in index.html');
+
 if (problems.length) {
   console.error(`check-dist: ${problems.length} problem(s) found:\n  ${[...new Set(problems)].join('\n  ')}`);
   process.exit(1);
 }
 console.log(
-  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk; no eval or Function constructor outside it.`,
+  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk; no eval or Function constructor outside it; _headers matches the page CSP.`,
 );

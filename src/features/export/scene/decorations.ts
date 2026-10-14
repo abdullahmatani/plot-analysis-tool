@@ -186,7 +186,8 @@ export function layoutLegend(
     rows.push({ kind: 'title', lines, y });
     y += lines.length * titleSize * 1.2 + 1.5 * ui;
   }
-  const multipleGroups = model.groups.length > 1 || (model.groups[0] && model.groups[0].title.trim() !== '');
+  // Group headings only help when there is more than one group.
+  const multipleGroups = model.groups.length > 1;
   model.groups.forEach((g, gi) => {
     if (multipleGroups && g.title.trim()) {
       if (gi > 0) y += 1.2 * ui;
@@ -401,7 +402,7 @@ export function northArrow(
   items.push(text('N', nx, ny, size * 0.32, { anchor: 'middle', baseline: 'middle', bold: true }));
   if (caption)
     items.push(
-      text(caption, cx, cy + s + size * 0.35, size * 0.16, {
+      text(caption, cx, cy + s + size * 0.08, size * 0.16, {
         anchor: 'middle',
         baseline: 'top',
         color: MUTED,
@@ -488,8 +489,8 @@ export function layoutTitleBlock(
           out.push(
             ...northArrow(
               x0 + northW / 2,
-              y + panelH * 0.5,
-              panelH * 0.55,
+              y + panelH * 0.49,
+              panelH * 0.5,
               extra.northAngle,
               extra.northCaption,
             ),

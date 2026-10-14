@@ -72,7 +72,7 @@ export class PngStreamEncoder {
     this.prev = new Uint8Array(this.rowBytes);
     this.cur = new Uint8Array(this.rowBytes);
     this.idatSize = opts.idatSize ?? 256 * 1024;
-    this.parts.push(PNG_SIGNATURE);
+    this.parts.push(PNG_SIGNATURE.slice());
     const ihdr = new Uint8Array(13);
     const dv = new DataView(ihdr.buffer);
     dv.setUint32(0, width);

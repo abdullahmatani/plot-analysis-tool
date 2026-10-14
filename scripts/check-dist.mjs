@@ -39,6 +39,7 @@ const INERT = [
   /^https:\/\/tinyurl\.com\/y2uuvskb$/, // Dexie
   /^http:\/\/bit\.ly\/2kdckMn$/, // Dexie
   /^https:\/\/bit\.ly\/wb-precache$/, // Workbox
+  /^https:\/\/github\.com\/ashtuchkin\/iconv-lite\/wiki\//, // iconv-lite (via fontkit) warning text
   /^http:\/\/www\.xfa\.org\/schema\//, // XFA XML namespaces (pdf.js)
   // pdf.js URL helpers: dummy bases for `new URL(x, base)` parsing and a template literal, never fetched.
   /^https:\/\/foo\.bar$/,

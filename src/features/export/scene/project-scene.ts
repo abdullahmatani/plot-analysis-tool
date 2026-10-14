@@ -364,7 +364,7 @@ export function buildProjectScene(input: ProjectSceneInput): ProjectSceneResult 
         stroke: { color: '#9ca3af', width: 0.18 },
       },
     ];
-    if (wantNorth) items.push(...northArrow(x0 + northW / 2, y0 + h * 0.48, h * 0.55, north, northCaption));
+    if (wantNorth) items.push(...northArrow(x0 + northW / 2, y0 + h * 0.49, h * 0.5, north, northCaption));
     if (wantScaleBar) {
       const sx = x0 + northW + 3 * ui;
       items.push({

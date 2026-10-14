@@ -15,7 +15,8 @@ import type { Bounds } from '@/core/types';
  *   GK.ELLIPSE  cx, cy, mx, my, ratio, t0, t1      (major-axis vector (mx,my), minor/major ratio, params)
  *   GK.POLY     n, then n × (x, y, bulge)          (closed when FLAG.CLOSED is set)
  *   GK.POINT    x, y
- *   GK.TEXT     x, y, height, rotation, widthFactor, hAlign, vAlign, oblique, boxWidth, lineSpacing
+ *   GK.TEXT     x, y, height, rotation, widthFactor, hAlign, vAlign, oblique, boxWidth, lineSpacing,
+ *               font (index into `fonts`, -1 = unknown; row 24)
  *   GK.FILL     nRings, then per ring: n, n × (x, y, bulge)   (even-odd fill)
  *
  * TEXT alignment: hAlign 0 left, 1 centre, 2 right; vAlign 0 baseline, 1 bottom, 2 middle, 3 top.
@@ -133,6 +134,8 @@ export interface EntityStore {
   insertIndex: Int32Array;
   geom: Float64Array;
   texts: string[];
+  /** Font file of each text style used (e.g. "txt.shx", "arial.ttf"); see cad-fonts.ts. */
+  fonts?: string[];
   handles: string[];
   layers: SourceLayer[];
   linetypes: LinetypeDef[];
@@ -191,6 +194,7 @@ export class EntityStoreBuilder {
   private geom = new Float64Array(1024);
   private geomUsed = 0;
   texts: string[] = [];
+  fonts: string[] = [];
   handles: string[] = [];
   layers: SourceLayer[] = [];
   linetypes: LinetypeDef[] = [{ name: 'CONTINUOUS', pattern: [] }];
@@ -285,12 +289,24 @@ export class EntityStoreBuilder {
       insertIndex: this.insertIndex.slice(0, n),
       geom: this.geom.slice(0, this.geomUsed),
       texts: this.texts,
+      fonts: this.fonts,
       handles: this.handles,
       layers: this.layers,
       linetypes: this.linetypes,
       inserts: this.inserts,
     };
   }
+}
+
+/** Index of a font file in the builder's font table (deduplicated, case-insensitive). */
+export function fontIndex(b: { fonts: string[] }, font: string): number {
+  const f = font.trim();
+  if (!f) return -1;
+  const key = f.toLowerCase();
+  const i = b.fonts.findIndex((x) => x.toLowerCase() === key);
+  if (i >= 0) return i;
+  b.fonts.push(f);
+  return b.fonts.length - 1;
 }
 
 /** Typed arrays of a store, for postMessage transfer lists. */

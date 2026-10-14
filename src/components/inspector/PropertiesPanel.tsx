@@ -53,6 +53,7 @@ function PickedEntity() {
       {info.handle && <Row label="Handle">{info.handle}</Row>}
       {info.block && <Row label="From block">{info.block}</Row>}
       {info.text && <Row label="Text">{info.text}</Row>}
+      {info.font && <Row label="Font">{info.font}</Row>}
       {info.radius !== undefined && (
         <>
           <Row label="Radius">{len(info.radius)}</Row>

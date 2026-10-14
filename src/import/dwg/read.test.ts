@@ -161,7 +161,8 @@ describe('readDwg — reference fixtures', () => {
           const where = `${e.type} ${e.handle} #${k}`;
           expect(r.store.geomKind[i], where).toBe(o.kind);
           const g = r.store.geom.subarray(r.store.geomStart[i], r.store.geomStart[i] + r.store.geomLen[i]);
-          expect(g.length, where).toBe(o.geom.length);
+          // Text entities carry a trailing font index (row 24) not present in the reference data.
+          expect(g.length, where).toBe(o.geom.length + (o.kind === GK.TEXT ? 1 : 0));
           o.geom.forEach((v, q) =>
             expect(relClose(g[q], v, 1e-9), `${where} geom[${q}] ${g[q]} vs ${v}`).toBe(true),
           );

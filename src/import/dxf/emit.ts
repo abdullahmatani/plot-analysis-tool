@@ -12,6 +12,7 @@ import {
   type ImportReport,
   type LinetypeDef,
   type SourceLayer,
+  fontIndex,
 } from '@/underlay/entity-store';
 import { BBox } from './bounds';
 import { where, type DxfBlock, type DxfDocument } from './document';
@@ -110,6 +111,10 @@ export class Emitter {
   >();
   private emitted = 0;
   private visits = 0;
+  /** Text style name (upper case) → index into the store's font table (row 24). */
+  private readonly styleFont = new Map<string, number>();
+  /** Font of the text entity being converted. */
+  private curFont = -1;
 
   constructor(
     private readonly doc: DxfDocument,
@@ -124,6 +129,7 @@ export class Emitter {
     this.ltScale = lts && lts > 0 && Number.isFinite(lts) ? lts : 1;
     this.buildLinetypes();
     this.buildLayers();
+    this.buildStyles();
   }
 
   // ------------------------------------------------------------------------------------------
@@ -144,6 +150,25 @@ export class Emitter {
       this.ltIdx.set(key, this.b.linetypes.length);
       this.b.linetypes.push(def);
     }
+  }
+
+  private buildStyles() {
+    const t = this.t;
+    for (const r of this.doc.tables.get('STYLE') ?? []) {
+      const name = recStr(t, r, 2).trim().toUpperCase();
+      if (!name || this.styleFont.has(name) || recNum(t, r, 70, 0) & 1) continue; // 1 = shape file
+      // TrueType styles may carry the family name in ACAD XDATA (1000) when 3 is empty.
+      let font = recStr(t, r, 3).trim();
+      if (!font) {
+        for (let i = r.s; i < r.e; i++) if (t.code[i] === 1000 && t.str[i].trim()) font = t.str[i].trim();
+      }
+      this.styleFont.set(name, fontIndex(this.b, font || 'txt'));
+    }
+  }
+
+  private fontOfStyle(style: string): number {
+    const key = (style || 'STANDARD').trim().toUpperCase();
+    return this.styleFont.get(key) ?? this.styleFont.get('STANDARD') ?? -1;
   }
 
   private buildLayers() {
@@ -1196,7 +1221,7 @@ export class Emitter {
     }
     this.add(
       GK.TEXT,
-      [X, Y, h, rotation, w, hAlign, vAlign, oblique, bw, isMText ? lineSpacing : 1],
+      [X, Y, h, rotation, w, hAlign, vAlign, oblique, bw, isMText ? lineSpacing : 1, this.curFont],
       bb,
       text,
     );
@@ -1205,6 +1230,7 @@ export class Emitter {
   private text(r: Rec, ctx: Ctx, kind: 'TEXT' | 'ATTRIB' | 'ATTDEF') {
     this.load(r);
     this.props(kind === 'TEXT' || kind === 'ATTDEF' ? ET.TEXT : ET.ATTRIB, ctx);
+    this.curFont = this.fontOfStyle(this.s(7, 'STANDARD'));
     if (kind === 'ATTRIB' && this.n(70, 0) & 1) this.meta.flags = (this.meta.flags ?? 0) | FLAG.HIDDEN;
     const raw = kind === 'ATTDEF' ? this.s(2, '') : this.s(1, '');
     const text = decodeText(raw);
@@ -1287,6 +1313,7 @@ export class Emitter {
   private mtext(r: Rec, ctx: Ctx) {
     this.load(r);
     this.props(ET.MTEXT, ctx);
+    this.curFont = this.fontOfStyle(this.s(7, 'STANDARD'));
     const t = this.t;
     let chunks = '';
     let last = '';

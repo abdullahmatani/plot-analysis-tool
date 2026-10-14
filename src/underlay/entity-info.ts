@@ -2,6 +2,7 @@ import type { Drawing, Geometry } from '@/core/types';
 import { transformGeometry } from '@/geometry/convert';
 import { area, length, radiusOf } from '@/geometry/measure';
 
+import { substituteFont } from './cad-fonts';
 import { FLAG, GK } from './entity-store';
 import { entityText, entityToGeometry, entityTypeName } from './entity-geometry';
 import { getModel } from './models';
@@ -15,6 +16,8 @@ export interface EntityInfo {
   handle?: string;
   text?: string;
   block?: string;
+  /** Text: font named by the drawing and the bundled substitute used (row 24). */
+  font?: string;
   /** World metres. */
   length?: number;
   radius?: number;
@@ -45,6 +48,14 @@ export function entityInfo(d: Drawing, index: number): EntityInfo | null {
     world,
     calibrated: !!d.calibration,
   };
+  if (s.geomKind[index] === GK.TEXT && s.geomLen[index] > 10) {
+    const fi = s.geom[s.geomStart[index] + 10];
+    const name = fi >= 0 ? s.fonts?.[fi] : undefined;
+    if (name) {
+      const sub = substituteFont(name);
+      info.font = `${name} → ${sub.kind === 'mono' ? 'monospace' : 'Noto Sans'}${sub.widthScale !== 1 ? ` (width ×${sub.widthScale})` : ''}`;
+    }
+  }
   if (world && world.type !== 'point') {
     info.length = length(world);
     const r = radiusOf(world);

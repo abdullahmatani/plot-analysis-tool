@@ -6,6 +6,7 @@ import { useUiStore } from '@/store/ui';
 import { useViewStore, type ViewTransform } from '@/store/view';
 import { activeTool, bindToolContext, useToolUi } from '@/tools/registry';
 import type { FrameInfo, SnapResult, ToolContext, ToolPointerEvent } from '@/tools/types';
+import { substituteFont } from '@/underlay/cad-fonts';
 import { useModelsStore, type DrawingModel } from '@/underlay/models';
 import { drawingPlacement, visibleLayerFlags } from '@/underlay/pick';
 
@@ -337,7 +338,11 @@ export class CanvasController {
         budget--;
         const p = f.toScreen(apply(place, { x: gm[o], y: gm[o + 1] }));
         const rot = gm[o + 3] + placeRot + f.view.rotation;
-        const wf = gm[o + 4] || 1;
+        // Bundled substitute for the text style's SHX/TTF font, with width compensation (row 24).
+        const sub = substituteFont(
+          store.geomLen[i] > 10 && gm[o + 10] >= 0 ? store.fonts?.[gm[o + 10]] : undefined,
+        );
+        const wf = (gm[o + 4] || 1) * sub.widthScale;
         const hAlign = gm[o + 5];
         const vAlign = gm[o + 6];
         let rgb = store.color[i];
@@ -351,7 +356,7 @@ export class CanvasController {
         const oblique = gm[o + 7];
         if (oblique) g.transform(1, 0, -Math.tan(oblique), 1, 0, 0);
         g.fillStyle = `#${rgb.toString(16).padStart(6, '0')}`;
-        g.font = `${hPx * 1.38}px "PAT CAD Sans", "Noto Sans", "Noto Sans Arabic", sans-serif`;
+        g.font = `${hPx * 1.38}px ${sub.css}`;
         g.textAlign = hAlign === 1 ? 'center' : hAlign === 2 ? 'right' : 'left';
         g.textBaseline =
           vAlign === 3 ? 'top' : vAlign === 2 ? 'middle' : vAlign === 1 ? 'bottom' : 'alphabetic';

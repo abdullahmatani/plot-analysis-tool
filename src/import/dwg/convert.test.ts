@@ -875,9 +875,9 @@ describe('dwgDatabaseToStore — text', () => {
     const r = dwgDatabaseToStore(db);
     const t = (i: number) => r.store.texts[r.store.textIndex[i]];
     expect(t(0)).toBe('Ø25 ° ±1');
-    expectClose(geom(r, 0), [1, 2, 2, 0, 1, 0, 0, 0, 0, 1]);
-    expectClose(geom(r, 1), [5, 2, 2, 0, 1, 1, 2, 0, 0, 1]);
-    expectClose(geom(r, 2), [1, 2, 2, Math.PI / 2, 1, 0, 0, 0, 4, 1]);
+    expectClose(geom(r, 0), [1, 2, 2, 0, 1, 0, 0, 0, 0, 1, -1]);
+    expectClose(geom(r, 1), [5, 2, 2, 0, 1, 1, 2, 0, 0, 1, -1]);
+    expectClose(geom(r, 2), [1, 2, 2, Math.PI / 2, 1, 0, 0, 0, 4, 1, -1]);
     expect(geom(r, 3)[4]).toBe(-1);
   });
 
@@ -898,7 +898,7 @@ describe('dwgDatabaseToStore — text', () => {
     });
     const r = dwgDatabaseToStore(db);
     expect(r.store.texts[0]).toBe('Hello\nWorld 1/2 x\\y°');
-    expectClose(geom(r, 0), [3, 4, 2.5, Math.PI / 2, 1, 1, 2, 0, 40, 1.5]);
+    expectClose(geom(r, 0), [3, 4, 2.5, Math.PI / 2, 1, 1, 2, 0, 40, 1.5, -1]);
     expect(r.store.type[0]).toBe(ET.MTEXT);
   });
 });

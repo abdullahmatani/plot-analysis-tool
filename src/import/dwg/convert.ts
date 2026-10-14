@@ -40,6 +40,7 @@ import {
   type GeomKind,
   type ImportReport,
   type SourceLayer,
+  fontIndex,
 } from '@/underlay/entity-store';
 
 import { BBox } from './bounds';
@@ -282,10 +283,31 @@ class Converter {
     this.blocksByHandle = blocks.byHandle;
     this.buildLinetypes();
     this.buildLayers();
+    this.buildStyles();
   }
 
   // ------------------------------------------------------------------------------------------
   // Tables
+
+  /** Text style name (upper case) → index into the store's font table (row 24). */
+  private readonly styleFont = new Map<string, number>();
+  private curFont = -1;
+
+  private buildStyles() {
+    for (const st of this.db.tables?.STYLE?.entries ?? []) {
+      const name = String(st.name ?? '')
+        .trim()
+        .toUpperCase();
+      if (!name || this.styleFont.has(name) || fin(st.standardFlag, 0) & 1) continue; // 1 = shape file
+      const font = String(st.font || st.extendedFont || '').trim();
+      this.styleFont.set(name, fontIndex(this.b, font || 'txt'));
+    }
+  }
+
+  private fontOfStyle(style: string | undefined): number {
+    const key = (style || 'STANDARD').trim().toUpperCase();
+    return this.styleFont.get(key) ?? this.styleFont.get('STANDARD') ?? -1;
+  }
 
   private buildLinetypes() {
     this.ltIdx.set('CONTINUOUS', 0);
@@ -1190,7 +1212,7 @@ class Converter {
     }
     this.add(
       GK.TEXT,
-      [X, Y, h, rotation, w, hAlign, vAlign, oblique, bw, isMText ? lineSpacing : 1],
+      [X, Y, h, rotation, w, hAlign, vAlign, oblique, bw, isMText ? lineSpacing : 1, this.curFont],
       bb,
       text,
     );
@@ -1202,6 +1224,7 @@ class Converter {
       kind === 'TEXT' ? (e as DwgTextEntity) : (e as DwgAttribEntity | DwgAttdefEntity).text;
     if (!t) throw new InvalidEntity('missing text data');
     this.props(e, kind === 'ATTRIB' ? ET.ATTRIB : ET.TEXT, ctx);
+    this.curFont = this.fontOfStyle((t as { styleName?: string }).styleName);
     const attrFlags = kind === 'TEXT' ? 0 : fin((e as DwgAttribEntity).flags, 0);
     if (kind === 'ATTRIB' && attrFlags & 1) this.meta.flags = (this.meta.flags ?? 0) | FLAG.HIDDEN;
     // Multi-line attributes carry an embedded MTEXT frame.
@@ -1301,6 +1324,7 @@ class Converter {
 
   private mtext(e: DwgMTextEntity, ctx: Ctx, type: EntityTypeCode) {
     this.props(e, type, ctx);
+    this.curFont = this.fontOfStyle(e.styleName);
     const ls = fin(e.lineSpacing, 1);
     this.mtextFrame(
       mtextToPlain(String(e.text ?? '')),

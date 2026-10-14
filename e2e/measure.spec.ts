@@ -116,10 +116,16 @@ test('kept measurements are annotations whose text follows the display units (ro
   await page.getByRole('button', { name: 'Done' }).click();
   await expect(page.getByTestId('measure-value')).toHaveText('180\u202F277.6 mm');
   expect((await project(page)).display.units).toBe('mm');
+  await expect(page.getByTestId('project-settings')).toBeHidden();
   const box = (await page.getByTestId('canvas').boundingBox())!;
-  await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.6);
-  await page.mouse.move(box.x + box.width * 0.7 + 5, box.y + box.height * 0.6 + 5);
-  await expect(page.getByTestId('cursor-coords')).toContainText(' mm');
+  let dx = 0;
+  await expect
+    .poll(async () => {
+      dx = (dx + 7) % 40;
+      await page.mouse.move(box.x + box.width * 0.7 + dx, box.y + box.height * 0.6);
+      return page.getByTestId('cursor-coords').textContent();
+    })
+    .toContain(' mm');
   // Each setting is one undo step; the annotation itself was one more.
   await page.getByTestId('canvas').focus();
   await page.keyboard.press('Escape');

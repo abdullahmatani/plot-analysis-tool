@@ -1,0 +1,6 @@
+# Same-origin only, per FDR C3/C4. Row 7 will extend this for the real app
+# (e.g. 'wasm-unsafe-eval' for the WASM parsers, worker-src for blob workers).
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer

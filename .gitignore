@@ -13,3 +13,5 @@ public/pdfjs
 public/fonts
 .scratch
 .claude/
+.wrangler/
+.dev.vars*

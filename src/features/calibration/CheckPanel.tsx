@@ -47,7 +47,7 @@ export function CheckPanel({ s }: { s: CheckSession }) {
         </>
       }
     >
-      <div className="grid gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5">
         <div className="flex flex-wrap items-center gap-2">
           {s.picking ? (
             <Button size="xs" variant="secondary" onClick={stopCheckPicks}>

@@ -63,7 +63,7 @@ export function AlignPanel({ s }: { s: AlignSession }) {
         </>
       }
     >
-      <div className="grid gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5">
         <Row label="Align to">
           <Select
             value={s.baseId ?? ''}
@@ -106,7 +106,7 @@ export function AlignPanel({ s }: { s: AlignSession }) {
               Pick a point on “{sub.name}”, then the same feature on “{base?.name ?? 'the plot plan'}”; repeat
               for a second point far from the first. The sub-drawing is moved, rotated and scaled to match.
             </Note>
-            <ol className="grid gap-1 text-xs" data-testid="align-steps">
+            <ol className="grid grid-cols-1 gap-1 text-xs" data-testid="align-steps">
               {ALIGN_STEPS.map((st, i) => {
                 const done = !!s[st.list][st.index];
                 const active = s.step === i;

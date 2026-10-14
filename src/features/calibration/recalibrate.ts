@@ -1,11 +1,22 @@
 import { toast } from 'sonner';
 
 import { currentSession } from '@/app/session';
-import { applyVec, apply, approxEqual, invert, isSimilarity, multiply, transformBounds } from '@/core/affine';
+import {
+  applyVec,
+  apply,
+  approxEqual,
+  invert,
+  isSimilarity,
+  multiply,
+  scaleFactor,
+  transformBounds,
+} from '@/core/affine';
 import type { Affine2D, AnalysisObject, Anchor, Bounds, Drawing, Project } from '@/core/types';
 import { transformGeometry } from '@/geometry/convert';
 import { bounds as geometryBounds } from '@/geometry/measure';
+import { clampScale, visibleWorldBounds } from '@/render/view';
 import { commit, getProject } from '@/store/project';
+import { useViewStore } from '@/store/view';
 import { getModel, placementOf } from '@/underlay/models';
 
 import { askRecalibration } from './prompts';
@@ -182,5 +193,24 @@ export async function applyPlacementChange(
   if (!fresh) return false;
   const ok = commitPlan(now, fresh, label, mutate, move);
   if (!ok && plan.changed) toast.error('The change could not be applied (the project is read-only).');
+  if (ok && fresh.changed) followView(fresh, model?.result?.extents ?? null);
   return ok;
+}
+
+/**
+ * Keeps the drawing on screen when its placement changes (e.g. paper → site scale, or a sub-drawing
+ * moved onto the plot plan): when the drawing was in view, the view follows the delta transform.
+ */
+export function followView(plan: PlacementPlan, extents: Bounds | null) {
+  const vs = useViewStore.getState();
+  const v = vs.view;
+  if (extents) {
+    const b = transformBounds(plan.oldPlacement, extents);
+    const vis = visibleWorldBounds(v, vs.canvasSize.w, vs.canvasSize.h);
+    if (b.minX > vis.maxX || b.maxX < vis.minX || b.minY > vis.maxY || b.maxY < vis.minY) return;
+  }
+  const c = apply(plan.delta, { x: v.cx, y: v.cy });
+  const k = scaleFactor(plan.delta);
+  if (!(k > 0) || !Number.isFinite(c.x) || !Number.isFinite(c.y)) return;
+  vs.setView({ cx: c.x, cy: c.y, scale: clampScale(v.scale / k) });
 }

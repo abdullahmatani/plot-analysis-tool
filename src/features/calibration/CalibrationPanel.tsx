@@ -127,7 +127,7 @@ function TwoPointTab({
   const { a, b } = s.twoPoint;
   const picking = s.picking?.list === 'twoPoint';
   return (
-    <div className="grid gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5">
       <Note>
         Pick both ends of a dimension whose real length you know (snaps to the drawing), then type that
         length.
@@ -213,7 +213,7 @@ function FitSummary({
     );
   const f = preview.fit;
   return (
-    <div className="bg-muted/50 grid gap-0.5 rounded px-2 py-1.5 text-xs" data-testid={testId}>
+    <div className="bg-muted/50 grid grid-cols-1 gap-0.5 rounded px-2 py-1.5 text-xs" data-testid={testId}>
       <div>
         RMS residual{' '}
         <strong className="tabular-nums" data-testid="cal-rms" data-rms={f.rms}>
@@ -250,7 +250,7 @@ function DistanceRows({
   preview: Preview;
 }) {
   return (
-    <div className="grid gap-1.5" data-testid="cal-ref-table">
+    <div className="grid grid-cols-1 gap-1.5" data-testid="cal-ref-table">
       {s.distances.map((r, i) => {
         const picking = s.picking?.list === 'distances' && s.picking.index === i;
         const worst = preview.worstRow === i && (preview.fit?.rms ?? 0) > 0;
@@ -258,7 +258,7 @@ function DistanceRows({
           <div
             key={i}
             className={cn(
-              'grid gap-1 rounded border px-2 py-1.5',
+              'grid grid-cols-1 gap-1 rounded border px-2 py-1.5',
               worst && 'border-destructive/70 bg-destructive/5',
             )}
             data-testid={`cal-ref-row-${i}`}
@@ -291,8 +291,8 @@ function DistanceRows({
                 <Trash2 />
               </Button>
             </div>
-            <div className="grid grid-cols-[1fr_auto] items-center gap-2">
-              <div className="flex items-center gap-1">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+              <div className="flex min-w-0 items-center gap-1">
                 <Input
                   className="h-7 text-xs"
                   data-testid={`cal-ref-value-${i}`}
@@ -333,14 +333,14 @@ function PointRows({
   picking: number | null;
 }) {
   return (
-    <div className="grid gap-1.5" data-testid={`cal-${list}-table`}>
+    <div className="grid grid-cols-1 gap-1.5" data-testid={`cal-${list}-table`}>
       {rows.map((r, i) => {
         const worst = preview.worstRow === i && (preview.fit?.rms ?? 0) > 1e-9 && rows.length > 2;
         return (
           <div
             key={i}
             className={cn(
-              'grid gap-1 rounded border px-2 py-1.5',
+              'grid grid-cols-1 gap-1 rounded border px-2 py-1.5',
               worst && 'border-destructive/70 bg-destructive/5',
             )}
             data-testid={`cal-${list}-row-${i}`}
@@ -375,9 +375,9 @@ function PointRows({
                 <Trash2 />
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5">
               {(['x', 'y'] as const).map((k, ai) => (
-                <div key={k} className="flex items-center gap-1">
+                <div key={k} className="flex min-w-0 items-center gap-1">
                   <span className="text-muted-foreground w-3 text-xs">{axes[ai]}</span>
                   <Input
                     className="h-7 text-xs"
@@ -445,7 +445,7 @@ function ReferencesTab({
   const preview = s.refMode === 'distance' ? distPreview : ptPreview;
   const picking = s.picking?.list === (s.refMode === 'distance' ? 'distances' : 'points');
   return (
-    <div className="grid gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5">
       <Note>
         Three or more known distances (or points with known coordinates); a least-squares fit reports each
         reference's residual and highlights the worst.
@@ -495,7 +495,7 @@ function ReferencesTab({
             axes={['X', 'Y']}
             picking={s.picking?.list === 'points' ? s.picking.index : null}
           />
-          <div className="grid grid-cols-[auto_1fr] items-center gap-2">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
             <PickButton
               active={picking}
               onPick={() => pickPoint('points')}
@@ -534,7 +534,7 @@ function CoordinatesTab({
   const preview = useMemo(() => previewPoints(s, 'coords'), [s]);
   const picking = s.picking?.list === 'coords';
   return (
-    <div className="grid gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5">
       <Note>
         Pick two or more points with known plant coordinates (e.g. grid intersections) and type their E/N.
         World coordinates then are plant coordinates.
@@ -548,7 +548,7 @@ function CoordinatesTab({
         axes={['E', 'N']}
         picking={picking ? s.picking!.index : null}
       />
-      <div className="grid grid-cols-[auto_1fr] items-center gap-2">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
         <PickButton
           active={picking}
           onPick={() => pickPoint('coords')}
@@ -591,7 +591,7 @@ function RatioTab({
     const hMm = page ? page.height * PT_TO_MM : 0;
     const k = preview.factor && preview.calibration ? metresPerUnit(preview.calibration.transform) : null;
     return (
-      <div className="grid gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5">
         <Note>
           Enter the scale stated on the drawing. The PDF's true paper size is used: 1 pt ={' '}
           {formatNumber(METRES_PER_PT * 1000, 4)} mm on paper.
@@ -653,7 +653,7 @@ function RatioTab({
   }
   const insunits = model?.result?.insunits;
   return (
-    <div className="grid gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5">
       <Note>Confirm the drawing units read from the file header, or override them.</Note>
       <Row label="File units">
         <span className="text-xs" data-testid="cal-file-units">

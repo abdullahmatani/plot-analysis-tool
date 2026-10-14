@@ -52,6 +52,20 @@ test('two-point scale: re-measuring the calibrated dimension returns the entered
   await zoomTo(page, { minX: a.x - 0.02, minY: a.y - 0.03, maxX: b.x + 0.02, maxY: b.y + 0.03 });
   await page.getByTestId('cal-pick').click();
   await clickWorld(page, a);
+  // The unfinished calibration is kept as a draft within 1 s (C7, row 93).
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const w = window as unknown as {
+          __pat: { db(): { drafts: { toArray(): Promise<{ key: string; state: unknown }[]> } } };
+        };
+        const rows = await w.__pat.db().drafts.toArray();
+        const s = rows.find((r) => r.key === 'calibration:session')?.state as
+          { session?: { twoPoint?: { a: unknown } } } | undefined;
+        return !!s?.session?.twoPoint?.a;
+      }),
+    )
+    .toBe(true);
   await clickWorld(page, b);
   await expect(page.getByTestId('cal-picked')).toContainText('200.00 mm on paper');
   await page.getByTestId('cal-real-length').fill(String(ref.metres));

@@ -73,8 +73,8 @@ export function PromptsHost() {
             <AlertDialogDescription asChild>
               <div className="grid gap-2 text-sm">
                 <p>
-                  {recal?.label} changes where “{recal?.drawingName}” lies in the world.{' '}
-                  {recal && describe(recal.objects, recal.anchors)} lie on it.
+                  “{recal?.drawingName}” will move in the world.{' '}
+                  {recal && describe(recal.objects, recal.anchors)} on it.
                 </p>
                 <p>
                   <strong className="text-foreground">Move with drawing</strong> keeps them on the same
@@ -112,5 +112,5 @@ function describe(objects: number, anchors: number): string {
   const parts: string[] = [];
   if (objects) parts.push(`${objects} analysis object${objects === 1 ? '' : 's'}`);
   if (anchors) parts.push(`${anchors} anchor${anchors === 1 ? '' : 's'}`);
-  return parts.join(' and ');
+  return `${parts.join(' and ')} ${objects + anchors === 1 ? 'lies' : 'lie'}`;
 }

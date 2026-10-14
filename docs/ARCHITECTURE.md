@@ -129,6 +129,22 @@ types, layers, flags, geometry offsets), a Flatbush spatial index and text index
 `pickUnderlay(...)`, `entityToGeometry(store, i)` (exact geometry of an entity in drawing units;
 transform with `drawingPlacement`), `entityTypeName`, `entityText`.
 
+## Scale, units and measurement (0.4.0)
+
+- **Calibration guard (row 32):** tools that work with distances (measure, offset, contours) start
+  with `if (!(await warnIfUncalibrated('Offset'))) return;` (`@/features/calibration/guard`).
+- **Placement changes:** change a drawing's calibration, unit override or alignment only through
+  `applyPlacementChange(drawingId, label, mutate)` (`@/features/calibration/recalibrate`): it asks
+  whether analysis objects move with the drawing (row 33), commits once and clears `verified`.
+- **Exports:** put `calibrationStatement(project)` (`@/features/calibration/state`) on every output
+  that shows distances; measurement annotations' text is `annotationLines(project, o)`
+  (`@/features/measure/compute`); scale bars use `niceScaleBar` (`@/core/scale-bar`).
+- **Display formatting:** `fmtLength`, `fmtArea`, `fmtAngle`, `fmtCoord`, `coordinateAxes(project)`
+  (E/N with plant coordinates) from `@/features/units/format` follow `project.display`.
+- **Canvas chrome:** non-modal panels and overlays render into the canvas with
+  `<CanvasSlot name="top-left" | "top-right" | "bottom-left">` (`@/features/units/canvas-slot`);
+  panels need `pointer-events-auto`.
+
 ## Testing conventions
 
 - Unit tests next to the code (`*.test.ts`), Vitest, no DOM.

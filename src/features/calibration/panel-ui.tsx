@@ -76,7 +76,7 @@ export function StateBadge({ state }: { state: CalibrationState }) {
 
 export function Row({ label, children, htmlFor }: { label: string; children: ReactNode; htmlFor?: string }) {
   return (
-    <div className="grid grid-cols-[7.5rem_1fr] items-center gap-2">
+    <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] items-center gap-2">
       <Label htmlFor={htmlFor} className="text-muted-foreground text-xs font-normal">
         {label}
       </Label>

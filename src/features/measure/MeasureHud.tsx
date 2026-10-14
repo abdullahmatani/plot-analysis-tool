@@ -68,7 +68,7 @@ export function MeasureHud() {
         onClose={() => setTool('select')}
         className="w-[min(18rem,100%)] self-start"
       >
-        <div className="grid gap-2">
+        <div className="grid grid-cols-1 gap-2">
           {text && values ? (
             <>
               <div

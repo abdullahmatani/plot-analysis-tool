@@ -1,4 +1,5 @@
 import { chromium, test as base, expect, type BrowserContext, type Page } from '@playwright/test';
+import { execSync } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -95,4 +96,40 @@ export async function launchPersistent(
   });
   const violations = await guardEgress(context, baseURL);
   return { context, userDataDir, violations };
+}
+
+export type PersistentBrowser = Awaited<ReturnType<typeof launchPersistent>>;
+
+/** Kills (SIGKILL) every process of the browser running on this profile. Returns how many. */
+export function killBrowser(userDataDir: string) {
+  const out = execSync('ps -eo pid=,args=', { encoding: 'utf8' });
+  const pids = out
+    .split('\n')
+    .filter((l) => l.includes(`--user-data-dir=${userDataDir}`))
+    .map((l) => Number(l.trim().split(/\s+/)[0]))
+    .filter((p) => p > 0);
+  for (const pid of pids) {
+    try {
+      process.kill(pid, 'SIGKILL');
+    } catch {
+      /* already gone */
+    }
+  }
+  return pids.length;
+}
+
+/**
+ * Simulates a crash: the browser is killed with no chance to save or unload, then started again on
+ * the same profile. Renderer-only crashes (chrome://crash, DevTools Page.crash) are not used because
+ * some CI runners ignore them.
+ */
+export async function crashAndRelaunch(baseURL: string, browser: PersistentBrowser) {
+  expect(browser.violations, 'requests to non-origin hosts (zero-egress guarantee)').toEqual([]);
+  expect(killBrowser(browser.userDataDir), 'browser processes killed').toBeGreaterThan(0);
+  await browser.context.close().catch(() => {});
+  return launchPersistent(baseURL, browser.userDataDir);
+}
+
+export async function firstPage(context: BrowserContext) {
+  return context.pages()[0] ?? (await context.newPage());
 }

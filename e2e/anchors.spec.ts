@@ -51,6 +51,8 @@ async function placeAnchor(page: Page, at: string, name: string) {
   await page.getByLabel('Anchor name').fill(name);
   await page.getByRole('button', { name: 'OK' }).click();
   await expect(page.getByTestId(`anchor-${name}`)).toBeVisible();
+  // The dialog returns focus to its trigger when it has closed; wait so it cannot take focus later.
+  await expect(page.getByRole('dialog')).toBeHidden();
 }
 
 async function pasteTable(page: Page, text: string) {
@@ -140,10 +142,12 @@ test('anchors are snap targets: a circle centre picked near an anchor equals it 
   const box = (await page.getByTestId('canvas').boundingBox())!;
   await page.getByTestId('canvas').focus();
   await page.keyboard.press('c');
+  await expect(page.getByTestId('tool-hint')).toContainText('Circle: centre');
   await page.mouse.move(box.x + s.x + 3, box.y + s.y - 2);
   await page.mouse.move(box.x + s.x + 3, box.y + s.y - 3);
   await page.mouse.down();
   await page.mouse.up();
+  await expect(page.getByTestId('tool-hint')).toContainText('Circle: radius');
   await type(page, '5');
   await expect.poll(async () => (await project(page)).objects.length).toBe(1);
   const g = (await project(page)).objects[0].geometry;

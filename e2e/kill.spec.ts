@@ -1,11 +1,10 @@
 import { chromium, expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { execSync } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { unzipSync } from 'fflate';
 
-import { guardEgress } from './fixtures';
+import { guardEgress, killBrowser } from './fixtures';
 
 /**
  * Row 102: autosave fault-injection suite. The browser process is killed (SIGKILL) at random points
@@ -27,23 +26,6 @@ function rng(seed: number) {
     s = (s * 1664525 + 1013904223) >>> 0;
     return s / 2 ** 32;
   };
-}
-
-function killBrowser(userDataDir: string) {
-  const out = execSync('ps -eo pid=,args=', { encoding: 'utf8' });
-  const pids = out
-    .split('\n')
-    .filter((l) => l.includes(`--user-data-dir=${userDataDir}`))
-    .map((l) => Number(l.trim().split(/\s+/)[0]))
-    .filter((p) => p > 0);
-  for (const pid of pids) {
-    try {
-      process.kill(pid, 'SIGKILL');
-    } catch {
-      /* already gone */
-    }
-  }
-  return pids.length;
 }
 
 interface Edit {

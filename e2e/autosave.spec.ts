@@ -1,7 +1,9 @@
 import {
   commitEdit,
+  crashAndRelaunch,
   createProject,
   expect,
+  firstPage,
   launchPersistent,
   layerNames,
   openApp,
@@ -92,33 +94,31 @@ test.describe('autosave', () => {
     await expect.poll(() => layerNames(page)).toEqual(['Analysis', 'Before', 'After']);
   });
 
-  test('tab crash shows the recovery dialog and restores edits (row 95)', async ({ page, context }) => {
+  test('browser crash shows the recovery dialog and restores edits (row 95)', async ({ baseURL }) => {
+    const before = await launchPersistent(baseURL!);
+    const page = await firstPage(before.context);
     await openApp(page);
     await createProject(page, 'Crashy');
     for (let i = 0; i < 3; i++) await commitEdit(page, 'Add layer', `C${i}`);
     await waitSaved(page);
-    await test.step('crash the renderer', async () => {
-      const sleep = (ms: number) => new Promise<false>((r) => setTimeout(() => r(false), ms));
-      const crashed = new Promise<true>((r) => page.once('crash', () => r(true)));
-      page.goto('chrome://crash').catch(() => {});
-      if (!(await Promise.race([crashed, sleep(15_000)]))) {
-        // Some environments ignore chrome://crash; crash the renderer through DevTools instead.
-        const cdp = await context.newCDPSession(page);
-        cdp.send('Page.crash').catch(() => {});
-        expect(await Promise.race([crashed, sleep(15_000)]), 'renderer crashed').toBe(true);
-      }
-    });
-    const page2 = await test.step('open a new tab', () => context.newPage());
-    await test.step('recovery dialog offers the crashed project', async () => {
-      await openApp(page2);
-      await expect(page2.getByTestId('recovery-dialog')).toBeVisible();
-      await expect(page2.getByTestId('recovery-dialog')).toContainText('Crashy');
-    });
-    await test.step('recover', async () => {
-      await page2.getByTestId('recovery-apply').click();
-      await expect(page2.getByTestId('workspace')).toBeVisible();
-      expect(await layerNames(page2)).toEqual(['Analysis', 'C0', 'C1', 'C2']);
-    });
+    const after = await test.step('crash the browser and start it again', () =>
+      crashAndRelaunch(baseURL!, before));
+    try {
+      const page2 = await firstPage(after.context);
+      await test.step('recovery dialog offers the crashed project', async () => {
+        await openApp(page2);
+        await expect(page2.getByTestId('recovery-dialog')).toBeVisible();
+        await expect(page2.getByTestId('recovery-dialog')).toContainText('Crashy');
+      });
+      await test.step('recover', async () => {
+        await page2.getByTestId('recovery-apply').click();
+        await expect(page2.getByTestId('workspace')).toBeVisible();
+        expect(await layerNames(page2)).toEqual(['Analysis', 'C0', 'C1', 'C2']);
+      });
+      expect(after.violations).toEqual([]);
+    } finally {
+      await after.context.close();
+    }
   });
 
   test('second tab opens read-only, follows edits and can take over (row 100)', async ({ page, context }) => {

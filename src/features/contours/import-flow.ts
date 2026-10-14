@@ -1,4 +1,5 @@
 import type { CellValue, Project } from '@/core/types';
+import { warnIfUncalibrated } from '@/features/calibration/guard';
 import { detectFileType } from '@/import/detect';
 import { importTable, type ImportInput, type ImportKind, type ImportResult } from '@/tables/table';
 import { suggestMapping, type Mapping } from '@/tables/suggest';
@@ -9,13 +10,9 @@ import { suggestMapping, type Mapping } from '@/tables/suggest';
  * mapping — an identical dataset.
  */
 
-/**
- * Calibration guard (row 32) — STUB, to be wired after merge to
- * `warnIfUncalibrated('Import contour dataset')` from `src/features/calibration/guard.ts`.
- * Resolves false when the user cancels the import.
- */
-export async function calibrationGuard(): Promise<boolean> {
-  return true;
+/** Calibration guard (row 32): contour positions and sizes need a calibrated drawing. Resolves false to cancel. */
+export function calibrationGuard(): Promise<boolean> {
+  return warnIfUncalibrated('Import contour dataset');
 }
 
 /** A table source held by the import dialog (bytes for files, text/html for pasted ranges). */

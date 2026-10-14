@@ -70,6 +70,33 @@ function bundledAssets(): Plugin {
 }
 
 /** Injects the CSP meta tag into the built index.html (not in dev, where HMR needs inline scripts and websockets). */
+/**
+ * fontkit's bundle inlines the `function-bind` polyfill, whose fallback (used only when native
+ * `Function.prototype.bind` is missing — never in supported browsers) builds functions with the
+ * Function constructor. That expression is replaced by one that throws, so no dynamic code
+ * evaluation ships at all (row 88). The build fails if the pattern is not found, so a fontkit update
+ * cannot silently bring it back past `check-dist`.
+ */
+const BINDER_RE =
+  /Function\(\s*(['"])binder\1\s*,\s*(['"])return function \(\2\s*\+\s*[\w$]+\.join\(\s*(['"]),\3\s*\)\s*\+\s*(['"])\)\{ return binder\.apply\(this,arguments\); \}\4\s*\)/g;
+
+function noFunctionConstructor(): Plugin {
+  return {
+    name: 'pat-no-function-constructor',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/[\\/]@pdf-lib[\\/]fontkit[\\/]dist[\\/]fontkit\.es(\.min)?\.js$/.test(id)) return null;
+      const out = code.replace(
+        BINDER_RE,
+        '(function(){throw new TypeError("Function.prototype.bind is required")})',
+      );
+      if (out === code && /['"]binder['"]/.test(code))
+        this.error('fontkit: function-bind fallback pattern changed — update noFunctionConstructor()');
+      return { code: out, map: null };
+    },
+  };
+}
+
 function cspMeta(): Plugin {
   return {
     name: 'pat-csp-meta',
@@ -93,6 +120,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     cspMeta(),
+    noFunctionConstructor(),
     VitePWA({
       registerType: 'prompt',
       injectRegister: false,
@@ -138,6 +166,7 @@ export default defineConfig({
   },
   worker: {
     format: 'es',
+    plugins: () => [noFunctionConstructor()],
   },
   build: {
     target: 'es2022',

@@ -4,6 +4,7 @@ import type { AnalysisObject, OffsetDerivation } from '@/core/types';
 import { formatLength } from '@/core/units';
 import { commit, getProject } from '@/store/project';
 import { useViewStore } from '@/store/view';
+import { warnIfUncalibrated } from '@/features/calibration/guard';
 import { addObjects } from '@/features/objects/ops';
 
 import { computeOffset, type DeriveReport } from './derive';
@@ -11,14 +12,9 @@ import { formatOffset, planOffsets, planRings, type OffsetParams, type RingParam
 
 /** Offset commands (rows 55–61): each user action is one command. */
 
-/**
- * TODO(calibration): replace the body with `return warnIfUncalibrated(actionName)` from
- * '@/features/calibration/guard' once that module is merged (row 32: offset tools warn when the
- * drawings are not calibrated). Resolve false to abort the action.
- */
-export async function calibrationGuard(actionName: string): Promise<boolean> {
-  void actionName;
-  return true;
+/** Row 32: offset tools warn when the drawings are not calibrated. Resolves false to abort. */
+export function calibrationGuard(actionName: string): Promise<boolean> {
+  return warnIfUncalibrated(actionName);
 }
 
 /** Selected objects that can be offset (any selectable object; hidden and locked layers cannot be selected). */

@@ -1,6 +1,8 @@
 import { invert, transformBounds } from '@/core/affine';
 import type { Affine2D, Bounds, Pt } from '@/core/types';
 import { rectPath, SceneBuilder, type Scene, type SceneItem } from '@/export/scene';
+
+import './annotations';
 import { geomBounds, intersects } from '@/features/objects/geometry-cache';
 import { bounds as geometryBounds } from '@/geometry/measure';
 import { buildLegend, type LegendModel } from '@/features/legend/legend-model';

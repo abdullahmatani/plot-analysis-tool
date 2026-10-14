@@ -10,7 +10,16 @@ import { registerExtentProvider } from '@/render/canvas-controller';
 import { getProject, useProjectStore } from '@/store/project';
 import { useUiStore } from '@/store/ui';
 
-import { contourExtents, datasetContours, datasetEnvelopes, datasetLegend } from './compute';
+import { setContourExportProvider, type ContourExportProvider } from '@/features/export/inputs';
+
+import {
+  contourExtents,
+  datasetContours,
+  datasetEnvelopes,
+  datasetLegend,
+  labelPerRing,
+  ringsHiddenByEnvelope,
+} from './compute';
 import { openImport } from './actions';
 import { DatasetsPanel } from './DatasetsPanel';
 import { EditMappingDialog, MAPPING_DIALOG } from './EditMappingDialog';
@@ -106,7 +115,46 @@ function installHook() {
   };
 }
 
+/**
+ * Exports and the legend use exactly what the overlay draws: validated, filtered rings with their
+ * resolved styles and labels, and the envelopes (rows 70, 74, 75, 77).
+ */
+const exportProvider: ContourExportProvider = (project, ds) => {
+  const dc = datasetContours(project, ds);
+  const perRing = labelPerRing(ds);
+  // Without per-ring fields in the template, a row is labelled once, on its outermost ring.
+  const outer = new Map<number, number>();
+  for (const r of dc.rings) outer.set(r.row, Math.max(outer.get(r.row) ?? -Infinity, r.item.r));
+  const items = ringsHiddenByEnvelope(ds)
+    ? []
+    : dc.rings.map((r) => ({
+        ...r.item,
+        color: r.style.stroke,
+        dash: r.style.dash,
+        fillOpacity: r.style.fillOpacity,
+        strokeWidth: r.style.strokeWidth,
+        label: perRing || r.item.r === outer.get(r.row) ? r.label : '',
+        legendKey: r.legendKey,
+      }));
+  const envelopes = datasetEnvelopes(project, ds).flatMap((e) =>
+    e.geometry
+      ? [
+          {
+            sizeColumn: e.sizeColumn,
+            label: e.legendLabel,
+            geometry: e.geometry,
+            color: e.style.stroke,
+            dash: e.style.dash,
+            strokeWidth: e.style.strokeWidth,
+          },
+        ]
+      : [],
+  );
+  return { items, envelopes };
+};
+
 export function register() {
+  const unExportProvider = setContourExportProvider(exportProvider);
   const unOverlays = registerContourOverlays();
   const unPick = installContourPicking();
   const unExtents = registerExtentProvider(() => {
@@ -186,6 +234,7 @@ export function register() {
     },
   ]);
   return () => {
+    unExportProvider();
     unOverlays();
     unPick();
     unExtents();

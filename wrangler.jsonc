@@ -1,0 +1,19 @@
+// Cloudflare Workers deployment (hosted mode, FDR decision D-3 option a).
+// Assets-only Worker: Cloudflare serves the static files, no server-side code
+// runs, and no drawing or project data ever reaches the server (FDR C2).
+//
+// The Worker name in the Cloudflare dashboard must match `name` below.
+//
+// Until the Vite scaffold lands (FDR row 2), this serves the placeholder in
+// ./public. When it lands: set `assets.directory` to "./dist", set the
+// Workers Builds build command to `npm run build`, and delete
+// public/index.html and public/styles.css. Keep public/_headers, because Vite
+// copies public/ into dist/.
+{
+  "name": "plot-analysis-tool",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
+  }
+}

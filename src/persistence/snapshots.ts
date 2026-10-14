@@ -135,3 +135,20 @@ export async function getSnapshot(id: string): Promise<SnapshotRecord | undefine
 export async function renameRestorePoint(id: string, label: string): Promise<void> {
   await getDb().snapshots.update(id, { label, kind: 'named' });
 }
+
+/**
+ * Before a project is upgraded to a newer schema (row 87), keeps the stored state as a named restore
+ * point so the upgrade can be undone; restoring migrates it again with the current rules.
+ */
+export async function preserveBeforeMigration(
+  projectId: string,
+  seq: number,
+  state: HistoryState,
+  fromSchema: number,
+  serialize: (s: HistoryState) => Promise<SerializedSnapshot>,
+): Promise<SnapshotRecord> {
+  return writeSnapshot(projectId, seq, 'named', await serialize(state), {
+    label: `Before upgrade from schema ${fromSchema}`,
+    summary: 'Saved automatically before the project was upgraded to this version of the app',
+  });
+}

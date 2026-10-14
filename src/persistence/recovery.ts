@@ -23,6 +23,8 @@ export interface LoadedProject {
   state: HistoryState;
   seq: number;
   report: RecoveryReport;
+  /** When the stored project used an older schema: the state before migrating (row 87). */
+  preMigration?: HistoryState;
 }
 
 export async function journalAfter(projectId: string, seq: number): Promise<JournalRecord[]> {
@@ -52,11 +54,7 @@ export async function loadProjectState(
   if (!snap) throw new Error('No readable snapshot was found for this project.');
   let state = snap.state;
   let migratedFrom: number | undefined;
-  const migrated = migrateProject(state.project);
-  if (migrated.from !== migrated.project.schemaVersion) {
-    migratedFrom = migrated.from;
-    state = { ...state, project: migrated.project };
-  }
+  let preMigration: HistoryState | undefined;
   const entries = opts.checkpointOnly
     ? []
     : (await journalAfter(projectId, snap.record.seq)).filter((r) => r.seq <= upto);
@@ -75,9 +73,22 @@ export async function loadProjectState(
       skippedEntries.push({ seq: rec.seq, at: rec.at, reason: (e as Error).message });
     }
   }
+  // Journal entries were recorded against the stored schema, so they are replayed first and the
+  // result is migrated afterwards. Undo history cannot be applied across a schema change; the state
+  // before the upgrade is kept as a restore point instead (see preserveBeforeMigration).
+  const migrated = migrateProject(state.project);
+  if (migrated.from !== migrated.project.schemaVersion) {
+    migratedFrom = migrated.from;
+    preMigration = state;
+    state = { project: migrated.project, undo: [], redo: [] };
+  } else if (migrated.project !== state.project) {
+    // Same schema, newer optional fields filled with defaults: history stays valid.
+    state = { ...state, project: migrated.project };
+  }
   return {
     state,
     seq,
+    preMigration,
     report: {
       snapshotId: snap.record.id,
       snapshotSeq: snap.record.seq,

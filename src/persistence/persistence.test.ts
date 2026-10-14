@@ -13,7 +13,7 @@ import { loadProjectState, pendingRecovery } from './recovery';
 import { serializeSnapshot } from './serialize';
 import { DEFAULT_AUTOSAVE_SETTINGS } from './settings';
 import type { StoreCheckpointer } from './serializer-client';
-import { listSnapshots, pruneSnapshots, verifySnapshot } from './snapshots';
+import { listSnapshots, preserveBeforeMigration, pruneSnapshots, verifySnapshot } from './snapshots';
 import { checkpointFromStorage } from './store-checkpoint';
 
 let dbCounter = 0;
@@ -308,5 +308,53 @@ describe('blobs and project files', () => {
 
   it('rejects files that are not projects with a readable error', async () => {
     await expect(readProjectFile(new Uint8Array([1, 2, 3]))).rejects.toThrow(/not a Plot Analysis project/);
+  });
+});
+
+describe('schema migrations on open (row 87)', () => {
+  it('replays the journal on the stored schema, migrates, and keeps the old state as a restore point', async () => {
+    // A project as saved by a pre-release build: no schemaVersion field.
+    const h = new Harness();
+    const legacy = { ...h.state.project } as Record<string, unknown>;
+    delete legacy.schemaVersion;
+    h.state = { ...h.state, project: legacy as unknown as typeof h.state.project };
+    await storeNewProject(h.state.project);
+    h.addLayer('Old A');
+    h.addLayer('Old B');
+    await h.engine.flush();
+    h.engine.dispose();
+
+    const loaded = await loadProjectState(h.state.project.id);
+    expect(loaded.report.migratedFrom).toBe(0);
+    expect(loaded.state.project.schemaVersion).toBe(1);
+    expect(loaded.state.project.layers.map((l) => l.name)).toEqual(['Analysis', 'Old A', 'Old B']);
+    expect(loaded.state.undo).toEqual([]);
+    expect(loaded.preMigration?.undo).toHaveLength(2);
+
+    const rec = await preserveBeforeMigration(
+      h.state.project.id,
+      loaded.seq,
+      loaded.preMigration!,
+      0,
+      serializeSnapshot,
+    );
+    expect(rec.kind).toBe('named');
+    expect(rec.label).toBe('Before upgrade from schema 0');
+    const kept = await verifySnapshot(rec);
+    expect((kept.project as unknown as Record<string, unknown>).schemaVersion).toBeUndefined();
+
+    // The session then checkpoints the migrated state, so the next open needs no migration.
+    const engine = new AutosaveEngine(
+      { projectId: h.state.project.id, getState: () => loaded.state },
+      DEFAULT_AUTOSAVE_SETTINGS,
+      serializeSnapshot,
+      loaded.seq,
+      { lastSnapshotSeq: -1 },
+    );
+    await engine.checkpoint('post-migration');
+    engine.dispose();
+    const again = await loadProjectState(h.state.project.id);
+    expect(again.report.migratedFrom).toBeUndefined();
+    expect(again.state.project).toEqual(loaded.state.project);
   });
 });

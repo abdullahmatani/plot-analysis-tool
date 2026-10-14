@@ -18,7 +18,8 @@ import {
   loadAutosaveSettings,
   type AutosaveSettings,
 } from '@/persistence/settings';
-import { getSnapshot, verifySnapshot } from '@/persistence/snapshots';
+import { getSnapshot, preserveBeforeMigration, verifySnapshot } from '@/persistence/snapshots';
+import { migrateProject } from '@/core/migrations';
 import { SessionTracker } from '@/persistence/sessions';
 import { setJournalSink, useProjectStore } from '@/store/project';
 import { useViewStore } from '@/store/view';
@@ -30,6 +31,13 @@ import { useModelsStore } from '@/underlay/models';
  */
 
 export const TAB_ID = newId('tab');
+
+/** Restore points saved by older builds are upgraded to the current schema before use (row 87). */
+function migratedState(state: HistoryState): HistoryState {
+  const m = migrateProject(state.project);
+  if (m.from !== m.project.schemaVersion) return { project: m.project, undo: [], redo: [] };
+  return m.project === state.project ? state : { ...state, project: m.project };
+}
 export const sessionTracker = new SessionTracker();
 const snapshots = createSnapshotService();
 
@@ -94,6 +102,14 @@ export class ProjectSession {
   private async start(opts: { checkpointOnly?: boolean }) {
     const writer = await this.lock.acquire();
     const loaded = await loadProjectState(this.projectId, opts);
+    if (writer && loaded.preMigration && loaded.report.migratedFrom !== undefined)
+      await preserveBeforeMigration(
+        this.projectId,
+        loaded.seq,
+        loaded.preMigration,
+        loaded.report.migratedFrom,
+        snapshots.serialize,
+      );
     const store = useProjectStore.getState();
     store.load(loaded.state);
     this.engine = new AutosaveEngine(
@@ -115,7 +131,11 @@ export class ProjectSession {
       this.settings,
       snapshots.serialize,
       loaded.seq,
-      { lastSnapshotSeq: loaded.report.snapshotSeq, storeCheckpoint: snapshots.checkpointFromStore },
+      {
+        // After a schema upgrade the stored snapshot is outdated: force a fresh checkpoint.
+        lastSnapshotSeq: loaded.report.migratedFrom !== undefined ? -1 : loaded.report.snapshotSeq,
+        storeCheckpoint: snapshots.checkpointFromStore,
+      },
     );
     useSessionStore
       .getState()
@@ -134,7 +154,11 @@ export class ProjectSession {
     if (writer) {
       this.becomeWriter(false);
       // A recovered journal tail is folded into a fresh checkpoint so recovery stays fast.
-      if (loaded.report.replayed > 0 || loaded.report.skippedSnapshots.length > 0)
+      if (
+        loaded.report.replayed > 0 ||
+        loaded.report.skippedSnapshots.length > 0 ||
+        loaded.report.migratedFrom !== undefined
+      )
         void this.engine.checkpoint('post-recovery');
     } else {
       this.becomeFollower();
@@ -263,7 +287,7 @@ export class ProjectSession {
   async applyRestorePoint(snapshotId: string): Promise<boolean> {
     const rec = await getSnapshot(snapshotId);
     if (!rec) return false;
-    const state = await verifySnapshot(rec);
+    const state = migratedState(await verifySnapshot(rec));
     await this.beforeHighImpact(`restoring "${rec.label ?? 'restore point'}"`);
     const store = useProjectStore.getState();
     if (store.preview) store.endPreview();
@@ -273,7 +297,7 @@ export class ProjectSession {
   async previewRestorePoint(snapshotId: string): Promise<boolean> {
     const rec = await getSnapshot(snapshotId);
     if (!rec) return false;
-    const state = await verifySnapshot(rec);
+    const state = migratedState(await verifySnapshot(rec));
     useProjectStore
       .getState()
       .startPreview(state, { snapshotId, label: rec.label ?? 'Restore point', at: rec.at });

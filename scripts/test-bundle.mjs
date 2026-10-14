@@ -43,17 +43,22 @@ let port = 8790;
 for (const l of launchers) {
   port++;
   const proc = spawn(l.cmd, [...l.args, String(port)], { cwd: bundleDir, stdio: 'pipe' });
+  let output = '';
+  proc.stdout.on('data', (d) => (output += d));
+  proc.stderr.on('data', (d) => (output += d));
   const url = `http://localhost:${port}/`;
   const browser = await chromium.launch();
   try {
-    for (let i = 0; i < 50; i++) {
+    let up = false;
+    for (let i = 0; i < 50 && !up; i++) {
       try {
-        if ((await fetch(url)).ok) break;
+        up = (await fetch(url)).ok;
       } catch {
         /* not up yet */
       }
-      await new Promise((r) => setTimeout(r, 200));
+      if (!up) await new Promise((r) => setTimeout(r, 200));
     }
+    if (!up) throw new Error(`the launcher did not start. Its output:\n${output}`);
     const context = await browser.newContext();
     const egress = [];
     context.on('request', (r) => {

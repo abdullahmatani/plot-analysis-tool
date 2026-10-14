@@ -102,15 +102,24 @@ export async function runExport(
   const fileName = fileNameFor(project, settings);
   const target = opts.target ?? (await chooseTarget(fileName, settings.format));
   if (!target) return null;
-  run.set({ running: true, fraction: 0, message: 'Preparing…', cancel: null });
   let job: JobHandle | null = null;
+  let cancelled = false;
+  // Cancel works from the moment the progress appears, including while the project is checkpointed.
+  run.set({
+    running: true,
+    fraction: 0,
+    message: 'Preparing…',
+    cancel: () => {
+      cancelled = true;
+      job?.cancel();
+    },
+  });
   try {
     await currentSession()?.beforeExport();
+    if (cancelled) throw new ExportCancelled();
     job = exportJob(project, settings, (fraction, message) =>
       useExportRun.getState().set({ fraction, message: message ?? useExportRun.getState().message }),
     );
-    const handle = job;
-    useExportRun.getState().set({ cancel: () => handle.cancel() });
     const done = await job.promise;
     const parts = done.parts ?? [];
     await saveParts(target, parts, fileName, done.mime ?? formatInfo(settings.format).mime);

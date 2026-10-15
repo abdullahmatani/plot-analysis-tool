@@ -49,8 +49,10 @@ for (const l of launchers) {
   const url = `http://localhost:${port}/`;
   const browser = await chromium.launch();
   try {
+    // PowerShell can take more than 10 s to start on a busy CI runner (it printed nothing in that time
+    // in CI run 33); the test checks that each launcher works, not how fast it starts.
     let up = false;
-    for (let i = 0; i < 50 && !up; i++) {
+    for (const deadline = Date.now() + 60_000; Date.now() < deadline && !up;) {
       try {
         up = (await fetch(url)).ok;
       } catch {

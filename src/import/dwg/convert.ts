@@ -46,6 +46,8 @@ import {
 import { BBox } from './bounds';
 import { DwgReadError } from './errors';
 import { flattenRings, generatePatternSegments, hatchGeometry, type HatchGeometry, type Ring } from './hatch';
+import { fineEnough, splineTolerance, tolUnder } from '../spline-tolerance';
+
 import { tessellateSpline } from './spline';
 import { decodeTextCodes, mtextToPlain } from './text';
 import { dwgVersionInfo } from './version';
@@ -259,7 +261,10 @@ class Converter {
   private readonly invalidSamples: string[] = [];
   private invalidCount = 0;
   private readonly warned = new Set<string>();
-  private readonly splineCache = new WeakMap<object, number[]>();
+  /** Splines by entity, with the chord tolerance they were tessellated at (inserts scale it). */
+  private readonly splineCache = new WeakMap<object, { tol: number | undefined; pts: number[] }>();
+  /** Largest chord deviation of splines in drawing units, when INSUNITS is known (NFR-7). */
+  private readonly splineTol: number | undefined;
   private readonly hatchCache = new WeakMap<
     object,
     { g: HatchGeometry; segs: Float64Array | null; capped: boolean; tooDense: boolean }
@@ -279,6 +284,7 @@ class Converter {
     const lts = db.header?.LTSCALE;
     this.ltScale = typeof lts === 'number' && lts > 0 && Number.isFinite(lts) ? lts : 1;
     this.preR2000 = opts.version ? dwgVersionInfo(opts.version).preR2000 : false;
+    this.splineTol = splineTolerance(this.preR2000 ? undefined : db.header?.INSUNITS);
     this.blocks = blocks.byName;
     this.blocksByHandle = blocks.byHandle;
     this.buildLinetypes();
@@ -920,7 +926,9 @@ class Converter {
 
   private spline(e: DwgSplineEntity, ctx: Ctx) {
     this.props(e, ET.SPLINE, ctx);
-    let pts = this.splineCache.get(e);
+    const tol = tolUnder(this.splineTol, ctx.xf);
+    const cached = this.splineCache.get(e);
+    let pts = cached && fineEnough(cached.tol, tol) ? cached.pts : undefined;
     if (!pts) {
       const ctrl: number[] = [];
       for (const p of e.controlPoints ?? []) ctrl.push(px(p), py(p), pz(p));
@@ -944,8 +952,9 @@ class Converter {
           closed: false,
         },
         (m) => this.warnOnce(`spline:${m}`, m),
+        tol,
       );
-      this.splineCache.set(e, pts);
+      this.splineCache.set(e, { tol, pts });
     }
     const n = pts.length / 3;
     if (n < 2) throw new InvalidEntity('spline has no control or fit points');
@@ -1032,7 +1041,7 @@ class Converter {
     let cached = this.hatchCache.get(e);
     if (!cached) {
       cached = {
-        g: hatchGeometry(e, (m) => this.warnOnce(`hatch:${m}`, m)),
+        g: hatchGeometry(e, (m) => this.warnOnce(`hatch:${m}`, m), this.splineTol),
         segs: null,
         capped: false,
         tooDense: false,

@@ -82,7 +82,7 @@ function sweepOf(a0: number, a1: number, ccw: boolean): number {
   return s;
 }
 
-function pathRing(path: DwgBoundaryPath, warn: (m: string) => void): Ring | null {
+function pathRing(path: DwgBoundaryPath, warn: (m: string) => void, splineTol?: number): Ring | null {
   const ring: Ring = [];
   if ('vertices' in path && Array.isArray(path.vertices)) {
     for (const v of path.vertices)
@@ -173,13 +173,20 @@ function pathRing(path: DwgBoundaryPath, warn: (m: string) => void): Ring | null
             ctrl.push(num(c.x, NaN), num(c.y, NaN), 0);
             w.push(num(c.weight ?? c.w, 1));
           }
-          pts = tessellateNurbs(num(e.degree, 3), e.knots ?? [], ctrl, e.isRational ? w : null, warn);
+          pts = tessellateNurbs(
+            num(e.degree, 3),
+            e.knots ?? [],
+            ctrl,
+            e.isRational ? w : null,
+            warn,
+            splineTol,
+          );
         } else {
           const fit: number[] = [];
           for (const f of e.fitDatum ?? []) fit.push(num(f.x, NaN), num(f.y, NaN), 0);
           const tan = (t?: { x: number; y: number }): [number, number, number] | null =>
             t && (t.x || t.y) ? [num(t.x), num(t.y), 0] : null;
-          pts = interpolateFitPoints(fit, tan(e.startTangent), tan(e.endTangent), false);
+          pts = interpolateFitPoints(fit, tan(e.startTangent), tan(e.endTangent), false, splineTol);
         }
         for (let i = 0; i + 3 < pts.length; i += 3) ring.push(pts[i], pts[i + 1], 0);
         break;
@@ -192,7 +199,12 @@ function pathRing(path: DwgBoundaryPath, warn: (m: string) => void): Ring | null
 }
 
 /** Boundary rings and pattern definition of a HATCH. */
-export function hatchGeometry(h: DwgHatchEntity, warn: (m: string) => void): HatchGeometry {
+/** @param splineTol largest chord deviation of spline edges, in drawing units (NFR-7). */
+export function hatchGeometry(
+  h: DwgHatchEntity,
+  warn: (m: string) => void,
+  splineTol?: number,
+): HatchGeometry {
   const paths = Array.isArray(h.boundaryPaths) ? h.boundaryPaths : [];
   let use = paths;
   // Style 2 ("ignore"): only the outermost boundary is filled.
@@ -202,7 +214,7 @@ export function hatchGeometry(h: DwgHatchEntity, warn: (m: string) => void): Hat
   }
   const rings: Ring[] = [];
   for (const p of use) {
-    const r = pathRing(p, warn);
+    const r = pathRing(p, warn, splineTol);
     if (r) rings.push(r);
   }
   const gradient = (h as { gradientFlag?: number }).gradientFlag === 1;

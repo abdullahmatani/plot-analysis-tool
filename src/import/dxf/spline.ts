@@ -152,6 +152,7 @@ export function tessellateNurbs(
   ctrl: number[],
   weights: number[] | null,
   warn?: (msg: string) => void,
+  maxTol?: number,
 ): number[] {
   const n = ctrl.length / 3;
   if (n < 2) return ctrl.slice();
@@ -169,7 +170,8 @@ export function tessellateNurbs(
   if (p === 1 && !W) return ctrl.slice(); // linear spline: the control polygon itself
 
   const curve = new Nurbs(p, U, ctrl, W);
-  const tol = Math.max(bboxDiag(ctrl) * REL_TOL, 1e-12);
+  // Relative to the spline's size, and at most maxTol (drawing units) when given.
+  const tol = Math.max(Math.min(bboxDiag(ctrl) * REL_TOL, maxTol ?? Infinity), 1e-12);
   const out: number[] = [];
   const pa = new Float64Array(3);
   const pb = new Float64Array(3);
@@ -226,6 +228,7 @@ export function interpolateFitPoints(
   startTan: [number, number, number] | null,
   endTan: [number, number, number] | null,
   closed: boolean,
+  maxTol?: number,
 ): number[] {
   const pts = fit.slice();
   let np = pts.length / 3;
@@ -293,35 +296,63 @@ export function interpolateFitPoints(
     for (let i = np - 2; i >= 0; i--) m[i] = (r[i] - c[i] * m[i + 1]) / b[i];
     M.push(m);
   }
+  // Point at parameter u of the cubic between fit points i and i + 1.
+  const at = (i: number, u: number): [number, number, number] => {
+    const h = t[i + 1] - t[i];
+    const A = t[i + 1] - u;
+    const B = u - t[i];
+    const q: [number, number, number] = [0, 0, 0];
+    for (let dim = 0; dim < 3; dim++) {
+      const m = M[dim];
+      const y0 = pts[i * 3 + dim];
+      const y1 = pts[(i + 1) * 3 + dim];
+      q[dim] =
+        (m[i] * A * A * A) / (6 * h) +
+        (m[i + 1] * B * B * B) / (6 * h) +
+        (y0 / h - (m[i] * h) / 6) * A +
+        (y1 / h - (m[i + 1] * h) / 6) * B;
+    }
+    return q;
+  };
+  // With maxTol, steps whose chord strays further from the curve are halved until it does not.
+  let budget = MAX_SPLINE_POINTS - 1;
+  const refine = (i: number, u0: number, a: number[], u1: number, b: number[], depth: number) => {
+    if (maxTol === undefined || depth >= MAX_DEPTH || budget <= 0) return;
+    const um = (u0 + u1) / 2;
+    const m = at(i, um);
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const dz = b[2] - a[2];
+    const l2 = dx * dx + dy * dy + dz * dz;
+    const k = l2 > 0 ? ((m[0] - a[0]) * dx + (m[1] - a[1]) * dy + (m[2] - a[2]) * dz) / l2 : 0;
+    if (Math.hypot(m[0] - a[0] - k * dx, m[1] - a[1] - k * dy, m[2] - a[2] - k * dz) <= maxTol) return;
+    budget--;
+    refine(i, u0, a, um, m, depth + 1);
+    out.push(m[0], m[1], m[2]);
+    refine(i, um, m, u1, b, depth + 1);
+  };
   const out: number[] = [pts[0], pts[1], pts[2]];
   const steps = Math.max(4, Math.min(64, Math.floor(MAX_SPLINE_POINTS / np)));
   for (let i = 0; i < np - 1; i++) {
     const h = t[i + 1] - t[i];
+    let u0 = t[i];
+    let a: number[] = [pts[i * 3], pts[i * 3 + 1], pts[i * 3 + 2]];
     for (let k = 1; k <= steps; k++) {
-      const u = t[i] + (h * k) / steps;
-      const A = t[i + 1] - u;
-      const B = u - t[i];
-      for (let dim = 0; dim < 3; dim++) {
-        const m = M[dim];
-        const y0 = pts[i * 3 + dim];
-        const y1 = pts[(i + 1) * 3 + dim];
-        out.push(
-          k === steps
-            ? y1
-            : (m[i] * A * A * A) / (6 * h) +
-                (m[i + 1] * B * B * B) / (6 * h) +
-                (y0 / h - (m[i] * h) / 6) * A +
-                (y1 / h - (m[i + 1] * h) / 6) * B,
-        );
-      }
+      const u1 = k === steps ? t[i + 1] : t[i] + (h * k) / steps;
+      const b = k === steps ? [pts[(i + 1) * 3], pts[(i + 1) * 3 + 1], pts[(i + 1) * 3 + 2]] : at(i, u1);
+      refine(i, u0, a, u1, b, 0);
+      out.push(b[0], b[1], b[2]);
+      u0 = u1;
+      a = b;
     }
   }
   return out;
 }
 
 /** Tessellates a SPLINE definition: control points when present, otherwise fit points. */
-export function tessellateSpline(sp: SplineData, warn?: (msg: string) => void): number[] {
-  if (sp.ctrl.length >= 6) return tessellateNurbs(sp.degree, sp.knots, sp.ctrl, sp.weights, warn);
-  if (sp.fit.length >= 6) return interpolateFitPoints(sp.fit, sp.startTangent, sp.endTangent, sp.closed);
+export function tessellateSpline(sp: SplineData, warn?: (msg: string) => void, maxTol?: number): number[] {
+  if (sp.ctrl.length >= 6) return tessellateNurbs(sp.degree, sp.knots, sp.ctrl, sp.weights, warn, maxTol);
+  if (sp.fit.length >= 6)
+    return interpolateFitPoints(sp.fit, sp.startTangent, sp.endTangent, sp.closed, maxTol);
   return [];
 }

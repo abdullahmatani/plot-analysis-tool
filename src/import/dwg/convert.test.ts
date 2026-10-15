@@ -473,6 +473,47 @@ describe('dwgDatabaseToStore — simple entities and properties', () => {
   });
 });
 
+describe('dwgDatabaseToStore — spline accuracy (NFR-7)', () => {
+  // Exactly a quarter circle of radius 500 m: rational quadratic.
+  const arc = () =>
+    ent('SPLINE', {
+      degree: 2,
+      knots: [0, 0, 0, 1, 1, 1],
+      controlPoints: [
+        { x: 600_500, y: 2_500_000, z: 0 },
+        { x: 600_500, y: 2_500_500, z: 0 },
+        { x: 600_000, y: 2_500_500, z: 0 },
+      ],
+      weights: [1, Math.SQRT1_2, 1],
+      fitPoints: [],
+    });
+  const deviation = (r: DrawingParseResult) => {
+    const p = readPoly(r.store, 0);
+    let worst = 0;
+    for (let k = 1; k < p.length; k++)
+      worst = Math.max(
+        worst,
+        500 - Math.hypot((p[k - 1].x + p[k].x) / 2 - 600_000, (p[k - 1].y + p[k].y) / 2 - 2_500_000),
+      );
+    return worst;
+  };
+
+  it('stays within 0.5 mm of the true curve when the drawing is in metres', () => {
+    expect(
+      deviation(dwgDatabaseToStore(makeDb({ model: [arc()], header: { INSUNITS: 6 } }))),
+    ).toBeLessThanOrEqual(5e-4);
+    // Unitless, or a pre-2000 file (whose INSUNITS is not read): the relative tolerance only.
+    expect(
+      deviation(dwgDatabaseToStore(makeDb({ model: [arc()], header: { INSUNITS: 0 } }))),
+    ).toBeGreaterThan(1e-3);
+    expect(
+      deviation(
+        dwgDatabaseToStore(makeDb({ model: [arc()], header: { INSUNITS: 6 } }), { version: 'AC1014' }),
+      ),
+    ).toBeGreaterThan(1e-3);
+  });
+});
+
 describe('dwgDatabaseToStore — block references', () => {
   it('applies insertion point, rotation, scale and base point', () => {
     const db = makeDb({

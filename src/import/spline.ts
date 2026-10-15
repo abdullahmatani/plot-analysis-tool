@@ -1,7 +1,9 @@
 /**
- * SPLINE tessellation: NURBS evaluation (de Boor, homogeneous coordinates) with adaptive
- * subdivision, and interpolation through fit points for splines stored only as fit data (AutoCAD
- * "fit" splines in DWG carry no control points). Points are flat (x, y, z) arrays.
+ * SPLINE tessellation for the DXF and DWG importers (SPLINE entities and HATCH spline edges): NURBS
+ * evaluation (de Boor, homogeneous coordinates) with adaptive subdivision, and interpolation through
+ * fit points for splines stored only as fit data (AutoCAD "fit" splines carry no control points).
+ * Points are flat (x, y, z) arrays. The chord tolerance is relative to each spline's size, and at
+ * most `maxTol` when the drawing's units are known (see spline-tolerance.ts, NFR-7).
  */
 
 export interface SplineDef {

@@ -22,7 +22,7 @@ import { flattenRings, generatePattern, parseHatch, type HatchData, type Ring } 
 import { mtextToPlain } from './mtext';
 import { fineEnough, splineTolerance, tolUnder } from '../spline-tolerance';
 
-import { tessellateSpline, type SplineData } from './spline';
+import { tessellateSpline, type SplineDef } from '../spline';
 import { recNum, recStr, type Rec, type Tags } from './tokenizer';
 import { Xform, compose, ocsXform } from './xform';
 
@@ -859,9 +859,9 @@ export class Emitter {
     return true;
   }
 
-  private splineData(r: Rec): SplineData {
+  private splineData(r: Rec): SplineDef {
     const t = this.t;
-    const sp: SplineData = {
+    const sp: SplineDef = {
       degree: 3,
       knots: [],
       ctrl: [],

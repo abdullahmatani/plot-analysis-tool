@@ -3,7 +3,7 @@ import type { DwgBoundaryPath, DwgHatchEntity } from '@mlightcad/libredwg-web';
 import { arcSegments } from '@/geometry/bulge';
 import { TAU } from '@/geometry/vec';
 
-import { tessellateNurbs, interpolateFitPoints } from './spline';
+import { tessellateNurbs, interpolateFitPoints } from '../spline';
 
 /**
  * HATCH support: boundary paths → rings of (x, y, bulge) in the hatch's OCS, and pattern-line

@@ -2,9 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { readPoly } from '@/underlay/entity-store';
 
-import { interpolateFitPoints as dwgFit } from './dwg/spline';
 import { parseDxf } from './dxf';
-import { interpolateFitPoints as dxfFit, tessellateNurbs } from './dxf/spline';
+import { interpolateFitPoints, tessellateNurbs } from './spline';
 import { fineEnough, SPLINE_TOL_METRES, splineTolerance, tolUnder } from './spline-tolerance';
 
 /**
@@ -155,10 +154,8 @@ describe('spline tessellation accuracy (NFR-7)', () => {
     expect(chordDeviation(at(5e-4), o, 500)).toBeLessThanOrEqual(5e-4);
   });
 
-  it.each([
-    ['DXF', dxfFit],
-    ['DWG', dwgFit],
-  ] as const)('%s fit-point splines are refined to the tolerance between fit points', (_, fit) => {
+  it('fit-point splines are refined to the tolerance between fit points', () => {
+    const fit = interpolateFitPoints;
     // Fit points every 40° on a 200 m circle (140 m apart).
     const pts: number[] = [];
     for (let a = 0; a <= 160; a += 40)

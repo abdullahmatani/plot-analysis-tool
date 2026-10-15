@@ -48,7 +48,7 @@ import { DwgReadError } from './errors';
 import { flattenRings, generatePatternSegments, hatchGeometry, type HatchGeometry, type Ring } from './hatch';
 import { fineEnough, splineTolerance, tolUnder } from '../spline-tolerance';
 
-import { tessellateSpline } from './spline';
+import { tessellateSpline } from '../spline';
 import { decodeTextCodes, mtextToPlain } from './text';
 import { dwgVersionInfo } from './version';
 import { Xform, compose, ocsXform, unitNormal } from './xform';

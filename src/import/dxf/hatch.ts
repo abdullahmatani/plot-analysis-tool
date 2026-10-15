@@ -1,7 +1,7 @@
 import { arcSegments } from '@/geometry/bulge';
 import { TAU } from '@/geometry/vec';
 import { InvalidEntityError } from './errors';
-import { tessellateNurbs, interpolateFitPoints } from './spline';
+import { tessellateNurbs, interpolateFitPoints } from '../spline';
 import type { Rec, Tags } from './tokenizer';
 
 /** Ring vertex list: flat (x, y, bulge) triples in the hatch's OCS. */

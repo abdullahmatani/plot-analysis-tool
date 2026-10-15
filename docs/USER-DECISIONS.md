@@ -139,6 +139,11 @@ with your own drawings and tools is worthwhile:
   zoom (13 px on a 2 km site), while snapping and measuring, which use the exact coordinates, were
   right. Zoomed in that far, the app now draws from exact data around the view
   (`e2e/large-site.spec.ts`).
+- **Arcs and circles looked like polygons when zoomed in (fixed in 0.1.6).** They were drawn with
+  the same chords at every zoom: a tank shell on the reference plot plan lay up to 0.8 mm inside its
+  true circle, 1.6 px at 2 000 px per metre and 160 px at the maximum zoom, so a point snapped on
+  the circle appeared beside the drawn line. They are now redrawn for the view, as a CAD viewer does
+  (`e2e/curves.spec.ts`). Splines are still drawn as tessellated at import.
 - **Headless browsers render WebGL in software** even on machines with a GPU, so the reference
   performance run uses a visible window (`npm run perf:reference`).
 - **`example_r14.dwg`**, a Release 14 file on which the published DWG reader crashed, now reads with

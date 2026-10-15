@@ -56,6 +56,11 @@ drawings** (with permission) to confirm the results on your own drawings. See
   and along lines kilometres long. Verified by `src/render/detail.test.ts`, which emulates the
   vertex shader's float32 arithmetic, and by `e2e/large-site.spec.ts`, which reads the rendered
   pixels back while panning at the maximum zoom (required within one pixel; measured at most 0.25 px).
+- **Curves (rows 14, 27):** arcs and circles are drawn within 1/8 px of the true curve wherever the
+  full tessellation would stray more than half a pixel, so arc snaps sit on the drawn line. Verified
+  by `src/render/detail.test.ts` and by `e2e/curves.spec.ts`, which reads the rendered tank shell
+  of the reference plot plan back at three zooms (required within one pixel; measured at most
+  0.5 px).
 
 ## 4. Acceptance traceability
 

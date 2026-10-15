@@ -50,6 +50,12 @@ Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y n
   the float64 entities in a window three views wide, cut to it and stored relative to its centre
   (`buildDetailData`), rebuilt only when the view leaves the window. Anything new drawn by the GPU
   must keep its float32 values close to their origin in the same way.
+- **Curves at high zoom (rows 14, 27).** The full batches tessellate arcs, circles, ellipses and
+  polyline bulges once, at a chord tolerance of 2 × 10⁻⁶ of the drawing's diagonal. When those
+  chords would stray more than half a pixel (`needsDetail`), detail batches take over and redraw
+  the curves inside their window at 1/8 px (`FineCurves`; only the stretches of each arc inside the
+  window are refined, see `arcIntervalsInRect`), so a curve looks as a CAD viewer draws it and arc
+  snaps sit on the drawn line. Splines are tessellated at import and are not refined.
 - **GPL isolation (D-1):** `@mlightcad/libredwg-web` is only imported from the DWG worker. Its
   WebAssembly and glue come from `vendor/libredwg-web`, the same release rebuilt without run-time
   code generation so the strict CSP applies to it (decision U-1); `vite.config.ts` redirects the

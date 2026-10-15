@@ -6,7 +6,7 @@ publishes anything.
 
 ## 1. Before tagging
 
-- [ ] **Every other register row is Complete (checked).** What is left as of 0.1.5:
+- [ ] **Every other register row is Complete (checked).** What is left as of 0.1.6:
   - Rows 17, 21 and 82: run `npm run perf:reference` on the reference machine and keep
     `test-results/perf.json` (`docs/USER-DECISIONS.md` U-2).
   - Row 88: sign off `docs/SECURITY-REVIEW.md` (U-3), and get the D-1 licensing advice on the GPL-3.0

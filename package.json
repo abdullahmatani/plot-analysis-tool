@@ -1,7 +1,7 @@
 {
   "name": "plot-analysis-tool",
   "private": true,
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Offline, private, in-browser spatial analysis on plot plans (DXF, DWG, PDF).",
   "type": "module",
   "license": "UNLICENSED",

@@ -4,9 +4,9 @@
 |---|---|
 | Document | FDR-PAT-001 |
 | Product | Plot Analysis Tool (working name) |
-| Current product version | **0.1.5** |
+| Current product version | **0.1.6** |
 | Target release | **1.0.0** |
-| FDR revision | Rev H — 15 Oct 2026 |
+| FDR revision | Rev I — 15 Oct 2026 |
 | Document status | Draft for review |
 | Owner | Abdullah |
 
@@ -530,3 +530,4 @@ Rows 90–102 were added in Rev B. They take the next free numbers (rows are nev
 | F | 15 Oct 2026 | Row 21: tables (CSV, TSV, XLSX, pasted ranges) are now parsed in a Web Worker as well; before, a 5 000-row XLSX blocked the UI for about 150 ms and a 200 000-row one for 2.5 s. A cancelled or failed reload of a stored drawing can be loaded again instead of staying "loading". Progress, cancel and UI use during a large import are tested (`e2e/background-parsing.spec.ts`); the performance suite measures no main-thread block over 50 ms while a 20 MB DXF, a 10 MB DWG or a 50 000-row table is read. Row 21 stays Incomplete until NFR-2 is confirmed on the reference machine (U-2). Product version 0.1.3 (patch). |
 | G | 15 Oct 2026 | C7 / rows 87, 93, 102: unfinished-work drafts are now part of the backup copy outside IndexedDB, so they also survive the browser deleting its database after a crash (before, the project was restored without them). Found through an intermittent CI failure of the draft crash tests. No status changes; product version 0.1.4 (patch). |
 | H | 15 Oct 2026 | Row 18 at NFR-7's 10 km extents: a line kilometres long, or any line on a 10 km site, was drawn up to 64 px from its true position at the maximum zoom (float32 offsets on the GPU). Zoomed in that far, drawings are now drawn from exact data around the view (`e2e/large-site.spec.ts`). Row 89: `npm run release:check`, a Release workflow that publishes the offline bundle, licence notices and changelog when a `v*` tag is pushed, and `docs/RELEASE-CHECKLIST.md`; nothing tagged. No status changes; product version 0.1.5 (patch). |
+| I | 15 Oct 2026 | Rows 14 and 27: arcs, circles, ellipses and polyline bulges were drawn with the same chords at every zoom (2 × 10⁻⁶ of the drawing's diagonal), so zoomed in they looked like polygons (a tank shell on the reference plot plan up to 0.8 mm, 4.9 px at 6 000 px/m, inside its true circle) and arc snaps sat beside the drawn line. They are now redrawn for the view at 1/8 px wherever the chords would stray more than half a pixel (`e2e/curves.spec.ts`). No status changes; product version 0.1.6 (patch). |

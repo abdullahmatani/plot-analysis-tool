@@ -48,8 +48,13 @@ nosniff` and `Referrer-Policy: no-referrer`. `check-dist` fails the build if `di
 
 ## 4. Untrusted input handling
 
-Every input file is parsed **in a Web Worker**: DXF, DWG, PDF, CSV, TSV, XLSX, and the zip of
-.patproj files. So a malformed file cannot freeze the UI, and the worker can be terminated.
+Every input file is parsed **in a Web Worker**: DXF, DWG, PDF, CSV, TSV, XLSX and pasted
+spreadsheet ranges, and the zip of .patproj files. So a malformed file cannot freeze the UI, and the
+worker can be terminated (Cancel). Until 0.1.3 tables were parsed on the main thread, contrary to
+this checklist; they now have their own worker (`src/workers/table.worker.ts`). Evidence:
+`e2e/background-parsing.spec.ts`, and `e2e/perf.spec.ts`, which measures no main-thread block over
+50 ms while a 20 MB DXF, a 10 MB DWG or a 50 000-row table is read. The project JSON inside a
+.patproj is parsed on the main thread after the zip is unpacked.
 
 - DWG: size guard (200 MB); time limit (60 s plus 15 s per MB); WebAssembly crashes become
   readable errors. Tests: `src/import/dwg/read.test.ts`.

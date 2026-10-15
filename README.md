@@ -9,7 +9,7 @@ computer. A strict Content-Security-Policy blocks other hosts, and every automat
 fails if a request leaves the app's origin.
 
 Requirements and progress are tracked in [`plot-analysis-tool-FDR.md`](plot-analysis-tool-FDR.md).
-Current product version: **0.1.2**. See [`CHANGELOG.md`](CHANGELOG.md) for what each register row
+Current product version: **0.1.3**. See [`CHANGELOG.md`](CHANGELOG.md) for what each register row
 delivers, and [`docs/USER-DECISIONS.md`](docs/USER-DECISIONS.md) for the items that need your
 decision or verification.
 

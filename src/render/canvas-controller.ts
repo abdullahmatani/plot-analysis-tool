@@ -257,6 +257,7 @@ export class CanvasController {
     this.raf = 0;
     if (!this.dirty) return;
     this.dirty = false;
+    const frameStart = performance.now();
     const project = getProject();
     const f = this.frame();
     const lightBg = f.lightBg;
@@ -268,11 +269,9 @@ export class CanvasController {
         if (tm && s.visible) tm.update(f.view, f.width, f.height, f.dpr, s.placement);
       }
       if (this.renderer) {
-        const t0 = performance.now();
         // Large drawings are uploaded over several frames (NFR-2: no long main-thread blocks).
         if (this.renderer.uploadPending()) this.requestRender();
         this.renderer.render(f.view, f.width, f.height, states, lightBg);
-        this.lastGpuMs = performance.now() - t0;
       }
     }
     // 2D overlay.
@@ -304,10 +303,26 @@ export class CanvasController {
       drawOverlays(true);
     }
     this.frames++;
+    this.frameMs[this.frames % FRAME_SAMPLES] = performance.now() - frameStart;
   }
 
   frames = 0;
-  lastGpuMs = 0;
+  /** Main-thread time of the last frames (ms), a ring of FRAME_SAMPLES; see {@link frameTimes}. */
+  private frameMs = new Float32Array(FRAME_SAMPLES);
+  private framesAtReset = 0;
+
+  /**
+   * Main-thread (CPU) time of each frame rendered since the last reset, at most the last
+   * FRAME_SAMPLES (performance budget NFR-4, measured by e2e/perf.spec.ts). The GPU's own drawing
+   * time is not included: WebGL commands are queued, not executed, on this thread.
+   */
+  frameTimes(reset = false): number[] {
+    const n = Math.min(this.frames - this.framesAtReset, FRAME_SAMPLES);
+    const out: number[] = [];
+    for (let k = this.frames - n + 1; k <= this.frames; k++) out.push(this.frameMs[k % FRAME_SAMPLES]);
+    if (reset) this.framesAtReset = this.frames;
+    return out;
+  }
 
   /** CAD TEXT/MTEXT drawn with Canvas 2D (bundled fonts; row 24). */
   private drawUnderlayText(g: CanvasRenderingContext2D, f: FrameInfo, project: Project) {
@@ -641,6 +656,8 @@ export class CanvasController {
     });
   }
 }
+
+const FRAME_SAMPLES = 1024;
 
 function normaliseRotation(r: number): number {
   const t = Math.PI * 2;

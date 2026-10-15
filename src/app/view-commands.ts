@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 
 import { newId } from '@/core/ids';
+import type { SavedView } from '@/core/types';
 import { degToRad, radToDeg } from '@/core/units';
 import { canvasController } from '@/render/canvas-controller';
 import { commit, getProject } from '@/store/project';
@@ -184,6 +185,11 @@ export function registerViewCommands() {
 
 let savedViewUnreg: (() => void) | null = null;
 
+/** Shows a saved view: its centre, scale and rotation (row 17). */
+export function goToView(v: SavedView) {
+  useViewStore.getState().setView({ cx: v.centre.x, cy: v.centre.y, scale: v.scale, rotation: v.rotation });
+}
+
 /** Saved views appear as palette/menu commands. */
 export function registerSavedViewCommands() {
   savedViewUnreg?.();
@@ -195,10 +201,7 @@ export function registerSavedViewCommands() {
       menu: 'View' as const,
       section: 'views',
       needsProject: true,
-      run: () =>
-        useViewStore
-          .getState()
-          .setView({ cx: v.centre.x, cy: v.centre.y, scale: v.scale, rotation: v.rotation }),
+      run: () => goToView(v),
     })),
   );
 }

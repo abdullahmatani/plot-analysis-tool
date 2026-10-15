@@ -180,15 +180,17 @@ test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ p
   await importFile(page, file);
   await expect.poll(async () => (await models(page))[0]?.status, { timeout: 120_000 }).toBe('ready');
   await page.keyboard.press('Home');
-  // Animate pan + zoom for 3 s and count rendered frames.
+  await page.waitForTimeout(500); // finish uploading the drawing to the GPU before measuring
+  // Animate pan + zoom and count rendered frames.
   const fps = await page.evaluate(
     () =>
       new Promise<number>((resolve) => {
-        const view = (
-          window as unknown as {
-            __pat: { view(): { view: { cx: number; cy: number; scale: number }; setView(v: object): void } };
-          }
-        ).__pat.view;
+        const w = window as unknown as {
+          __pat: { view(): { view: { cx: number; cy: number; scale: number }; setView(v: object): void } };
+          __patCanvas: { frameTimes(reset?: boolean): number[] };
+        };
+        const view = w.__pat.view;
+        w.__patCanvas.frameTimes(true);
         const start = { ...view().view };
         let frames = 0;
         const t0 = performance.now();
@@ -200,7 +202,8 @@ test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ p
             scale: start.scale * (1.5 + Math.sin(k * 3)),
           });
           frames++;
-          if (t - t0 < 3000) requestAnimationFrame(step);
+          // At least 3 s, and enough frames for the CPU sample when rendering is slow (software GL).
+          if ((t - t0 < 3000 || frames < 4) && t - t0 < 30_000) requestAnimationFrame(step);
           else resolve((frames * 1000) / (t - t0));
         };
         requestAnimationFrame(step);
@@ -209,6 +212,19 @@ test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ p
   results['nfr4.fps'] = fps;
   results['nfr4.segments'] = (await models(page))[0].segments;
   expect(results['nfr4.segments']).toBeGreaterThanOrEqual(200_000);
+  // Main-thread (CPU) time per frame: culling, WebGL command encoding and the 2D overlay. It does not
+  // depend on the GPU, so it is enforced everywhere: at most half of a 50 fps frame (20 ms), so the
+  // main thread is never what holds the frame rate below NFR-4.
+  const cpu = (
+    await page.evaluate(() =>
+      (window as unknown as { __patCanvas: { frameTimes(): number[] } }).__patCanvas.frameTimes(),
+    )
+  ).sort((a, b) => a - b);
+  results['nfr4.cpuFrames'] = cpu.length;
+  results['nfr4.cpuFrameMsMedian'] = cpu[Math.floor(cpu.length / 2)] ?? NaN;
+  results['nfr4.cpuFrameMsMax'] = cpu[cpu.length - 1] ?? NaN;
+  expect(cpu.length).toBeGreaterThanOrEqual(3);
+  expect(results['nfr4.cpuFrameMsMax']).toBeLessThanOrEqual(10);
   if (gl.software && !STRICT) {
     // Software rasterisation cannot represent the reference machine's integrated GPU; report only.
     test

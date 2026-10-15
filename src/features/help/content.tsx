@@ -46,8 +46,9 @@ export const QUICK_START: HelpTopic[] = [
           Files are read on this computer only.
         </li>
         <li>
-          Navigate: mouse wheel zooms at the cursor, middle button or Space+drag pans,{' '}
-          <Cmd id="view.zoomExtents" /> shows everything.
+          Navigate: mouse wheel (or pinch) zooms at the cursor, middle button, Space+drag or one finger pans,{' '}
+          <Cmd id="view.zoomExtents" /> shows everything and <Cmd id="view.zoomSelection" /> the selection.
+          Keep views you return to with <Cmd id="view.saveView" /> (<Cmd id="view.manageViews" /> lists them).
         </li>
         <li>
           Set the scale before measuring (calibration); the status bar shows whether the drawing is

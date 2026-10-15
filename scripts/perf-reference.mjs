@@ -58,6 +58,7 @@ const BUDGETS = [
   ['NFR-2', 'Longest main-thread block during that import', 'nfr2.maxMainThreadBlockMs', '<=', 100, 'ms'],
   ['NFR-3', '10 MB DWG parsed and displayed', 'nfr3.seconds', '<=', 15, 's'],
   ['NFR-4', 'Pan and zoom, 200 000 segments', 'nfr4.fps', '>=', 50, 'fps'],
+  ['NFR-4', 'Main-thread time per frame while panning', 'nfr4.cpuFrameMsMax', '<=', 10, 'ms'],
   ['NFR-10', 'Longest autosave step while editing', 'nfr10.autosaveMaxSyncMs', '<=', 16, 'ms'],
   ['NFR-10', 'Reopen to an editable state', 'nfr10.reopenSeconds', '<=', 5, 's'],
 ];

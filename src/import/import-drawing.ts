@@ -277,8 +277,11 @@ export async function syncModels(project: Project | null) {
         const out = await job.promise;
         await installModel(d, out, bytes);
       } catch (e) {
-        if (!(e instanceof ParseCancelled))
-          models.set(d.id, { status: 'error', error: (e as Error).message });
+        // Never left "loading": a cancelled or failed load can be retried (Drawings → Load again).
+        const cancelled = e instanceof ParseCancelled;
+        const error = cancelled ? 'Loading was cancelled.' : (e as Error).message;
+        models.set(d.id, { status: 'error', error });
+        if (!cancelled) toast.error(`“${d.name}” could not be loaded`, { description: error });
       } finally {
         loading.delete(d.id);
       }

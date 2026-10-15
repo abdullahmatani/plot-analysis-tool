@@ -1,4 +1,12 @@
-import { ClipboardPaste, FileSpreadsheet, FileUp, LayoutTemplate, Trash2, Wand2 } from 'lucide-react';
+import {
+  ClipboardPaste,
+  FileSpreadsheet,
+  FileUp,
+  LayoutTemplate,
+  Loader2,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -28,22 +36,24 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { ParseCancelled } from '@/import/parse-client';
 import { getProject } from '@/store/project';
 import { useUiStore } from '@/store/ui';
 import { diffTables, type TableDiff } from '@/tables/diff';
 import { mappingErrors } from '@/tables/suggest';
+import type { ImportResult } from '@/tables/table';
 import { cellText } from '@/tables/values';
 
 import {
   calibrationGuard,
   datasetNameFor,
   initialMapping,
-  parseSource,
   readTableSource,
   type ParseOptions,
   type TableSource,
 } from './import-flow';
 import { MappingEditor, type MappingDraft } from './MappingEditor';
+import { parseTableInWorker } from './table-client';
 import { addDataset, buildDataset, nextDatasetName, replaceData } from './ops';
 import { useContoursUi } from './store';
 import {
@@ -115,6 +125,9 @@ export function ImportTableDialog({
   );
 }
 
+/** A parsed table, or the reason it could not be read. */
+type ParsedTable = { result: ImportResult | null; error: string | null };
+
 function ImportBody({ payload, close }: { payload: ImportPayload; close: () => void }) {
   const restored = payload.draft;
   const reimportOf = payload.reimportOf ?? restored?.reimportOf;
@@ -159,13 +172,33 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
     if (payload.paste) setTimeout(() => pasteRef.current?.focus(), 50);
   }, [payload.paste]);
 
-  const parsed = useMemo(() => {
-    if (!src) return null;
-    try {
-      return { result: parseSource(src, opts), error: null };
-    } catch (e) {
-      return { result: null, error: (e as Error).message };
+  // Parsed in a worker (row 21): a large table never blocks the UI. A newer source or option cancels
+  // the parse in progress; the previous result stays shown, with the actions disabled, until the new
+  // one arrives (a different source clears it at once).
+  const [parsed, setParsed] = useState<ParsedTable | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const parsedSrc = useRef<TableSource | null>(null);
+  useEffect(() => {
+    if (parsedSrc.current !== src) setParsed(null);
+    parsedSrc.current = src;
+    if (!src) {
+      // Cancelled (or no source yet): the cleanup below stopped any parse in progress.
+      setParsing(false);
+      return;
     }
+    let live = true;
+    const job = parseTableInWorker(src, opts);
+    setParsing(true);
+    job.promise
+      .then(
+        (result) => live && setParsed({ result, error: null }),
+        (e: Error) => live && !(e instanceof ParseCancelled) && setParsed({ result: null, error: e.message }),
+      )
+      .finally(() => live && setParsing(false));
+    return () => {
+      live = false;
+      job.cancel();
+    };
   }, [src, opts]);
   const result = parsed?.result ?? null;
   const columns = useMemo(() => result?.table.columns ?? [], [result]);
@@ -330,6 +363,8 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
         <SourceStage
           src={src}
           loading={loading}
+          parsing={parsing}
+          cancelParse={() => setSrc(null)}
           setSrc={(s) => {
             setSrc(s);
             setOpts({});
@@ -416,7 +451,7 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
               variant="secondary"
               data-testid="import-with-template"
               onClick={() => void doImport(applyTemplate(best.template, columns))}
-              disabled={busy}
+              disabled={busy || parsing}
             >
               <LayoutTemplate /> Import with “{best.template.name}”
             </Button>
@@ -424,13 +459,14 @@ function ImportBody({ payload, close }: { payload: ImportPayload; close: () => v
           {stage === 'source' && result && target && (
             <Button
               data-testid="reimport-next"
+              disabled={parsing}
               onClick={() => (headersOk ? setStage('reimport') : startMapping())}
             >
               {headersOk ? 'Next: review changes' : 'Next: remap columns'}
             </Button>
           )}
           {stage === 'source' && result && !target && (
-            <Button data-testid="mapping-next" onClick={() => startMapping()}>
+            <Button data-testid="mapping-next" disabled={parsing} onClick={() => startMapping()}>
               Next: map columns
             </Button>
           )}
@@ -574,6 +610,8 @@ const DELIMS: { v: string; l: string }[] = [
 function SourceStage({
   src,
   loading,
+  parsing,
+  cancelParse,
   setSrc,
   pasteRef,
   parsed,
@@ -582,9 +620,11 @@ function SourceStage({
 }: {
   src: TableSource | null;
   loading: boolean;
+  parsing: boolean;
+  cancelParse: () => void;
   setSrc: (s: TableSource) => void;
   pasteRef: React.RefObject<HTMLTextAreaElement | null>;
-  parsed: { result: ReturnType<typeof parseSource> | null; error: string | null } | null;
+  parsed: ParsedTable | null;
   opts: ParseOptions;
   setOpts: (o: ParseOptions) => void;
 }) {
@@ -686,6 +726,14 @@ function SourceStage({
       </div>
 
       {loading && <p className="text-muted-foreground text-sm">Reading file…</p>}
+      {parsing && (
+        <div className="text-muted-foreground flex items-center gap-2 text-sm" data-testid="table-parsing">
+          <Loader2 className="size-4 animate-spin" aria-hidden /> Reading table…
+          <Button variant="ghost" size="xs" onClick={cancelParse}>
+            Cancel
+          </Button>
+        </div>
+      )}
       {parsed?.error && (
         <p className="text-destructive text-sm" role="alert">
           {parsed.error}

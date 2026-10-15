@@ -169,6 +169,32 @@ test('NFR-3: 10 MB DWG parsed and displayed ≤ 15 s', async ({ page }) => {
   expect(results['nfr3.megabytes']).toBeGreaterThanOrEqual(9.5);
   expect(results['nfr3.segments']).toBeGreaterThan(150_000);
   expect(elapsed).toBeLessThanOrEqual(15 * FACTOR);
+  // Parsed in a worker (row 21): the UI stays responsive, as for DXF (NFR-2).
+  expect(results['nfr3.maxMainThreadBlockMs']).toBeLessThanOrEqual(STRICT ? 100 : 100 * 2);
+});
+
+test('Row 21: a 50 000-row table is read without blocking the main thread over 100 ms', async ({ page }) => {
+  test.setTimeout(120_000);
+  // Ten times the NFR-5 reference table (5 000 rows × 3 size columns): about 3.3 MB of CSV.
+  const file = path.resolve('test-results', 'perf-table-50k.csv');
+  if (!existsSync(file)) {
+    const lines = ['Tag,Scenario,Category,X,Y,R1,R2,R3,Label,Notes'];
+    for (let i = 0; i < 50_000; i++)
+      lines.push(
+        `P-${i},S${i % 40},Jet fire,${600_000 + (i % 500)},${2_500_000 + Math.floor(i / 500)},${10 + (i % 7)},${20 + (i % 9)},${35 + (i % 5)},Release ${i},note ${i}`,
+      );
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, lines.join('\n'));
+  }
+  await openApp(page);
+  await createProject(page, 'Perf');
+  await installLongTaskObserver(page);
+  const t0 = Date.now();
+  await importFile(page, file);
+  await expect(page.getByTestId('import-preview')).toBeVisible({ timeout: 60_000 });
+  results['table50k.seconds'] = (Date.now() - t0) / 1000;
+  results['table50k.maxMainThreadBlockMs'] = Math.max(0, ...(await longTasks(page)));
+  expect(results['table50k.maxMainThreadBlockMs']).toBeLessThanOrEqual(STRICT ? 100 : 100 * 2);
 });
 
 test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ page }) => {

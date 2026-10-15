@@ -10,6 +10,7 @@ import {
   Crosshair,
   ArrowUp,
   ArrowDown,
+  RefreshCw,
 } from 'lucide-react';
 
 import { transformBounds } from '@/core/affine';
@@ -111,7 +112,11 @@ function DrawingRow({ drawing: d }: { drawing: Drawing }) {
           <div className="text-muted-foreground flex items-center gap-1 text-[11px]">
             {d.source.kind.toUpperCase()}
             {model?.status === 'loading' && <span>· loading…</span>}
-            {model?.status === 'error' && <span className="text-destructive">· error</span>}
+            {model?.status === 'error' && (
+              <span className="text-destructive" title={model.error} data-testid="drawing-not-loaded">
+                · not loaded
+              </span>
+            )}
             {model?.result?.page?.raster && (
               <span className="text-warning">· raster — snapping unavailable</span>
             )}
@@ -131,6 +136,11 @@ function DrawingRow({ drawing: d }: { drawing: Drawing }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{d.source.fileName}</DropdownMenuLabel>
+            {model?.status === 'error' && (
+              <DropdownMenuItem onSelect={() => void reloadModel(d)}>
+                <RefreshCw /> Load again
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onSelect={() => {
                 const m = useModelsStore.getState().models[d.id];

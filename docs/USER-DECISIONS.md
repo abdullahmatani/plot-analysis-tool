@@ -16,6 +16,9 @@ excluded):
 - NFR-2 CPU side: a 20 MB DXF parses and loads in about 1.5–5 s; the longest main-thread block is
   under 100 ms.
 - NFR-3 CPU side: a 10 MB DWG parses and loads in about 9.4 s (budget 15 s).
+- NFR-4 CPU side: 1–3 ms of main-thread time per frame while panning and zooming 200 000 segments.
+  CI enforces at most 10 ms (half a 50 fps frame), so on the reference machine the frame rate depends
+  on the GPU alone. Every navigation feature of row 17 is tested (`e2e/navigation.spec.ts`).
 - NFR-1: cold start from cache in 0.5–0.7 s.
 - NFR-10: autosave's longest synchronous step is about 1–14 ms; reopen takes 0.3–0.75 s.
 

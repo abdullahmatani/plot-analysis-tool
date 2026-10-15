@@ -3,7 +3,10 @@ import { newId, nowIso } from '@/core/ids';
 import { getDb, type BlobRecord } from './db';
 import {
   MIRROR_DIR,
+  decodeDrafts,
+  draftsFileName,
   mirrorFileName,
+  parseDraftsFileName,
   parseMirrorFileName,
   pickMirror,
   readMirrorFile,
@@ -97,7 +100,12 @@ export async function restoreProject(m: MirrorState, src: MirrorSource): Promise
     const info = known.get(sha256) ?? { sha256, size, name: sha256, type: 'application/octet-stream' };
     blobs.push({ ...info, where: 'opfs', createdAt: now });
   }
-  await db.transaction('rw', [db.projects, db.snapshots, db.journal, db.blobs], async () => {
+  // Unfinished work (row 93) kept with the backup, offered for resuming when the project opens.
+  const drafts = (decodeDrafts(await src.read(draftsFileName(m.meta.id))) ?? []).map((d) => ({
+    ...d,
+    projectId: m.meta.id,
+  }));
+  await db.transaction('rw', [db.projects, db.snapshots, db.journal, db.blobs, db.drafts], async () => {
     await db.projects.put({ ...m.meta, lastOpenedAt: m.meta.lastOpenedAt || now });
     await db.snapshots.put({
       ...m.base.snapshot,
@@ -107,6 +115,7 @@ export async function restoreProject(m: MirrorState, src: MirrorSource): Promise
     });
     if (m.journal.length) await db.journal.bulkPut(m.journal);
     for (const b of blobs) if (!(await db.blobs.get(b.sha256))) await db.blobs.put(b);
+    if (drafts.length) await db.drafts.bulkPut(drafts);
   });
 }
 
@@ -123,8 +132,8 @@ export async function checkMirror(src: MirrorSource | null = opfsMirrorSource())
   const fresh = !marker && projectIds.size === 0;
   if (!fresh) {
     for (const name of await src.list()) {
-      const p = parseMirrorFileName(name);
-      if (p && !projectIds.has(p.projectId)) await src.remove(name);
+      const id = parseMirrorFileName(name)?.projectId ?? parseDraftsFileName(name);
+      if (id && !projectIds.has(id)) await src.remove(name);
     }
     return [];
   }

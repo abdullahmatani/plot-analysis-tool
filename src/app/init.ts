@@ -73,7 +73,7 @@ async function restoreLostProjects() {
         : `${restored.length} projects were restored from their backup copies`,
       {
         description:
-          'The browser lost this app’s local database, which can happen after a crash. Every saved edit was recovered; restore points and app settings from before the loss are not included.',
+          'The browser lost this app’s local database, which can happen after a crash. Every saved edit was recovered, and unfinished work is offered for resuming when you open the project; restore points and app settings from before the loss are not included.',
         duration: 30000,
       },
     );

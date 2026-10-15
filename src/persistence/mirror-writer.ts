@@ -1,9 +1,11 @@
 import { sha256Hex } from '@/core/canonical';
 
-import { getDb, type JournalRecord, type SnapshotRecord } from './db';
+import { getDb, type DraftRecord, type JournalRecord, type SnapshotRecord } from './db';
 import type { JournalMeta } from './journal-write';
 import {
+  draftsFileName,
   encodeBase,
+  encodeDrafts,
   encodeJournal,
   MIRROR_DIR,
   MIRROR_VERSION,
@@ -196,6 +198,23 @@ export class MirrorWriter {
     this.tracked.delete(projectId);
     await this.files.remove(mirrorFileName(projectId, 'a'));
     await this.files.remove(mirrorFileName(projectId, 'b'));
+    await this.files.remove(draftsFileName(projectId));
+  }
+
+  /**
+   * Replaces the project's backed-up drafts (row 93) with `drafts`, so unfinished work also survives
+   * the loss of the database. A write cut short by a crash leaves a file that fails its check and is
+   * ignored on restore, as if there were no drafts.
+   */
+  async writeDrafts(projectId: string, drafts: DraftRecord[]): Promise<void> {
+    const name = draftsFileName(projectId);
+    if (!drafts.length) return this.files.remove(name);
+    const bytes = encodeDrafts(drafts);
+    await this.files.open(name, (f) => {
+      f.write(bytes, 0);
+      f.truncate(bytes.length);
+      f.flush();
+    });
   }
 
   private async load(projectId: string): Promise<Tracked | null> {

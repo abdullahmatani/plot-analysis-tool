@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { isQuotaError, type JournalRecord } from '@/persistence/db';
+import { isQuotaError, type DraftRecord, type JournalRecord } from '@/persistence/db';
 import { writeJournalBatch, type JournalMeta } from '@/persistence/journal-write';
 import { MirrorWriter, opfsMirrorFiles } from '@/persistence/mirror-writer';
 
@@ -11,6 +11,7 @@ import { MirrorWriter, opfsMirrorFiles } from '@/persistence/mirror-writer';
  * `upTo` are durable; { type: 'error', projectId, message, quota, retryInMs } on failure.
  * After each durable batch the records are also appended to the project's backup copy outside
  * IndexedDB (mirror-writer.ts); `rotate` starts a new backup base and `drop` removes the backup.
+ * `drafts` replaces the project's backed-up unfinished-work drafts.
  */
 
 const BATCH_MS = 100;
@@ -91,14 +92,41 @@ async function updateMirror(projectId: string, q: Queue, batch: JournalRecord[])
   }
 }
 
+/**
+ * Drafts backup (row 93): each project's drafts file is rewritten in order, and only the latest set
+ * waiting to be written is kept, so a burst of draft changes costs one write.
+ */
+const draftWrites = new Map<string, Promise<void>>();
+const draftsWaiting = new Map<string, DraftRecord[]>();
+
+function backupDrafts(projectId: string, drafts: DraftRecord[]) {
+  if (!mirror) return;
+  const queued = draftsWaiting.has(projectId);
+  draftsWaiting.set(projectId, drafts);
+  if (queued) return;
+  const run = (draftWrites.get(projectId) ?? Promise.resolve()).then(async () => {
+    const latest = draftsWaiting.get(projectId) ?? [];
+    draftsWaiting.delete(projectId);
+    try {
+      await mirror.writeDrafts(projectId, latest);
+    } catch (err) {
+      console.warn('drafts backup not updated', err);
+    }
+  });
+  draftWrites.set(projectId, run);
+}
+
 self.onmessage = (
   e: MessageEvent<
     | { type: 'record'; rec: JournalRecord; meta?: JournalMeta }
     | { type: 'flush' | 'rotate' | 'drop'; projectId: string }
+    | { type: 'drafts'; projectId: string; drafts: DraftRecord[] }
   >,
 ) => {
   const m = e.data;
-  if (m.type === 'record') {
+  if (m.type === 'drafts') {
+    backupDrafts(m.projectId, m.drafts);
+  } else if (m.type === 'record') {
     const q = queueOf(m.rec.projectId);
     q.records.push(m.rec);
     if (m.meta) q.meta = m.meta;

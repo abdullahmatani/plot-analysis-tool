@@ -4,13 +4,16 @@ import { commit, type HistoryState } from '@/core/history';
 import { createLayer, createProject } from '@/core/project';
 
 import { AutosaveEngine } from './autosave';
-import { getDb, PatDb, setDb, type JournalRecord } from './db';
+import { getDb, PatDb, setDb, type DraftRecord, type JournalRecord } from './db';
 import type { JournalWorkerMessage, JournalWriter } from './journal-client';
 import { writeJournalBatch } from './journal-write';
 import { checkMirror, type MirrorSource } from './mirror';
 import {
+  decodeDrafts,
   decodeFrames,
+  draftsFileName,
   encodeBase,
+  encodeDrafts,
   encodeJournal,
   mirrorFileName,
   pickMirror,
@@ -87,6 +90,7 @@ function workerLike(mirror: MirrorWriter): JournalWriter {
     },
     rotate: (projectId) => void mirror.rotate(projectId),
     drop: (projectId) => void mirror.drop(projectId),
+    drafts: (projectId, drafts) => void mirror.writeDrafts(projectId, drafts),
     listen(projectId, fn) {
       listeners.set(projectId, fn);
       return () => listeners.delete(projectId);
@@ -380,5 +384,93 @@ describe('backup copy outside IndexedDB (C7, rows 90 and 102)', () => {
     await engine.checkpoint('test');
     expect(rotations).toEqual([state.project.id]);
     engine.dispose();
+  });
+});
+
+describe('unfinished-work drafts kept with the backup (row 93, C7)', () => {
+  const draft = (projectId: string, key: string, state: unknown): DraftRecord => ({
+    projectId,
+    key,
+    tool: key,
+    label: `Unfinished ${key}`,
+    at: '2026-10-15T00:00:00.000Z',
+    state,
+  });
+
+  it('round-trips drafts, file bytes included, and rejects damaged files', () => {
+    const bytes = new Uint8Array(70_000).map((_, i) => (i * 31) % 256);
+    const drafts = [
+      draft('p1', 'trace.manual', { pts: [{ x: 600_000.125, y: 2_500_000.5 }], closed: false }),
+      draft('p1', 'import-table', { src: { kind: 'xlsx', name: 'r.xlsx', bytes }, opts: { sheet: 'A' } }),
+    ];
+    const file = encodeDrafts(drafts);
+    const back = decodeDrafts(file)!;
+    expect(back).toEqual(drafts);
+    expect((back[1].state as { src: { bytes: unknown } }).src.bytes).toBeInstanceOf(Uint8Array);
+    expect(decodeDrafts(file.subarray(0, file.length - 3))).toBeNull();
+    const flipped = file.slice();
+    flipped[20] ^= 0xff;
+    expect(decodeDrafts(flipped)).toBeNull();
+    expect(decodeDrafts(encodeJournal({ recs: [rec(1)] }))).toBeNull();
+    expect(decodeDrafts(null)).toBeNull();
+  });
+
+  it('the writer replaces the drafts file, and removes it with the last draft or the project', async () => {
+    const fs = memoryFs();
+    const mirror = new MirrorWriter(fs.mf);
+    await mirror.writeDrafts('p1', [draft('p1', 'a', { n: 1 }), draft('p1', 'b', { n: 2 })]);
+    await mirror.writeDrafts('p1', [draft('p1', 'a', { n: 3 })]);
+    expect(decodeDrafts(fs.files.get(draftsFileName('p1'))!)).toEqual([draft('p1', 'a', { n: 3 })]);
+    await mirror.writeDrafts('p1', []);
+    expect(fs.files.has(draftsFileName('p1'))).toBe(false);
+    await mirror.writeDrafts('p1', [draft('p1', 'a', { n: 4 })]);
+    await mirror.drop('p1');
+    expect(fs.files.has(draftsFileName('p1'))).toBe(false);
+  });
+
+  it('drafts come back with their project after the browser deletes the database', async () => {
+    const t = await setup();
+    t.addLayer('L0');
+    await t.engine.flush();
+    const id = t.state.project.id;
+    const trace = draft(id, 'trace.manual', {
+      pts: [
+        { x: 1, y: 2 },
+        { x: 21, y: 2 },
+      ],
+    });
+    await t.mirror.writeDrafts(id, [trace]);
+    t.engine.dispose();
+    await wipeDatabase();
+    expect(await checkMirror(t.fs.src)).toEqual(['Mirrored']);
+    expect(await getDb().drafts.where('projectId').equals(id).toArray()).toEqual([trace]);
+  });
+
+  it('a damaged drafts file does not stop the project being restored', async () => {
+    const t = await setup();
+    t.addLayer('L0');
+    await t.engine.flush();
+    const id = t.state.project.id;
+    await t.mirror.writeDrafts(id, [draft(id, 'x', { n: 1 })]);
+    const name = draftsFileName(id);
+    t.fs.files.set(name, t.fs.files.get(name)!.subarray(0, 12));
+    const expected = t.state.project;
+    t.engine.dispose();
+    await wipeDatabase();
+    expect(await checkMirror(t.fs.src)).toEqual(['Mirrored']);
+    expect((await loadProjectState(id)).state.project).toEqual(expected);
+    expect(await getDb().drafts.count()).toBe(0);
+  });
+
+  it('drafts files of projects that no longer exist are removed at start-up', async () => {
+    const t = await setup();
+    t.addLayer('L0');
+    await t.engine.flush();
+    await t.mirror.writeDrafts('gone', [draft('gone', 'x', { n: 1 })]);
+    await t.mirror.writeDrafts(t.state.project.id, [draft(t.state.project.id, 'y', { n: 2 })]);
+    expect(await checkMirror(t.fs.src)).toEqual([]);
+    expect(t.fs.files.has(draftsFileName('gone'))).toBe(false);
+    expect(t.fs.files.has(draftsFileName(t.state.project.id))).toBe(true);
+    t.engine.dispose();
   });
 });

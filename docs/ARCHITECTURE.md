@@ -16,6 +16,7 @@ feature follows. The requirements live in `plot-analysis-tool-FDR.md` (register 
 | E2E            | `npm run e2e` (Playwright; serves `dist/` with `vite preview` on `PAT_PORT`, default 4173) |
 | Offline bundle | `npm run bundle`, `npm run test:bundle`                                                    |
 | Release check  | `npm run release:check` (row 89; `docs/RELEASE-CHECKLIST.md`)                              |
+| D-3 spike      | `node scripts/spikes/single-file-probe.mjs` (`docs/SPIKE-D3-SINGLE-FILE.md`)               |
 
 Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y npm@11 install …`.
 

@@ -62,6 +62,10 @@ export interface RenderData {
   textIds: Uint32Array;
   extents: Bounds;
   segmentCount: number;
+  /** Chord tolerance of curves in the full batches (drawing units). */
+  curveTol: number;
+  /** Whether any visible entity is drawn as a curve (see `hasCurves`). */
+  curves: boolean;
 }
 
 export interface RenderOptions {
@@ -90,29 +94,36 @@ export function clipSegment(
   y1: number,
   r: Bounds,
 ): [number, number] | null {
+  if (
+    x0 >= r.minX &&
+    x0 <= r.maxX &&
+    x1 >= r.minX &&
+    x1 <= r.maxX &&
+    y0 >= r.minY &&
+    y0 <= r.maxY &&
+    y1 >= r.minY &&
+    y1 <= r.maxY
+  )
+    return [0, 1];
   const dx = x1 - x0;
   const dy = y1 - y0;
   let t0 = 0;
   let t1 = 1;
-  for (const [p, q] of [
-    [-dx, x0 - r.minX],
-    [dx, r.maxX - x0],
-    [-dy, y0 - r.minY],
-    [dy, r.maxY - y0],
-  ]) {
-    if (p === 0) {
-      if (q < 0) return null;
+  // Each edge: p·t ≤ q keeps the point inside.
+  const edge = (p: number, q: number): boolean => {
+    if (p === 0) return q >= 0;
+    const t = q / p;
+    if (p < 0) {
+      if (t > t1) return false;
+      if (t > t0) t0 = t;
     } else {
-      const t = q / p;
-      if (p < 0) {
-        if (t > t1) return null;
-        if (t > t0) t0 = t;
-      } else {
-        if (t < t0) return null;
-        if (t < t1) t1 = t;
-      }
+      if (t < t0) return false;
+      if (t < t1) t1 = t;
     }
-  }
+    return true;
+  };
+  if (!edge(-dx, x0 - r.minX) || !edge(dx, r.maxX - x0) || !edge(-dy, y0 - r.minY) || !edge(dy, r.maxY - y0))
+    return null;
   return [t0, t1];
 }
 
@@ -336,10 +347,109 @@ class TriWriter {
   }
 }
 
+/** Angle step of an arc of radius r with chord deviation at most tol. */
+function arcStep(r: number, tol: number): number {
+  return tol >= r ? Math.PI / 2 : 2 * Math.acos(1 - tol / r);
+}
+
 function arcSegs(r: number, sweep: number, tol: number): number {
   if (r <= 0) return 1;
-  const step = tol >= r ? Math.PI / 2 : 2 * Math.acos(1 - tol / r);
-  return Math.max(2, Math.min(512, Math.ceil(Math.abs(sweep) / step)));
+  return Math.max(2, Math.min(512, Math.ceil(Math.abs(sweep) / arcStep(r, tol))));
+}
+
+const TAU = Math.PI * 2;
+/** Most segments a curve gets for one stretch inside a detail window. */
+export const MAX_FINE_SEGMENTS = 4096;
+
+/**
+ * View-dependent curve tessellation of detail batches (rows 14, 27): curve parts inside `rect` get
+ * chord tolerance `tol`, so arcs stay smooth at any zoom; parts outside keep the full build's.
+ */
+export interface FineCurves {
+  tol: number;
+  rect: Bounds;
+}
+
+/**
+ * Parameter intervals [t0, t1] ⊆ [0, 1] of the arc (cx + r cos θ, cy + r sin θ), θ = a0 + sweep·t
+ * (sweep signed, |sweep| ≤ 2π), that lie inside `rect`.
+ */
+export function arcIntervalsInRect(
+  cx: number,
+  cy: number,
+  r: number,
+  a0: number,
+  sweep: number,
+  rect: Bounds,
+): [number, number][] {
+  if (!(r > 0) || !sweep) return [];
+  if (cx + r < rect.minX || cx - r > rect.maxX || cy + r < rect.minY || cy - r > rect.maxY) return [];
+  const ts = [0, 1];
+  const at = (theta: number) => {
+    const d = ((((sweep > 0 ? theta - a0 : a0 - theta) % TAU) + TAU) % TAU) / Math.abs(sweep);
+    if (d > 0 && d < 1) ts.push(d);
+  };
+  for (const x of [rect.minX, rect.maxX]) {
+    const u = (x - cx) / r;
+    if (Math.abs(u) > 1) continue;
+    at(Math.acos(u));
+    at(-Math.acos(u));
+  }
+  for (const y of [rect.minY, rect.maxY]) {
+    const v = (y - cy) / r;
+    if (Math.abs(v) > 1) continue;
+    at(Math.asin(v));
+    at(Math.PI - Math.asin(v));
+  }
+  ts.sort((a, b) => a - b);
+  const out: [number, number][] = [];
+  for (let k = 0; k + 1 < ts.length; k++) {
+    const [t0, t1] = [ts[k], ts[k + 1]];
+    if (t1 <= t0) continue;
+    const th = a0 + sweep * ((t0 + t1) / 2);
+    const x = cx + r * Math.cos(th);
+    const y = cy + r * Math.sin(th);
+    if (x < rect.minX || x > rect.maxX || y < rect.minY || y > rect.maxY) continue;
+    if (out.length && out[out.length - 1][1] === t0) out[out.length - 1][1] = t1;
+    else out.push([t0, t1]);
+  }
+  return out;
+}
+
+/**
+ * Increasing parameters 0 … 1 at which an arc is tessellated: the full build's even steps, but with
+ * `fine`, steps at its tolerance where the arc runs inside its rectangle.
+ */
+function arcParams(
+  cx: number,
+  cy: number,
+  r: number,
+  a0: number,
+  sweep: number,
+  tol: number,
+  fine?: FineCurves,
+): number[] {
+  const k = arcSegs(r, sweep, tol);
+  const coarse = (from: number, to: number, out: number[]) => {
+    // The full build's steps strictly between from and to.
+    for (let j = Math.floor(from * k) + 1; j / k < to; j++) out.push(j / k);
+  };
+  const out = [0];
+  if (fine) {
+    const step = arcStep(r, fine.tol);
+    let at = 0;
+    for (const [t0, t1] of arcIntervalsInRect(cx, cy, r, a0, sweep, fine.rect)) {
+      const n = Math.min(MAX_FINE_SEGMENTS, Math.ceil((Math.abs(sweep) * (t1 - t0)) / step));
+      if (n <= Math.ceil(k * (t1 - t0))) continue; // the full build's steps are fine enough here
+      coarse(at, t0, out);
+      if (t0 > out[out.length - 1]) out.push(t0);
+      for (let j = 1; j <= n; j++) out.push(t0 + ((t1 - t0) * j) / n);
+      at = t1;
+    }
+    coarse(at, 1, out);
+  } else coarse(0, 1, out);
+  if (out[out.length - 1] < 1) out.push(1);
+  return out;
 }
 
 /** Appends tessellated points of a bulge polyline ring/path into `out` (flat x,y). */
@@ -348,6 +458,7 @@ function flattenBulges(
   closed: boolean,
   tol: number,
   out: number[],
+  fine?: FineCurves,
 ) {
   const n = pts.length;
   if (!n) return;
@@ -358,14 +469,42 @@ function flattenBulges(
     const b = pts[(i + 1) % n];
     const arc = a.bulge ? bulgeToArc(a, b, a.bulge) : null;
     if (arc) {
-      const k = arcSegs(arc.r, arc.sweep, tol);
-      for (let j = 1; j < k; j++) {
-        const t = arc.a0 + (arc.sweep * j) / k;
+      const ts = arcParams(arc.c.x, arc.c.y, arc.r, arc.a0, arc.sweep, tol, fine);
+      for (let j = 1; j < ts.length - 1; j++) {
+        const t = arc.a0 + arc.sweep * ts[j];
         out.push(arc.c.x + arc.r * Math.cos(t), arc.c.y + arc.r * Math.sin(t));
       }
     }
     if (!(closed && i === segs - 1)) out.push(b.x, b.y);
   }
+}
+
+/** Whether any bulge arc of the rings comes inside `fine`'s rectangle (so a fill must be redone). */
+function bulgesNear(rings: { x: number; y: number; bulge: number }[][], fine: FineCurves): boolean {
+  const r = fine.rect;
+  for (const ring of rings)
+    for (let i = 0; i < ring.length; i++) {
+      if (!ring[i].bulge) continue;
+      const arc = bulgeToArc(ring[i], ring[(i + 1) % ring.length], ring[i].bulge);
+      if (arc && arcIntervalsInRect(arc.c.x, arc.c.y, arc.r, arc.a0, arc.sweep, r).length) return true;
+    }
+  return false;
+}
+
+/** Whether the store has entities drawn as curves (arcs, circles, ellipses, polyline bulges). */
+export function hasCurves(store: EntityStore): boolean {
+  const g = store.geom;
+  for (let i = 0; i < store.count; i++) {
+    if (store.flags[i] & FLAG.HIDDEN) continue;
+    const k = store.geomKind[i];
+    if (k === GK.CIRCLE || k === GK.ARC || k === GK.ELLIPSE) return true;
+    if (k !== GK.POLY && k !== GK.FILL) continue;
+    const o = store.geomStart[i];
+    if (k === GK.POLY) {
+      for (let p = 0; p < g[o]; p++) if (g[o + 3 + p * 3]) return true;
+    } else if (readRings(store, i).some((ring) => ring.some((v) => v.bulge))) return true;
+  }
+  return false;
 }
 
 export function packRgba(rgb: number, alpha = 255): number {
@@ -386,6 +525,7 @@ function emitEntity(
   sw: SegWriter,
   tw: TriWriter,
   fills?: FillCache,
+  fine?: FineCurves,
 ): number {
   const g = store.geom;
   const flat = scratch;
@@ -428,10 +568,9 @@ function emitEntity(
       const a0 = store.geomKind[i] === GK.ARC ? g[o + 3] : 0;
       let sweep = store.geomKind[i] === GK.ARC ? g[o + 4] - a0 : Math.PI * 2;
       if (sweep <= 0) sweep += Math.PI * 2;
-      const n = arcSegs(r, sweep, tol);
       flat.length = 0;
-      for (let j = 0; j <= n; j++) {
-        const t = a0 + (sweep * j) / n;
+      for (const u of arcParams(cx, cy, r, a0, sweep, tol, fine)) {
+        const t = a0 + sweep * u;
         flat.push(cx + r * Math.cos(t), cy + r * Math.sin(t));
       }
       polyline(flat, false);
@@ -447,7 +586,10 @@ function emitEntity(
       let sweep = g[o + 6] - t0;
       if (sweep <= 0) sweep += Math.PI * 2;
       const major = Math.hypot(mx, my);
-      const n = arcSegs(major, sweep, tol) * 2;
+      let n = arcSegs(major, sweep, tol) * 2;
+      // Detail batches: the whole ellipse at the fine tolerance, up to MAX_FINE_SEGMENTS.
+      if (fine && major > 0)
+        n = Math.max(n, Math.min(MAX_FINE_SEGMENTS, Math.ceil(sweep / arcStep(major, fine.tol)) * 2));
       const vx = -my * ratio;
       const vy = mx * ratio;
       flat.length = 0;
@@ -465,7 +607,7 @@ function emitEntity(
         pts[p] = { x: g[o + 1 + p * 3], y: g[o + 2 + p * 3], bulge: g[o + 3 + p * 3] };
       flat.length = 0;
       const closed = (flags & FLAG.CLOSED) !== 0;
-      flattenBulges(pts, closed, tol, flat);
+      flattenBulges(pts, closed, tol, flat, fine);
       polyline(flat, closed);
       break;
     }
@@ -485,20 +627,23 @@ function emitEntity(
         // Pattern hatch: draw the boundary; the pattern lines are separate DERIVED entities.
         for (const ring of rings) {
           flat.length = 0;
-          flattenBulges(ring, true, tol, flat);
+          flattenBulges(ring, true, tol, flat, fine);
           polyline(flat, true);
         }
       } else {
-        let t = fills?.get(i);
+        // Arcs inside a detail window are redone at its tolerance; otherwise the triangulation is
+        // the full build's, kept between windows.
+        const refine = fine && bulgesNear(rings, fine) ? fine : undefined;
+        let t = refine ? undefined : fills?.get(i);
         if (!t) {
           const coords: number[] = [];
           const holes: number[] = [];
           for (let r = 0; r < rings.length; r++) {
             if (r > 0) holes.push(coords.length / 2);
-            flattenBulges(rings[r], true, tol, coords);
+            flattenBulges(rings[r], true, tol, coords, refine);
           }
           t = { coords, idx: coords.length >= 6 ? earcut(coords, holes.length ? holes : undefined, 2) : [] };
-          fills?.set(i, t);
+          if (!refine) fills?.set(i, t);
         }
         if (t.idx.length) tw.pushTriangles(t.coords, t.idx, rgba, layer);
       }
@@ -601,15 +746,17 @@ export function buildRenderData(store: EntityStore, extents: Bounds, opts: Rende
     textIds: Uint32Array.from(textList),
     extents,
     segmentCount,
+    curveTol: tol,
+    curves: !opts.indexOnly && hasCurves(store),
   };
 }
 
 /**
- * Detail batches for the entities `ids`, cut to `rect` and stored relative to its centre (row 18).
- * Drawn instead of the full batches when the view is zoomed in so far that their float32 offsets
- * would show (see `precisionRadius`); tessellated exactly as `buildRenderData` with the same
- * `extents` and options, so curves look the same in both. `fills` keeps fill triangulations between
- * builds.
+ * Detail batches for the entities `ids`, cut to `rect` and stored relative to its centre (rows 14,
+ * 18, 27). Drawn instead of the full batches when the view is zoomed in so far that their float32
+ * offsets would show (see `precisionRadius`) or their curves would look faceted. Tessellated as
+ * `buildRenderData` with the same `extents` and options, except that with `fineTol` curves inside
+ * `rect` use that chord tolerance. `fills` keeps fill triangulations between builds.
  */
 export function buildDetailData(
   store: EntityStore,
@@ -618,8 +765,10 @@ export function buildDetailData(
   rect: Bounds,
   opts: RenderOptions = {},
   fills?: FillCache,
+  fineTol?: number,
 ): Pick<RenderData, 'segments' | 'triangles' | 'segmentCount'> {
   const { diag, tol } = tessellation(extents, opts);
+  const fine = fineTol !== undefined && fineTol < tol ? { tol: fineTol, rect } : undefined;
   const ox = (rect.minX + rect.maxX) / 2;
   const oy = (rect.minY + rect.maxY) / 2;
   const sw = new SegWriter(ox, oy, rect);
@@ -627,7 +776,7 @@ export function buildDetailData(
   let segmentCount = 0;
   // In file order, as within the cells of the full build.
   for (const i of Uint32Array.from(ids).sort())
-    segmentCount += emitEntity(store, i, tol, diag, sw, tw, fills);
+    segmentCount += emitEntity(store, i, tol, diag, sw, tw, fills, fine);
   sw.flush();
   tw.flush();
   return { segments: sw.batches, triangles: tw.batches, segmentCount };

@@ -11,6 +11,11 @@ import { visibleWorldBounds } from './view';
  * while the view pans. Past `DETAIL_THRESHOLD_PX` the renderer draws detail batches instead: the
  * float64 entities around the view, cut to a window and stored relative to its centre, which
  * keeps every vertex within a few screen sizes of its origin at any zoom.
+ *
+ * Curves (rows 14, 27) are tessellated once for the full batches, with a chord tolerance of 2 × 10⁻⁶
+ * of the drawing's diagonal, so zoomed in they look like polygons and arc snaps sit off the drawn
+ * line. Past `CURVE_THRESHOLD_PX` of chord error, detail batches also redraw curves inside the
+ * window at `FINE_CURVE_PX`, as a CAD viewer regenerates them.
  */
 
 /** On-screen error (CSS px) the full batches may have before detail batches take over. */
@@ -23,6 +28,28 @@ export const DETAIL_THRESHOLD_PX = 0.25;
  */
 export function batchErrorPx(radius: number, pxPerUnit: number): number {
   return 2.5 * radius * pxPerUnit * 2 ** -24;
+}
+
+/** Chord error (CSS px) of the full batches' curves beyond which detail batches redraw them. */
+export const CURVE_THRESHOLD_PX = 0.5;
+/** Chord error (CSS px) of curves in detail batches, at the zoom they are built for. */
+export const FINE_CURVE_PX = 0.125;
+/** A window is rebuilt after zooming in this much, so curves stay within CURVE_THRESHOLD_PX. */
+export const WINDOW_ZOOM = CURVE_THRESHOLD_PX / FINE_CURVE_PX;
+
+/** What decides whether a drawing needs detail batches: see `precisionRadius` and `RenderData`. */
+export interface DetailNeeds {
+  radius: number;
+  curveTol: number;
+  curves: boolean;
+}
+
+/** Whether a drawing should be drawn from detail batches at this zoom. */
+export function needsDetail(d: DetailNeeds, pxPerUnit: number): boolean {
+  return (
+    batchErrorPx(d.radius, pxPerUnit) > DETAIL_THRESHOLD_PX ||
+    (d.curves && d.curveTol * pxPerUnit > CURVE_THRESHOLD_PX)
+  );
 }
 
 /** Largest stretch of the placement (screen px per drawing unit at view scale 1). */
@@ -54,13 +81,13 @@ export function windowAround(view: Bounds): Bounds {
 }
 
 /**
- * Whether a window still serves the view: it covers it, and the view has not zoomed in so far
- * (16×) that the window would hold far more than is visible.
+ * Whether a window still serves the view: it covers it, and the view has not zoomed in more than
+ * `WINDOW_ZOOM` times since it was built (its curves would show their chords).
  */
 export function windowServes(win: DetailWindow, view: Bounds, pxPerUnit: number, version: number): boolean {
   return (
     win.version === version &&
-    pxPerUnit <= win.pxPerUnit * 16 &&
+    pxPerUnit <= win.pxPerUnit * WINDOW_ZOOM &&
     view.minX >= win.rect.minX &&
     view.minY >= win.rect.minY &&
     view.maxX <= win.rect.maxX &&

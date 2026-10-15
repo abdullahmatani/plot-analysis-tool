@@ -6,16 +6,21 @@ import { ET, EntityStoreBuilder, FLAG, GK, storeExtents, type EntityStore } from
 import {
   SEG_STRIDE,
   TRI_STRIDE,
+  arcIntervalsInRect,
   buildDetailData,
   buildRenderData,
   clipPolygon,
   clipSegment,
+  hasCurves,
   precisionRadius,
   type SegmentBatch,
 } from '@/underlay/render-data';
 
 import {
+  CURVE_THRESHOLD_PX,
   DETAIL_THRESHOLD_PX,
+  FINE_CURVE_PX,
+  needsDetail,
   batchErrorPx,
   placementStretch,
   viewInDrawing,
@@ -290,7 +295,7 @@ describe('detail batches (row 18)', () => {
     expect(fills.get(0)).toBe(cached);
   });
 
-  it('a window serves the view until the view leaves it or zooms 16× further in', () => {
+  it('a window serves the view until the view leaves it or zooms 4× further in', () => {
     const view: ViewTransform = { cx: 600_000, cy: 2_500_000, scale: 1_000, rotation: 0.5 };
     const A: Affine2D = [0.001, 0, 0, 0.001, 0, 0]; // millimetre drawing placed in metres
     const v = viewInDrawing(view, W, H, A);
@@ -303,11 +308,210 @@ describe('detail batches (row 18)', () => {
     const win = { rect, pxPerUnit: 1, version: 3 };
     expect(windowServes(win, v, 1, 3)).toBe(true);
     expect(windowServes(win, v, 1, 4)).toBe(false); // the drawing was reloaded
-    expect(windowServes(win, v, 16, 3)).toBe(true);
-    expect(windowServes(win, v, 17, 3)).toBe(false);
+    expect(windowServes(win, v, 4, 3)).toBe(true);
+    expect(windowServes(win, v, 4.01, 3)).toBe(false);
     const panned = { ...v, minX: v.minX + 1.01 * wide, maxX: v.maxX + 1.01 * wide };
     expect(windowServes(win, panned, 1, 3)).toBe(false);
     const nearly = { ...v, minX: v.minX + 0.99 * wide, maxX: v.maxX + 0.99 * wide };
     expect(windowServes(win, nearly, 1, 3)).toBe(true);
+  });
+});
+
+/** Curves at high zoom (rows 14, 27): smooth, as a CAD viewer regenerates them. */
+describe('curves in detail batches', () => {
+  const TANK = { x: 600_200, y: 2_500_150 };
+  /** A 400 m plan (like tests/fixtures/dxf/r2018_plotplan.dxf) with a 15 m tank shell. */
+  function plan(extra?: (b: EntityStoreBuilder) => void) {
+    const b = new EntityStoreBuilder();
+    line(b, 600_000, 2_500_000, 600_280, 2_500_290);
+    b.add({ ...meta, type: ET.CIRCLE }, GK.CIRCLE, [TANK.x, TANK.y, 15], {
+      minX: TANK.x - 15,
+      minY: TANK.y - 15,
+      maxX: TANK.x + 15,
+      maxY: TANK.y + 15,
+    });
+    extra?.(b);
+    const store = b.finish();
+    return { store, extents: storeExtents(store) };
+  }
+  /** Chord segments of the batches in drawing units (origin + float32 offsets). */
+  const chords = (batches: SegmentBatch[]) =>
+    batches.flatMap((b) => {
+      const f32 = new Float32Array(b.data);
+      return Array.from({ length: b.count }, (_, k) => {
+        const o = (k * SEG_STRIDE) / 4;
+        return {
+          x0: b.ox + f32[o],
+          y0: b.oy + f32[o + 1],
+          x1: b.ox + f32[o + 2],
+          y1: b.oy + f32[o + 3],
+          d: f32[o + 6],
+        };
+      });
+    });
+  /** Largest distance (drawing units) from the circle of the drawn chords, where they run inside `r`. */
+  const sagitta = (cs: ReturnType<typeof chords>, c: Pt, radius: number, r: Bounds) => {
+    let worst = 0;
+    for (const s of cs) {
+      const t = clipSegment(s.x0, s.y0, s.x1, s.y1, r);
+      if (!t) continue;
+      for (let k = 0; k <= 8; k++) {
+        const u = t[0] + ((t[1] - t[0]) * k) / 8;
+        const x = s.x0 + (s.x1 - s.x0) * u;
+        const y = s.y0 + (s.y1 - s.y0) * u;
+        worst = Math.max(worst, Math.abs(Math.hypot(x - c.x, y - c.y) - radius));
+      }
+    }
+    return worst;
+  };
+
+  it('finds where an arc runs inside a rectangle', () => {
+    const r: Bounds = { minX: 0, minY: 0, maxX: 10, maxY: 10 };
+    // Unit circle around (0, 0): the quarter in the first quadrant is inside.
+    const q = arcIntervalsInRect(0, 0, 5, 0, 2 * Math.PI, r);
+    expect(q).toHaveLength(1);
+    expect(q[0][0]).toBeCloseTo(0, 12);
+    expect(q[0][1]).toBeCloseTo(0.25, 12);
+    // Clockwise from 90° to -90°: the first half (90° → 0°) is inside.
+    const cw = arcIntervalsInRect(0, 0, 5, Math.PI / 2, -Math.PI, r);
+    expect(cw).toHaveLength(1);
+    expect(cw[0][0]).toBeCloseTo(0, 12);
+    expect(cw[0][1]).toBeCloseTo(0.5, 12);
+    // A circle wholly inside, one wholly outside, and one around the rectangle.
+    expect(arcIntervalsInRect(5, 5, 2, 1, 2 * Math.PI, r)).toEqual([[0, 1]]);
+    expect(arcIntervalsInRect(50, 50, 2, 0, 2 * Math.PI, r)).toEqual([]);
+    expect(arcIntervalsInRect(5, 5, 100, 0, 2 * Math.PI, r)).toEqual([]);
+    // Starting inside the rectangle (at 225°), a full circle around its corner (10, 10) is inside at
+    // its start and again at its end.
+    const two = arcIntervalsInRect(10, 10, 3, 1.25 * Math.PI, 2 * Math.PI, r);
+    expect(two).toHaveLength(2);
+    expect(two[0][0]).toBe(0);
+    expect(two[0][1]).toBeCloseTo(0.125, 12);
+    expect(two[1][0]).toBeCloseTo(0.875, 12);
+    expect(two[1][1]).toBe(1);
+  });
+
+  it('switches when curves would show their chords, and only for drawings with curves', () => {
+    const { store, extents } = plan();
+    const full = buildRenderData(store, extents);
+    expect(full.curves).toBe(true);
+    const needs = { radius: precisionRadius(full), curveTol: full.curveTol, curves: full.curves };
+    const at = CURVE_THRESHOLD_PX / full.curveTol; // px per unit where chords reach the threshold
+    expect(needsDetail(needs, at * 0.99)).toBe(false);
+    expect(needsDetail(needs, at * 1.01)).toBe(true);
+    expect(needsDetail({ ...needs, curves: false }, at * 1.01)).toBe(false);
+    // Lines only, or curves only on hidden entities: no curves.
+    const b = new EntityStoreBuilder();
+    line(b, 0, 0, 10, 10);
+    b.add({ ...meta, type: ET.CIRCLE, flags: FLAG.HIDDEN }, GK.CIRCLE, [5, 5, 1], {
+      minX: 4,
+      minY: 4,
+      maxX: 6,
+      maxY: 6,
+    });
+    expect(hasCurves(b.finish())).toBe(false);
+    const poly = new EntityStoreBuilder();
+    poly.add({ ...meta, type: ET.LWPOLYLINE }, GK.POLY, [2, 0, 0, 1, 10, 0, 0], {
+      minX: 0,
+      minY: -5,
+      maxX: 10,
+      maxY: 5,
+    });
+    expect(hasCurves(poly.finish())).toBe(true);
+  });
+
+  it.each([2e3, 2e4, MAX_SCALE])(
+    'a 15 m tank shell stays within FINE_CURVE_PX of the true circle (%d px/m)',
+    (px) => {
+      const { store, extents } = plan();
+      const full = buildRenderData(store, extents);
+      // A view on the shell's north-east, at its full-build chord midpoints' worst.
+      const p = { x: TANK.x + 15 * Math.cos(0.8), y: TANK.y + 15 * Math.sin(0.8) };
+      const v: ViewTransform = { cx: p.x, cy: p.y, scale: px, rotation: 0 };
+      const view = viewInDrawing(v, W, H, I);
+      const staticPx = sagitta(chords(full.segments), TANK, 15, view) * px;
+      const rect = windowAround(view);
+      const detail = buildDetailData(store, extents, [0, 1], rect, {}, undefined, FINE_CURVE_PX / px);
+      const cs = chords(detail.segments);
+      const detailPx = sagitta(cs, TANK, 15, view) * px;
+      // Full batches: chords of 0.8 mm deviation (2 × 10⁻⁶ of the 409 m diagonal).
+      if (px >= 2e4) expect(staticPx).toBeGreaterThan(5);
+      expect(detailPx).toBeLessThanOrEqual(FINE_CURVE_PX + 0.01);
+      // Linetype distance runs on along the arc: each chord starts where the previous one ended.
+      const arc = cs.filter((s) => Math.hypot(s.x0 - TANK.x, s.y0 - TANK.y) > 14);
+      for (let k = 1; k < arc.length; k++)
+        if (Math.hypot(arc[k].x0 - arc[k - 1].x1, arc[k].y0 - arc[k - 1].y1) < 1e-6)
+          expect(arc[k].d - arc[k - 1].d).toBeCloseTo(
+            Math.hypot(arc[k - 1].x1 - arc[k - 1].x0, arc[k - 1].y1 - arc[k - 1].y0),
+            3,
+          );
+      // Segments stay bounded however far in the view is zoomed.
+      expect(detail.segmentCount).toBeLessThan(5_000);
+    },
+  );
+
+  it('bulge arcs of polylines and solid fills are redone inside the window; fills elsewhere are reused', () => {
+    // A closed polyline and a solid fill, each a full circle of radius 15 from two bulge-1 vertices.
+    const ring = [TANK.x + 15, TANK.y, 1, TANK.x - 15, TANK.y, 1];
+    const box = { minX: TANK.x - 15, minY: TANK.y - 15, maxX: TANK.x + 15, maxY: TANK.y + 15 };
+    const { store, extents } = plan((b) => {
+      b.add({ ...meta, type: ET.LWPOLYLINE, flags: FLAG.CLOSED }, GK.POLY, [2, ...ring], box);
+      b.add({ ...meta, type: ET.SOLID }, GK.FILL, [1, 2, ...ring], box);
+    });
+    const px = 2e4;
+    const p = { x: TANK.x + 15 * Math.cos(2.2), y: TANK.y + 15 * Math.sin(2.2) };
+    const view = viewInDrawing({ cx: p.x, cy: p.y, scale: px, rotation: 0 }, W, H, I);
+    const rect = windowAround(view);
+    const fills = new Map<number, { coords: number[]; idx: number[] }>();
+    const fineTol = FINE_CURVE_PX / px;
+    const detail = buildDetailData(store, extents, [2, 3], rect, {}, fills, fineTol);
+    expect(sagitta(chords(detail.segments), TANK, 15, view) * px).toBeLessThanOrEqual(FINE_CURVE_PX + 0.01);
+    // The fill reaches the circle to within the fine tolerance: every vertex on or inside it, and
+    // its area within the window equals the exact area to within the chord deficit.
+    // Areas relative to the tank centre (UTM-sized products would lose the digits compared here).
+    const area = (tris: typeof detail.triangles) => {
+      let a = 0;
+      for (const t of tris) {
+        const f32 = new Float32Array(t.data);
+        for (let k = 0; k < t.count; k += 3) {
+          const v = [0, 1, 2].map((j) => [
+            t.ox - TANK.x + f32[((k + j) * TRI_STRIDE) / 4],
+            t.oy - TANK.y + f32[((k + j) * TRI_STRIDE) / 4 + 1],
+          ]);
+          a +=
+            Math.abs((v[1][0] - v[0][0]) * (v[2][1] - v[0][1]) - (v[2][0] - v[0][0]) * (v[1][1] - v[0][1])) /
+            2;
+        }
+      }
+      return a;
+    };
+    const n = 200_000;
+    const circle = Array.from({ length: n }, (_, k) => [
+      15 * Math.cos((2 * Math.PI * k) / n),
+      15 * Math.sin((2 * Math.PI * k) / n),
+    ]).flat();
+    const local = {
+      minX: rect.minX - TANK.x,
+      minY: rect.minY - TANK.y,
+      maxX: rect.maxX - TANK.x,
+      maxY: rect.maxY - TANK.y,
+    };
+    const c = clipPolygon(circle, local);
+    let exact = 0;
+    for (let i = 0; i < c.length / 2; i++) {
+      const j = (i + 1) % (c.length / 2);
+      exact += (c[i * 2] * c[j * 2 + 1] - c[j * 2] * c[i * 2 + 1]) / 2;
+    }
+    // The fill meets the circle to within the fine tolerance along the arc crossing the window; the
+    // full build's chords (0.8 mm) leave a gap about 100 times larger.
+    const bound = 2 * Math.hypot(rect.maxX - rect.minX, rect.maxY - rect.minY) * fineTol;
+    expect(Math.abs(area(detail.triangles) - exact)).toBeLessThan(bound);
+    const coarse = buildDetailData(store, extents, [3], rect).triangles;
+    expect(Math.abs(area(coarse) - exact)).toBeGreaterThan(20 * bound);
+    expect(fills.has(3)).toBe(false); // redone for this window, not cached
+    // A window away from the fill's arcs reuses the full build's triangulation.
+    const inner = { minX: TANK.x - 1, minY: TANK.y - 1, maxX: TANK.x + 1, maxY: TANK.y + 1 };
+    buildDetailData(store, extents, [3], inner, {}, fills, fineTol);
+    expect(fills.has(3)).toBe(true);
   });
 });

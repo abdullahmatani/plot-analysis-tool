@@ -12,12 +12,13 @@ import { drawingPlacement, visibleLayerFlags } from '@/underlay/pick';
 import { buildDetailData, precisionRadius, type FillCache, type RenderData } from '@/underlay/render-data';
 
 import {
-  batchErrorPx,
-  DETAIL_THRESHOLD_PX,
+  FINE_CURVE_PX,
+  needsDetail,
   placementStretch,
   viewInDrawing,
   windowAround,
   windowServes,
+  type DetailNeeds,
   type DetailWindow,
 } from './detail';
 import { UnderlayRenderer, type DrawingRenderState } from './underlay-renderer';
@@ -88,7 +89,7 @@ export class CanvasController {
   private pdfHidden = new Map<string, string>();
   /** Detail windows in use, by drawing (row 18), and the fill triangulations they reuse. */
   private detail = new Map<string, DetailWindow & { fills: FillCache }>();
-  private radius = new WeakMap<RenderData, number>();
+  private needs = new WeakMap<RenderData, DetailNeeds>();
   private unsubs: (() => void)[] = [];
   private ro: ResizeObserver;
   private pointers = new Map<number, Pt>();
@@ -257,7 +258,8 @@ export class CanvasController {
 
   /**
    * Switches drawings to detail batches when the view is zoomed in past the precision of their full
-   * batches, and back (row 18; see detail.ts). A window is rebuilt only when the view leaves it.
+   * batches or the smoothness of their curves, and back (rows 14, 18, 27; see detail.ts). A window
+   * is rebuilt only when the view leaves it or zooms well into it.
    */
   private syncDetail(f: FrameInfo, states: DrawingRenderState[]) {
     const r = this.renderer!;
@@ -267,10 +269,13 @@ export class CanvasController {
       const m = models[s.id];
       const render = m?.render;
       if (!s.visible || !render || !m.result || !m.index || !this.uploaded.has(s.id)) continue;
-      let radius = this.radius.get(render);
-      if (radius === undefined) this.radius.set(render, (radius = precisionRadius(render)));
+      let needs = this.needs.get(render);
+      if (!needs) {
+        needs = { radius: precisionRadius(render), curveTol: render.curveTol, curves: render.curves };
+        this.needs.set(render, needs);
+      }
       const pxPerUnit = f.view.scale * placementStretch(s.placement);
-      if (batchErrorPx(radius, pxPerUnit) <= DETAIL_THRESHOLD_PX) continue;
+      if (!needsDetail(needs, pxPerUnit)) continue;
       shown.add(s.id);
       const view = viewInDrawing(f.view, f.width, f.height, s.placement);
       const prev = this.detail.get(s.id);
@@ -278,7 +283,8 @@ export class CanvasController {
       const rect = windowAround(view);
       const fills = prev?.version === m.version ? prev.fills : new Map();
       const ids = m.index.search(rect.minX, rect.minY, rect.maxX, rect.maxY);
-      r.setDetail(s.id, buildDetailData(m.result.store, render.extents, ids, rect, {}, fills));
+      const fineTol = FINE_CURVE_PX / pxPerUnit;
+      r.setDetail(s.id, buildDetailData(m.result.store, render.extents, ids, rect, {}, fills, fineTol));
       this.detail.set(s.id, { rect, pxPerUnit, version: m.version, fills });
     }
     for (const id of [...this.detail.keys()]) {

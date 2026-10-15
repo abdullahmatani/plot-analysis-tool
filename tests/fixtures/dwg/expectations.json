@@ -6481,9 +6481,1101 @@
   },
   {
    "file": "example_r14.dwg",
-   "note": "Release 14 file on which LibreDWG crashes (WebAssembly trap)",
+   "note": "Release 14 copy of the example drawing: the published libredwg-web 0.8.0 build crashed on it; the rebuilt reader (vendor/libredwg-web) reads it",
+   "reference": "regression values, checked against example_2004.dwg (AutoCAD DXF reference): same entity counts, types, extents, geometry, colours, lineweights and texts. R14 differences: no $INSUNITS, upper-case layer and linetype names, renumbered handles (ARC 449), and POLYLINE 41A lacks its last vertex (LibreDWG R14 limitation; the import report shows the reader warning with the DXF/PDF guidance)",
    "version": "AC1014",
-   "error": "reader-crashed"
+   "insunits": 0,
+   "layouts": [
+    "Model",
+    "Layout1",
+    "Layout2"
+   ],
+   "layers": [
+    {
+     "name": "0",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "TAVOLO_2",
+     "color": 16776960,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "TAVOLO_3",
+     "color": 65535,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": true
+    },
+    {
+     "name": "DEFPOINTS",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": false,
+     "plot": false
+    },
+    {
+     "name": "ADSK_SYSTEM_LIGHTS",
+     "color": 16777215,
+     "linetype": "CONTINUOUS",
+     "off": false,
+     "frozen": true,
+     "plot": true
+    }
+   ],
+   "linetypes": [
+    {
+     "name": "CONTINUOUS",
+     "pattern": []
+    }
+   ],
+   "counts": {
+    "LINE": 8,
+    "LWPOLYLINE": 11,
+    "ARC": 2,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 1,
+    "MTEXT": 1,
+    "TEXT": 2,
+    "INSERT": 10,
+    "ATTRIB": 2,
+    "HATCH": 1,
+    "3DFACE": 2,
+    "DIMENSION": 9,
+    "POLYLINE": 1,
+    "SOLID": 1,
+    "ACAD_TABLE": 1,
+    "ATTDEF": 2
+   },
+   "skipped": {
+    "XLINE": 1,
+    "RAY": 1,
+    "WIPEOUT": 2,
+    "3DSOLID": 1,
+    "TOLERANCE": 1,
+    "MULTILEADER": 1,
+    "MLINE": 1,
+    "REGION": 2,
+    "ARC_DIMENSION": 1,
+    "POLYLINE (polyface mesh)": 1,
+    "LIGHT": 1
+   },
+   "storeCount": 1558,
+   "storeTypes": {
+    "LINE": 70,
+    "LWPOLYLINE": 11,
+    "ARC": 3,
+    "SPLINE": 2,
+    "ELLIPSE": 1,
+    "POINT": 126,
+    "MTEXT": 17,
+    "TEXT": 4,
+    "ATTRIB": 2,
+    "CIRCLE": 8,
+    "HATCH": 1298,
+    "3DFACE": 2,
+    "SOLID": 13,
+    "POLYLINE": 1
+   },
+   "inBlock": 226,
+   "derived": 1297,
+   "inserts": 20,
+   "extents": [
+    -2680430.0681091985,
+    -1672547.1795475576,
+    731426.8775168755,
+    1094412.8177514465
+   ],
+   "readerErrors": true,
+   "entities": [
+    {
+     "handle": "8B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        370.8586116534307,
+        730.6303035220437,
+        450.0397564202603,
+        619.219273076899
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8D",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        7,
+        571.6812651496753,
+        1289.727758628673,
+        0,
+        950.4337964778983,
+        1016.513309439171,
+        0,
+        797.0517376842868,
+        941.8483272855899,
+        0,
+        600.4080708725392,
+        989.0051576564304,
+        0,
+        478.4890027274623,
+        1142.264860760166,
+        0,
+        918.970809952963,
+        1130.475653167456,
+        0,
+        571.6812651496753,
+        1289.727758628673,
+        0
+       ],
+       "color": 16776960,
+       "layer": "TAVOLO_2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "8E",
+     "type": "LWPOLYLINE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "90",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        1061.049489167742,
+        1142.369513054377,
+        830.6389483702103,
+        4.623770471193484,
+        2.0471994875150337
+       ],
+       "color": 16776960,
+       "layer": "TAVOLO_2",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "170",
+     "type": "ELLIPSE",
+     "occurrences": [
+      {
+       "kind": 4,
+       "geom": [
+        3532.16682102557,
+        2904.260916516109,
+        -1220.865643219909,
+        355.8017603696389,
+        0.5120328285529597,
+        0,
+        6.283185307179586
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "177",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        3385.39238329175,
+        3206.071452770084
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "178",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        0,
+        0,
+        2.5,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "ATRIBUTO"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "179",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        6909.323543582498,
+        4954.117753698214,
+        50,
+        0,
+        1,
+        0,
+        3,
+        0,
+        1465.765284540372,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "Teksto granda nur por testi.\nAlia linio.\nAlia pli."
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "17B",
+     "type": "TEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        5881.252623040076,
+        1296.904699727624,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0,
+       "text": "teksto simpla"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "18B",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        3913.6873392210546,
+        6894.32349636867,
+        4040.860820276823,
+        6157.305577036386
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        -562191.2703493047,
+        -1672547.1795475578,
+        731426.8775168755,
+        -1085950.4859364303
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "18C",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        4040.860820276823,
+        6157.305577036386,
+        3404.9933024557176,
+        6233.548812830417
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 1,
+       "geom": [
+        731426.8775168755,
+        -1085950.4859364303,
+        -741961.6934590824,
+        375807.83559850766
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 2450.177,
+       "flags": 2
+      }
+     ],
+     "total": 2
+    },
+    {
+     "handle": "192",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        3352.919670555355,
+        5847.99500585132,
+        100,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro de la teksto en bloko"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "1BB",
+     "type": "CIRCLE",
+     "occurrences": [
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8482.03056736465,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1381.341268226861,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 2,
+       "geom": [
+        8688.507233303753,
+        -1582.968414015893,
+        130.0490046078758
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BC",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8409.902797554154,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1391.4060092458533
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8616.379463493256,
+        -1593.033155034885
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "1BD",
+     "type": "POINT",
+     "occurrences": [
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8446.668925899081,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1323.1805144476023
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      },
+      {
+       "kind": 6,
+       "geom": [
+        8653.145591838183,
+        -1524.807660236634
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 8
+    },
+    {
+     "handle": "24F",
+     "type": "HATCH",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        6,
+        1403.271282119223,
+        1189.00937966363,
+        0,
+        1394.543262823821,
+        1405.563510462793,
+        0,
+        1202.637874609587,
+        1506.281889427836,
+        0,
+        1019.460505690754,
+        1390.446137593716,
+        0,
+        1028.188524986156,
+        1173.892006794553,
+        0,
+        1220.093913200391,
+        1073.17362782951,
+        0
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 4
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "250",
+     "type": "LINE",
+     "occurrences": [
+      {
+       "kind": 1,
+       "geom": [
+        8445.647190576812,
+        104.6775475821341,
+        8025.993874877313,
+        -346.8962774037645
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D6",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -2199.208270715069,
+        10997.25178700468,
+        0,
+        -1219.899084674718,
+        12535.43474431358,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "2D7",
+     "type": "3DFACE",
+     "occurrences": [
+      {
+       "kind": 5,
+       "geom": [
+        4,
+        -54.05474532926746,
+        11789.64909083308,
+        0,
+        -1359.800396966195,
+        10344.68927305872,
+        0,
+        -473.7587524534901,
+        10344.68927305872,
+        0,
+        -54.05474532926746,
+        11789.64909083308,
+        0
+       ],
+       "color": 16777215,
+       "layer": "0",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 1
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "386",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        622.8621358549244,
+        10028.76735134761,
+        0,
+        623.6623947804059,
+        10028.53490759822,
+        0,
+        622.564934069494,
+        10026.25035269647,
+        0
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "387",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        3,
+        1041.171480482805,
+        11468.92561556908,
+        0,
+        1041.971739408287,
+        11468.69317181969,
+        0,
+        1042.268941193717,
+        11471.21017047083,
+        0
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "388",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        830.4162903178994,
+        10749.31137095713,
+        2.5,
+        1.2881140174800059,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "1504,68"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "398",
+     "type": "ARC",
+     "occurrences": [
+      {
+       "kind": 3,
+       "geom": [
+        5929.403601723592,
+        3203.807283161913,
+        806.6011875207088,
+        4.131293495034893,
+        1.1652649269650808
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "42B",
+     "type": "MTEXT",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        4405.9126971561,
+        4179.733256596116,
+        2.5,
+        0,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "4177,65"
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "4EF",
+     "type": "SOLID",
+     "occurrences": [
+      {
+       "kind": 8,
+       "geom": [
+        1,
+        4,
+        8858.216434189482,
+        4156.523078895603,
+        0,
+        9365.54011130218,
+        4241.030348923501,
+        0,
+        8815.93948451335,
+        3818.494106224847,
+        0,
+        9471.232520617397,
+        3924.128166899507,
+        0
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 0
+      }
+     ],
+     "total": 1
+    },
+    {
+     "handle": "757",
+     "type": "ATTRIB",
+     "occurrences": [
+      {
+       "kind": 7,
+       "geom": [
+        -320368.7698629209,
+        972635.9097041729,
+        184349.2018676835,
+        5.433976509909762,
+        1.766494090559283,
+        0,
+        0,
+        0,
+        0,
+        1
+       ],
+       "color": 65535,
+       "layer": "TAVOLO_3",
+       "lineweight": -3,
+       "linetype": "CONTINUOUS",
+       "ltscale": 1,
+       "flags": 2,
+       "text": "valoro"
+      }
+     ],
+     "total": 1
+    }
+   ],
+   "splines": [
+    {
+     "handle": "16E",
+     "points": [
+      [
+       -1160.70828949499,
+       1466.29959801825
+      ],
+      [
+       -1084.8247225116372,
+       1360.2015324565023
+      ],
+      [
+       -794.2686155251181,
+       1190.816382385141
+      ],
+      [
+       -931.4962791307373,
+       1065.9944519842038
+      ],
+      [
+       -1256.4748124512175,
+       1018.6716394458375
+      ],
+      [
+       -1339.7342729967488,
+       1123.2818267086757
+      ],
+      [
+       -1229.3947057598714,
+       1674.563090697212
+      ],
+      [
+       -1258.4773783589947,
+       1873.8273985890175
+      ],
+      [
+       -1446.5048888520419,
+       1892.761217745011
+      ],
+      [
+       -1526.5191496271632,
+       1792.1941608441887
+      ],
+      [
+       -1449.4712142059793,
+       1443.7454597647288
+      ]
+     ]
+    },
+    {
+     "handle": "894",
+     "points": [
+      [
+       -2514.288789172104,
+       1304.403225798
+      ],
+      [
+       -2495.1103688514513,
+       1628.9993912037921
+      ],
+      [
+       -2438.435252031751,
+       1789.6203925401028
+      ],
+      [
+       -2365.3778682294715,
+       1875.164254069921
+      ],
+      [
+       -2122.1955258702174,
+       1999.227123328168
+      ],
+      [
+       -1980.0584285844536,
+       2088.5839765459086
+      ],
+      [
+       -1918.3823687788613,
+       2203.293271965063
+      ],
+      [
+       -1839.1742659178383,
+       2343.210560319126
+      ],
+      [
+       -1576.3221330800484,
+       2583.7931839403595
+      ],
+      [
+       -1499.7964464934457,
+       2672.3124677530463
+      ],
+      [
+       -1541.918454872604,
+       2698.772966376651
+      ]
+     ]
+    }
+   ],
+   "patternSegments": {
+    "24F": 1297
+   },
+   "layoutChecks": {
+    "Layout1": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    },
+    "Layout2": {
+     "storeCount": 0,
+     "skipped": {
+      "VIEWPORT": 1
+     }
+    }
+   }
   }
  ]
 }

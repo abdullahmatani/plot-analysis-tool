@@ -102,17 +102,15 @@ for (const file of walk(dist)) {
 }
 if (!gplChunks) problems.push('libredwg worker chunk not found (DWG import missing from the build?)');
 
-// Row 88: no eval. Global eval and the Function constructor are rejected except for
-// (a) core-js's unreachable global-object fallback `(function(){return this})()||Function("return this")()`
-//     (every supported browser has globalThis), and
-// (b) the LibreDWG worker's embind glue (documented decision U-1 in docs/USER-DECISIONS.md; blocked by
-//     the CSP header unless that decision changes).
+// Row 88: no eval. Global eval and the Function constructor are rejected in every chunk, workers
+// included. The one exception is core-js's unreachable global-object fallback
+// `(function(){return this})()||Function("return this")()` (every supported browser has globalThis).
+// The DWG reader's glue is built without them (vendor/libredwg-web, decision U-1).
 const EVAL_RE = /(?<![\w$.}])eval\(|new Function\(|(?<![\w$.])Function\((?!"return this"\)\(\))/g;
-const EVAL_ALLOWED = [/(^|\/)libredwg\.worker-[\w-]+\.js$/];
 for (const file of walk(dist)) {
   if (!/\.(js|mjs)$/.test(file)) continue;
   const rel = path.relative(dist, file);
-  if (NOTICE_FILES.some((re) => re.test(rel)) || EVAL_ALLOWED.some((re) => re.test(rel))) continue;
+  if (NOTICE_FILES.some((re) => re.test(rel))) continue;
   const text = readFileSync(file, 'utf8');
   for (const m of text.matchAll(EVAL_RE)) {
     // `eval(a, b = 0) {` is a method named eval (e.g. spline evaluation), not a call.
@@ -122,10 +120,24 @@ for (const file of walk(dist)) {
   }
 }
 
+// Hosted mode (wrangler.jsonc): dist/_headers must send exactly the page's policy, as a header.
+const metaCsp = /http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(
+  readFileSync(path.join(dist, 'index.html'), 'utf8'),
+)?.[1];
+let headers = '';
+try {
+  headers = readFileSync(path.join(dist, '_headers'), 'utf8');
+} catch {
+  problems.push('_headers: missing (hosted mode would serve the app without its CSP header)');
+}
+if (!metaCsp) problems.push('index.html: Content-Security-Policy meta tag missing');
+else if (headers && !headers.includes(`  Content-Security-Policy: ${metaCsp}; frame-ancestors 'none'\n`))
+  problems.push('_headers: Content-Security-Policy differs from the policy in index.html');
+
 if (problems.length) {
   console.error(`check-dist: ${problems.length} problem(s) found:\n  ${[...new Set(problems)].join('\n  ')}`);
   process.exit(1);
 }
 console.log(
-  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk; no eval or Function constructor outside it.`,
+  `check-dist: OK — no external URLs that could be loaded (${inert.size} inert identifier/notice URLs ignored); LibreDWG isolated in its worker chunk; no eval or Function constructor in any chunk; _headers matches the page CSP.`,
 );

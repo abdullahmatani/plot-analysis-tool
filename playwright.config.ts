@@ -48,8 +48,20 @@ export default defineConfig({
           { name: 'webkit', use: { ...devices['Desktop Safari'] }, grep: /@smoke/ },
         ]
       : []),
-    // Performance budget (row 82): `npm run e2e:perf`; PAT_PERF_STRICT=1 on the reference machine.
-    { name: 'perf', testMatch: /perf\.spec/, use: { ...devices['Desktop Chrome'] }, timeout: 10 * 60_000 },
+    // Performance budget (row 82): `npm run e2e:perf`; on the reference machine `npm run perf:reference`,
+    // which enforces the FDR budgets (PAT_PERF_STRICT=1) in a visible window so WebGL uses the GPU
+    // (PAT_HEADED=1; headless browsers usually render in software), optionally in the installed
+    // Edge or Chrome (PAT_CHANNEL=msedge|chrome).
+    {
+      name: 'perf',
+      testMatch: /perf\.spec/,
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: !process.env.PAT_HEADED,
+        ...(process.env.PAT_CHANNEL ? { channel: process.env.PAT_CHANNEL } : {}),
+      },
+      timeout: 10 * 60_000,
+    },
     { name: 'faults', testMatch: /kill\.spec/, use: { ...devices['Desktop Chrome'] }, timeout: 30 * 60_000 },
   ],
 });

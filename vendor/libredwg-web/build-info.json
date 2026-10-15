@@ -1,0 +1,14 @@
+{
+  "package": "@mlightcad/libredwg-web",
+  "version": "0.8.0",
+  "source": "https://github.com/mlightcad/libredwg-web",
+  "commit": "d0b7c53d55a923f323256d19a310af7bc0137245",
+  "emscripten": "6.0.12",
+  "zlib": "1.3.2",
+  "changes": "Linked with -sDYNAMIC_EXECUTION=0 (no new Function in the glue) and with em++; otherwise the package's own build commands. No source changes.",
+  "build": "scripts/libredwg/build.sh",
+  "sha256": {
+    "libredwg-web.js": "b9e41d1f060ae256602a22fb9713ec5ad512dec181539fcafcf319104b169ea4",
+    "libredwg-web.wasm": "1b7306b74ba13c7c419aab1bdb53351b56dbc7d4faad9dd75dd42021bdeefab1"
+  }
+}

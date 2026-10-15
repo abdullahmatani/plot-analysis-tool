@@ -2,8 +2,8 @@
 /**
  * Row 8 acceptance (automated part): unzip the offline bundle into a temp folder, start each
  * available launcher (Node, Python 3, PowerShell 7 if installed), and verify with a headless browser
- * that the app loads, works, installs its service worker, and keeps working with the network
- * disconnected - with zero requests to any other host.
+ * that the app loads with its CSP sent as a header, works, installs its service worker, and keeps
+ * working with the network disconnected, including DWG import - with zero requests to any other host.
  */
 import { chromium } from '@playwright/test';
 import { spawn, spawnSync } from 'node:child_process';
@@ -59,6 +59,8 @@ for (const l of launchers) {
       if (!up) await new Promise((r) => setTimeout(r, 200));
     }
     if (!up) throw new Error(`the launcher did not start. Its output:\n${output}`);
+    // The launchers send the policy as a header, which also governs the workers (decision U-1).
+    const cspHeader = (await fetch(url)).headers.get('content-security-policy') ?? '';
     const context = await browser.newContext();
     const egress = [];
     context.on('request', (r) => {
@@ -85,9 +87,21 @@ for (const l of launchers) {
     await page.getByTestId('create-project').click();
     await page.waitForSelector('[data-testid="workspace"]', { timeout: 20000 });
     await page.waitForSelector('[data-testid="save-status"][data-state="saved"]', { timeout: 20000 });
-    const ok = egress.length === 0 && errors.length === 0 && !!csp;
+    // Still offline: a DWG imports under the launcher's CSP header (rows 8, 22).
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByTestId('canvas').focus();
+    await page.keyboard.press('Control+i');
+    await (await chooser).setFiles(path.join(root, 'tests/fixtures/dwg/example_2018.dwg'));
+    await page.waitForFunction(
+      () => ['ready', 'error'].includes(window.__pat.models()[0]?.status),
+      undefined,
+      { timeout: 60000 },
+    );
+    const dwg = await page.evaluate(() => window.__pat.models()[0]);
+    const dwgOk = dwg.status === 'ready' && dwg.segments > 1000;
+    const ok = egress.length === 0 && errors.length === 0 && !!csp && cspHeader === csp && dwgOk;
     console.log(
-      `${ok ? 'PASS' : 'FAIL'} ${l.name}: loaded, service worker active, works offline${egress.length ? `; egress: ${egress.join(', ')}` : ''}${errors.length ? `; errors: ${errors.join('; ')}` : ''}`,
+      `${ok ? 'PASS' : 'FAIL'} ${l.name}: loaded, CSP header sent, service worker active, works offline, DWG imported${dwgOk ? '' : ` (DWG: ${dwg.status}${dwg.error ? ` ${dwg.error}` : ''})`}${cspHeader === csp ? '' : '; CSP header differs from the page policy'}${egress.length ? `; egress: ${egress.join(', ')}` : ''}${errors.length ? `; errors: ${errors.join('; ')}` : ''}`,
     );
     if (!ok) failures++;
   } catch (e) {

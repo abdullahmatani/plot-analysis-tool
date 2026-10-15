@@ -4,9 +4,9 @@
 |---|---|
 | Document | FDR-PAT-001 |
 | Product | Plot Analysis Tool (working name) |
-| Current product version | **0.1.0** |
+| Current product version | **0.1.1** |
 | Target release | **1.0.0** |
-| FDR revision | Rev C — 14 Oct 2026 |
+| FDR revision | Rev D — 14 Oct 2026 |
 | Document status | Draft for review |
 | Owner | Abdullah |
 
@@ -130,7 +130,7 @@ Give engineers a fast, private, offline tool to carry out spatial analysis on **
 | UI | shadcn/ui, Tailwind CSS v4, Radix, lucide-react icons | Tailwind v4 uses the `@tailwindcss/vite` plugin and CSS-first config. |
 | State | Zustand + Immer; command pattern for undo/redo | Derived geometry via memoised selectors. |
 | DXF + DWG data model | `@mlightcad/realdwg-web` (MIT) data model for both formats | One entity model for DXF and DWG. |
-| DWG parsing | `@mlightcad/libredwg-converter` / `libredwg-web` (LibreDWG compiled to WASM) | **GPL-3.0**; runs in its own Web Worker bundle. See decision D-1. |
+| DWG parsing | `@mlightcad/libredwg-converter` / `libredwg-web` (LibreDWG compiled to WASM) | **GPL-3.0**; runs in its own Web Worker bundle. See decision D-1. Rebuilt from source without run-time code generation so the strict CSP applies (`vendor/libredwg-web`). |
 | DXF parsing | realdwg-web's DXF reader, or `dxf-parser` as fallback | ASCII DXF required. |
 | PDF | `pdfjs-dist` with worker, CMaps and standard fonts bundled locally | Vector paths read from `getOperatorList()` for snapping/tracing. |
 | Rendering | Underlay: WebGL (Three.js orthographic camera, batched lines). Overlay: Canvas 2D | See decision D-2. |
@@ -367,7 +367,7 @@ Rows 90–102 were added in Rev B. They take the next free numbers (rows are nev
 
 | # | Feature | Description and acceptance | Target | Status |
 |---|---|---|---|---|
-| 22 | DWG import | Native DWG via LibreDWG WASM in a dedicated worker, converted into the same entity model as DXF (row 14 entity coverage). Target formats up to the 2018 DWG format (AC1032); newer/unknown formats produce a clear message. Accept: reference DWG set renders matching a CAD viewer. | 0.3.0 | Incomplete |
+| 22 | DWG import | Native DWG via LibreDWG WASM in a dedicated worker, converted into the same entity model as DXF (row 14 entity coverage). Target formats up to the 2018 DWG format (AC1032); newer/unknown formats produce a clear message. Accept: reference DWG set renders matching a CAD viewer. | 0.3.0 | Complete |
 | 23 | DWG fallback and diagnostics | On failure or partial parse: show what loaded, what was skipped, and guidance to supply DXF or PDF of the same drawing. Accept: no DWG causes a hang or blank screen without explanation. | 0.3.0 | Complete |
 | 24 | CAD text fonts | Open-licence fallback fonts bundled for SHX/TTF text styles; font substitution table; never downloads fonts. Accept: text in reference drawings is legible and correctly positioned. | 0.3.0 | Complete |
 | 25 | Licence isolation and notices | GPL-3.0 DWG parser shipped only in its own worker bundle; About → Licences lists every third-party component and licence. Accept: licence list generated at build time and matches the dependency tree. | 0.3.0 | Complete |
@@ -525,3 +525,4 @@ Rows 90–102 were added in Rev B. They take the next free numbers (rows are nev
 | A | 13 Oct 2026 | First draft. Product at 0.0.0; row 1 Complete, rows 2–89 Incomplete. |
 | B | 14 Oct 2026 | Added autosave and data-loss protection: constraint C7, NFR-9 and NFR-10, Section 5.5, definitions, and rows 90–102 (0.1.0). Revised rows 9, 82, 87 and 89, the status bar, and the 0.1.0 and 1.0.0 roadmap entries. Product remains at 0.0.0. |
 | C | 14 Oct 2026 | Statuses updated after implementation: every row Complete except 17, 21 and 82 (GPU frame rates need the reference-machine performance run), 22 (DWG reader blocked by the CSP header, decision U-1), 88 (review sign-off) and 89 (release). Product version 0.1.0: rows 17, 21 and 22 keep 0.2.0 and later milestones open, although most of their rows are Complete. Row 54's accuracy target is defined in `docs/TEST-PLAN.md` §3. Autosave also keeps a backup copy outside IndexedDB, because Chromium can delete the database after a crash (found by row 102). "Merged" means merged into the integration branch `claude/youthful-mayer-flojae`, which fast-forwards onto `main` (decision U-6). Commit references per row are in `CHANGELOG.md`; open items are in `docs/USER-DECISIONS.md`. |
+| D | 14 Oct 2026 | Row 22 Complete: the DWG reader is rebuilt from the libredwg-web 0.8.0 sources without run-time code generation (decision U-1, option 1), so DWG import works under the strict CSP header in the offline bundle, `vite preview` and hosted mode. NFR-3 now has a performance test (10 MB DWG), and `npm run perf:reference` runs the reference-machine check on any OS in a visible browser window. Hosted mode (Cloudflare) serves the built app with the app's CSP as a header. Still Incomplete: 17, 21 and 82 (reference-machine run, U-2), 88 (reviewer sign-off and D-1 legal advice) and 89 (release). Product version 0.1.1 (patch: no new rows; the 0.2.0 milestone still waits for rows 17 and 21). Statuses on a feature branch take effect when it is merged into `main`, which now holds the Rev C work (pull request #1). |

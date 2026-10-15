@@ -1,13 +1,15 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { brotliDecompressSync } from 'node:zlib';
 
 import type { Page } from '@playwright/test';
 
 import { createProject, expect, launchPersistent, openApp, test } from './fixtures';
 
 /**
- * Performance budget (row 82). Runs in the `perf` Playwright project (`npm run e2e:perf`).
+ * Performance budget (row 82). Runs in the `perf` Playwright project (`npm run e2e:perf`; on the
+ * reference machine `npm run perf:reference`, see scripts/perf-reference.mjs).
  *
  * Budgets are the FDR targets for the reference machine (8 GB laptop, integrated GPU). CI runners
  * render WebGL in software (SwiftShader) and are slower, so unless PAT_PERF_STRICT=1 the frame-rate
@@ -18,15 +20,27 @@ import { createProject, expect, launchPersistent, openApp, test } from './fixtur
 const STRICT = !!process.env.PAT_PERF_STRICT;
 const FACTOR = STRICT ? 1 : Number(process.env.PAT_PERF_FACTOR ?? 4);
 const results: Record<string, number> = {};
+/** WebGL renderer of the run, so a result can be matched to the GPU that produced it. */
+const environment: { renderer?: string; softwareRenderer?: boolean } = {};
 const OUT = path.resolve('test-results');
 
 test.afterAll(() => {
   mkdirSync(OUT, { recursive: true });
-  writeFileSync(
-    path.join(OUT, 'perf.json'),
-    JSON.stringify({ strict: STRICT, factor: FACTOR, results }, null, 2),
-  );
-  console.log('performance results', results);
+  // A failed test ends its worker and the next tests run in a new one, each with its own afterAll.
+  // Merge with what earlier workers of this run wrote (Playwright empties test-results/ at the start
+  // of every run), so a missed budget is still reported.
+  const file = path.join(OUT, 'perf.json');
+  const earlier = existsSync(file)
+    ? (JSON.parse(readFileSync(file, 'utf8')) as { environment?: object; results?: object })
+    : {};
+  const merged = {
+    strict: STRICT,
+    factor: FACTOR,
+    environment: { ...earlier.environment, ...environment },
+    results: { ...earlier.results, ...results },
+  };
+  writeFileSync(file, JSON.stringify(merged, null, 2));
+  console.log('performance results', merged.environment, merged.results);
 });
 
 function syntheticDxf(mb: number): string {
@@ -38,6 +52,19 @@ function syntheticDxf(mb: number): string {
   return file;
 }
 
+/** The NFR-3 reference DWG (10 MB, AutoCAD 2000 format), stored Brotli-compressed (tests/fixtures/dwg/README.md). */
+function largeDwg(): string {
+  const file = path.resolve('test-results', 'perf-10mb.dwg');
+  if (!existsSync(file)) {
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(
+      file,
+      brotliDecompressSync(readFileSync(path.resolve('tests/fixtures/dwg/perf/plot-plan-10mb.dwg.br'))),
+    );
+  }
+  return file;
+}
+
 /** The WebGL renderer string; software renderers (SwiftShader, llvmpipe) make GPU timings meaningless. */
 async function glRenderer(page: Page): Promise<{ name: string; software: boolean }> {
   const name = await page.evaluate(() => {
@@ -45,7 +72,10 @@ async function glRenderer(page: Page): Promise<{ name: string; software: boolean
     const ext = gl?.getExtension('WEBGL_debug_renderer_info');
     return gl && ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : 'unknown';
   });
-  return { name, software: /swiftshader|llvmpipe|software|basic render/i.test(name) };
+  const software = /swiftshader|llvmpipe|software|basic render/i.test(name);
+  environment.renderer = name;
+  environment.softwareRenderer = software;
+  return { name, software };
 }
 
 /** On software GL, measure the CPU path only (WebGL draw calls disabled) — see the file comment. */
@@ -116,6 +146,29 @@ test('NFR-2: 20 MB ASCII DXF parsed and displayed ≤ 10 s without main-thread b
   expect(results['nfr2.segments']).toBeGreaterThan(200_000);
   expect(elapsed).toBeLessThanOrEqual(10 * FACTOR);
   expect(maxBlock).toBeLessThanOrEqual(STRICT ? 100 : 100 * 2);
+});
+
+test('NFR-3: 10 MB DWG parsed and displayed ≤ 15 s', async ({ page }) => {
+  test.setTimeout(180_000);
+  const file = largeDwg();
+  await openApp(page);
+  await createProject(page, 'Perf');
+  await disableGpuDrawsIfSoftware(page);
+  await installLongTaskObserver(page);
+  const t0 = Date.now();
+  await importFile(page, file);
+  await expect
+    .poll(async () => (await models(page))[0]?.status, { timeout: 120_000, intervals: [100] })
+    .toBe('ready');
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  const elapsed = (Date.now() - t0) / 1000;
+  results['nfr3.seconds'] = elapsed;
+  results['nfr3.megabytes'] = statSync(file).size / 1048576;
+  results['nfr3.maxMainThreadBlockMs'] = Math.max(0, ...(await longTasks(page)));
+  results['nfr3.segments'] = (await models(page))[0].segments;
+  expect(results['nfr3.megabytes']).toBeGreaterThanOrEqual(9.5);
+  expect(results['nfr3.segments']).toBeGreaterThan(150_000);
+  expect(elapsed).toBeLessThanOrEqual(15 * FACTOR);
 });
 
 test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ page }) => {

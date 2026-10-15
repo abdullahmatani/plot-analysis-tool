@@ -40,10 +40,13 @@ export function generate() {
           ? pj.license
           : (pj.license?.type ?? pj.licenses?.map((l) => l.type).join(' OR '));
     }
-    const scope = p.name.startsWith('@mlightcad/libredwg')
-      ? 'DWG import worker only (separate bundle)'
+    const libredwg = p.name.startsWith('@mlightcad/libredwg');
+    const scope = libredwg
+      ? 'DWG import worker only (separate bundle); WebAssembly rebuilt from the same release without run-time code generation (vendor/libredwg-web)'
       : undefined;
-    return { name: p.name, version: p.version, license: license ?? 'UNKNOWN', scope, text: licenceText(dir) };
+    const text =
+      licenceText(dir) ?? (libredwg ? readMaybe(path.join(root, 'vendor/libredwg-web/COPYING')) : undefined);
+    return { name: p.name, version: p.version, license: license ?? 'UNKNOWN', scope, text };
   });
   const pdfjs = path.join(root, 'node_modules/pdfjs-dist');
   const assets = [
@@ -90,6 +93,13 @@ export function generate() {
       license: 'MIT',
       scope: 'Bundled with pdf.js',
       text: readMaybe(path.join(pdfjs, 'wasm/LICENSE_QCMS')),
+    },
+    {
+      name: 'DWG reader runtime (Emscripten, libc++, musl, mimalloc, zlib)',
+      version: 'Emscripten 6.0.12, zlib 1.3.2',
+      license: 'MIT AND Apache-2.0 WITH LLVM-exception AND Zlib',
+      scope: 'Linked into the DWG reader WebAssembly (DWG import worker only)',
+      text: readMaybe(path.join(root, 'vendor/libredwg-web/THIRD-PARTY-NOTICES.txt')),
     },
     {
       name: 'JBIG2 decoder (pdf.js)',

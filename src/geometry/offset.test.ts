@@ -436,7 +436,9 @@ describe('NFR-6 performance', () => {
       `NFR-6: 1 000-vertex polygon offset ${best.toFixed(2)} ms (median ${times[4].toFixed(2)} ms` +
         `${coverageEnabled ? ', coverage instrumentation on' : ''})`,
     );
-    expect(best).toBeLessThan(coverageEnabled ? 1000 : 150);
+    // FDR budget 50 ms, enforced on the reference machine (PAT_PERF_STRICT=1, `npm run perf:reference`);
+    // elsewhere 150 ms leaves headroom for shared CI runners.
+    expect(best).toBeLessThan(coverageEnabled ? 1000 : process.env.PAT_PERF_STRICT ? 50 : 150);
   });
 });
 

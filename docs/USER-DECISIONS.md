@@ -7,74 +7,72 @@ change.
 
 ## A. Blocking items
 
-### U-1 — DWG reader vs. the Content-Security-Policy (rows 22, 88; D-1)
-
-**What happens now.** The DWG reader (LibreDWG, GPL-3.0, isolated in its own worker) uses
-JavaScript generated at run time (`new Function`, emitted by Emscripten's embind). When the page is
-served **with the CSP as an HTTP header**, the browser applies the policy to workers too and blocks
-it; the offline bundle's launchers and `vite preview` do this. DWG import then stops with a clear
-message telling the user to export DXF or PDF instead (tested in `e2e/dwg.spec.ts`). Where the CSP
-is only the page's `<meta>` tag (static hosting without headers, the dev server), DWG import works.
-The reference DWGs match AutoCAD's own DXF export entity for entity (1517 of 1519 and 1556 of 1558;
-the differences are fit splines).
-
-**Options.**
-
-1. **Rebuild libredwg-web with `-sDYNAMIC_EXECUTION=0`** (recommended). Emscripten then emits
-   glue without `new Function`, and the strict CSP stays unchanged everywhere. This needs the
-   Emscripten SDK and the libredwg-web sources from GitHub. GitHub was not reachable from the build
-   environment, so it could not be done here.
-2. **Relax the CSP for the DWG worker only.** Serve `assets/libredwg.worker-*.js` with a policy
-   that adds `'unsafe-eval'`. A worker's CSP comes from its own response, so the page keeps its strict
-   policy, and `connect-src 'self'` still prevents any egress from the worker. This weakens row 88's
-   "no eval" for that one worker.
-3. **Patch the generated glue** to use Emscripten's own non-eval code paths (equivalent to option 1
-   without recompiling). A working patch was written and then removed, because an automated safety
-   check flagged it as working around a security control. It needs your explicit approval.
-4. **Accept** that DWG import is unavailable in the offline bundle, and use DXF/PDF.
-
 ### U-2 — Performance on the reference machine (rows 17, 21, 82; NFR-1 to NFR-10)
 
 The build and CI containers have no GPU; WebGL runs in software (SwiftShader). There, frame rates
-and first-frame times say nothing about a laptop's integrated GPU. Measured here:
+and first-frame times say nothing about a laptop's integrated GPU. Measured here (GPU drawing
+excluded):
 
-- NFR-2 CPU side: a 20 MB DXF parses and loads in about 3–5 s; the longest main-thread block is
-  about 50–75 ms.
+- NFR-2 CPU side: a 20 MB DXF parses and loads in about 1.5–5 s; the longest main-thread block is
+  under 100 ms.
+- NFR-3 CPU side: a 10 MB DWG parses and loads in about 9.4 s (budget 15 s).
 - NFR-1: cold start from cache in 0.5–0.7 s.
-- NFR-10: autosave's longest synchronous step is about 14 ms; reopen takes 0.75 s.
+- NFR-10: autosave's longest synchronous step is about 1–14 ms; reopen takes 0.3–0.75 s.
 
 **Needed:** on the reference machine (mid-range laptop, 8 GB RAM, integrated GPU, current
-Chrome/Edge), run
+Chrome/Edge), plugged in and otherwise idle, run
 
 ```
-npm ci && npm run build && PAT_PERF_STRICT=1 npm run e2e:perf
+npm ci
+npx playwright install chromium
+npm run build
+npm run perf:reference
 ```
 
-and keep `test-results/perf.json`. If it passes, rows 17, 21 and 82 can be marked Complete.
+(`npm run perf:reference -- --channel=msedge` uses the installed Edge instead.) It works the same on
+Windows, macOS and Linux, enforces the FDR budgets exactly, runs in a visible browser window so
+WebGL uses the GPU, and prints every result next to its budget. It does not report success if the
+browser rendered in software. If it passes, keep `test-results/perf.json`; rows 17, 21 and 82 can
+then be marked Complete.
 
 ### U-3 — Security review sign-off (row 88)
 
-`docs/SECURITY-REVIEW.md` is the checklist, and every item has an automated check behind it. A
-person must review it, decide U-1, and sign it off.
+`docs/SECURITY-REVIEW.md` is the checklist, and every item has an automated check behind it. With
+U-1 resolved, no eval exception remains. A person must review it and sign it off.
 
 ### U-4 — D-1 licensing advice
 
 Before distributing the app commercially, get legal advice on the GPL-3.0 obligations of the
 LibreDWG worker. The FDR recommends this. The component is isolated in its own worker chunk, and
-it is listed in About → Licences.
+it is listed in About → Licences. The project now builds this component itself
+(`vendor/libredwg-web`); its corresponding source is the upstream release recorded in
+`vendor/libredwg-web/build-info.json` (unmodified) plus `scripts/libredwg/build.sh`. Ask whether
+the offline bundle should also carry that source, or a written offer for it.
 
 ### U-5 — Release (row 89)
 
-Tagging 1.0.0 requires every row to be Complete (U-1 to U-3 first, and U-6). The offline bundle is built by
-`npm run bundle` and uploaded by CI as the `offline-bundle` artifact. Publishing a release and
-choosing where to host the PWA are your decisions. Nothing has been tagged or published.
+Tagging 1.0.0 requires every row to be Complete (U-2 and U-3 first). The offline bundle is built by
+`npm run bundle` and uploaded by CI as the `offline-bundle` artifact. Publishing a release is your
+decision. Nothing has been tagged or published.
 
-### U-6 — Merging into `main`
+### U-7 — Cloudflare build command (hosted mode)
 
-All work is on the branch `claude/youthful-mayer-flojae` (the parallel feature branches were merged
-into it). It fast-forwards onto `main`, which holds only the FDR. No pull request was opened,
-because none was requested. The FDR statuses count a row as merged once it is on this branch. Open
-a pull request and merge it when you have reviewed it, so that `main` matches the FDR.
+`wrangler.jsonc` now serves the built app from `./dist`, with the app's CSP and security headers in
+`dist/_headers` (generated by the build). In the Cloudflare dashboard (Workers & Pages → plot-analysis-tool
+→ Settings → Build), set the **build command** to `npm run build`. Without it, the deployment has no
+`dist/` to upload. Until this branch is merged, the deployment still serves the placeholder page.
+
+### Resolved
+
+- **U-1 — DWG reader vs. the Content-Security-Policy (rows 22, 88):** resolved with option 1. The
+  reader is rebuilt from the libredwg-web 0.8.0 sources with `-sDYNAMIC_EXECUTION=0`
+  (`vendor/libredwg-web`, reproducible with `scripts/libredwg/build.sh`), so it no longer needs
+  `new Function`, and the strict policy applies everywhere unchanged. DWG import now works in the
+  offline bundle, `vite preview` and hosted mode, verified in Chromium, Edge and through the bundle
+  launchers. Updating `@mlightcad/libredwg-web` now means re-running the build script; the build
+  refuses a mismatched version.
+- **U-6 — Merging into `main`:** pull request #1 merged the integration branch into `main`. Later
+  work arrives through pull requests the same way.
 
 ## B. Recommended checks with your own material
 
@@ -109,6 +107,7 @@ with your own drawings and tools is worthwhile:
 | —   | Contour shape comes only from a shape column; there is no dataset-wide "all squares" setting                                                                                                                                       | Add a dataset-level default shape                                  |
 | —   | Exports leave out CAD layers marked "do not plot" (e.g. Defpoints), and white (ACI 7) prints black                                                                                                                                 | Print everything visible                                           |
 | —   | The export dialog remembers format, DPI and region per project in browser storage; choosing a profile copies its sheet layout into the project (one undo step)                                                                     | Store them in the project                                          |
+| —   | The rebuilt DWG reader (`vendor/libredwg-web`, 10.8 MB WebAssembly) and the 10 MB DWG performance fixture (3.4 MB compressed) are committed to the repository, so builds and CI need no Emscripten or LibreDWG toolchain           | Build them in CI (adds several minutes per run)                    |
 | —   | Shortcuts chosen: trace T / Shift+T / Shift+C / B, offset O, loupe Alt+M, text X, callout Shift+X, numbered tag N, measure distance D, export Ctrl+P, export again Ctrl+Shift+E                                                    | All can be remapped in Help → Keyboard shortcuts                   |
 
 ## D. Findings and test-environment limitations (for information)
@@ -123,6 +122,12 @@ with your own drawings and tools is worthwhile:
   with a notice (tested in `e2e/autosave.spec.ts` and by the fault-injection suite). Restore points,
   drafts and app settings are not in the backup. Linking a project to a file (row 98) remains the
   safest protection, because it also survives clearing the browser's site data.
+- **Headless browsers render WebGL in software** even on machines with a GPU, so the reference
+  performance run uses a visible window (`npm run perf:reference`).
+- **`example_r14.dwg`**, a Release 14 file on which the published DWG reader crashed, now reads with
+  the rebuilt reader. It matches the 2004 copy of the same drawing, except R14's own limits and one
+  polyline that lacks its last vertex. The import report shows the reader's warning with the DXF/PDF
+  advice, as for any file where the reader reports problems.
 - Playwright cannot emulate offline navigation in Firefox or WebKit. The offline-start test runs in
   Chromium only; the CSP test runs on all engines.
 - The File System Access API is unavailable in Firefox and Safari. Those browsers download project

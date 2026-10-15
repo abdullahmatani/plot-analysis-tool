@@ -83,11 +83,11 @@ function distToPolyline(p: [number, number], poly: { x: number; y: number }[]): 
   return best;
 }
 
-/** Flips 200 bytes after the header (deterministic). */
-function corrupt(src: Uint8Array, seed: number): Uint8Array {
+/** Flips `flips` bytes after the header (deterministic). */
+function corrupt(src: Uint8Array, seed: number, flips = 200): Uint8Array {
   const out = Uint8Array.from(src);
   let s = seed;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < flips; i++) {
     s = (s * 1103515245 + 12345) >>> 0;
     out[128 + (s % (out.length - 128))] ^= 0xff;
   }
@@ -312,14 +312,15 @@ describe('readDwg — failures are readable and never hang', () => {
     },
   );
 
-  it.skipIf(!has('example_r14.dwg') || !has('sample_2000.dwg'))(
+  it.skipIf(!has('2004_HatchG.dwg') || !has('sample_2000.dwg'))(
     'turns a LibreDWG crash into a readable error and recovers for the next file',
     { timeout: 60_000 },
     async () => {
-      const e = await rejection(readDwg(load('example_r14.dwg')));
+      // A damaged copy on which LibreDWG traps (WebAssembly "memory access out of bounds").
+      const e = await rejection(readDwg(corrupt(load('2004_HatchG.dwg'), 49, 20)));
       expect(e.code).toBe('reader-crashed');
       expect(e.message).toMatch(
-        /^The DWG reader stopped while (reading|converting) this AutoCAD R14 file \(memory access out of bounds\)\. The file may be damaged/,
+        /^The DWG reader stopped while (reading|converting) this AutoCAD 2004 file \(memory access out of bounds\)\. The file may be damaged/,
       );
       const r = await readDwg(load('sample_2000.dwg'));
       expect(r.store.count).toBe(6);
@@ -334,6 +335,30 @@ describe('readDwg — failures are readable and never hang', () => {
 });
 
 describe('LibreDWG integration details', () => {
+  it.skipIf(!has('example_2018.dwg'))(
+    'starts and reads a DWG without generating code at run time (CSP without unsafe-eval; U-1, row 88)',
+    async () => {
+      // What a Content-Security-Policy without 'unsafe-eval' forbids: the Function constructor and eval.
+      const g = globalThis as unknown as { Function: FunctionConstructor; eval: (code: string) => unknown };
+      const realFunction = g.Function;
+      const realEval = g.eval;
+      const blocked = () => {
+        throw new EvalError('code generation blocked by the test (as by the CSP)');
+      };
+      g.Function = new Proxy(realFunction, { apply: blocked, construct: blocked });
+      g.eval = blocked;
+      try {
+        const lib = await createLibreDwg();
+        const r = await readDwg(load('example_2018.dwg'), { libredwg: lib });
+        const exp = EXPECTATIONS.files.find((f) => f.file === 'example_2018.dwg');
+        expect(r.store.count).toBe(exp?.storeCount);
+      } finally {
+        g.Function = realFunction;
+        g.eval = realEval;
+      }
+    },
+  );
+
   it('caches one LibreDWG instance per worker and replaces it after a discard', async () => {
     const a = await loadLibreDwg();
     expect(await loadLibreDwg()).toBe(a);

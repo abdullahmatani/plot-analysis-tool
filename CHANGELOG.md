@@ -1,9 +1,23 @@
 # Changelog
 
-All work is on branch `claude/youthful-mayer-flojae`. Commit hashes are abbreviated; merge
-commits group the commits made in parallel feature branches. Register rows refer to
+Work up to 0.1.0 was done on branch `claude/youthful-mayer-flojae`, merged into `main` by pull
+request #1; 0.1.1 is on branch `claude/determined-edison-4bv6xi`. Commit hashes are abbreviated;
+merge commits group the commits made in parallel feature branches. Register rows refer to
 `plot-analysis-tool-FDR.md` §8. The statuses below follow the FDR's definition of Complete; the
 rows still Incomplete are listed under "Not complete" with the reason.
+
+## Product version 0.1.1 — 14 Oct 2026
+
+A patch release under the FDR's versioning rule (§0.3): no register rows were added, and the 0.2.0
+milestone still waits for rows 17 and 21 (reference-machine performance run).
+
+| Change                                                                                                                                                                                                                                                                     | Rows       | Commit  | Verified by                                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hosted mode (Cloudflare): serve `dist/` with the app's CSP as a header (`_headers` generated from the same policy as the page) instead of the placeholder page; fixes `main`'s format check                                                                                | 6, 7, 8    | f8c91ed | `scripts/check-dist.mjs` (`_headers` matches the page policy); CI format check                                                                                                                                     |
+| **Row 22 Complete.** DWG reader rebuilt from the libredwg-web 0.8.0 sources without run-time code generation (`vendor/libredwg-web`, reproducible bit for bit), so it runs under the strict CSP header (decision U-1, option 1); no eval exception left in the build audit | 22, 25, 88 | 28b0e1f | `src/import/dwg/read.test.ts` (reads a DWG with `Function` and `eval` blocked), `e2e/dwg.spec.ts` (CSP header; Chromium and Edge), `npm run test:bundle` (offline DWG import through every launcher), `check-dist` |
+| NFR-3 performance test (10 MB DWG); `npm run perf:reference` for the reference machine on any OS, in a visible browser window, at the exact budgets (incl. NFR-5, NFR-6); performance results kept when a test fails                                                       | 17, 21, 82 | c335ccf | `e2e/perf.spec.ts` (NFR-3: 9.4 s here with GPU drawing excluded; budget 15 s)                                                                                                                                      |
+
+CI run 29 (commit 28b0e1f) is green in every job.
 
 ## Product version 0.1.0 — 14 Oct 2026
 
@@ -52,12 +66,12 @@ projects are rebuilt from it at start-up with a notice (4d16e52).
 
 ### 0.3.0 — DWG support (rows 22–25)
 
-| Rows                                | Commits | Verified by                                                                                                              |
-| ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 22 DWG import                       | f9b82e4 | `src/import/dwg/*.test.ts` (entity-by-entity match with AutoCAD DXF exports) — **blocked under the CSP header, see U-1** |
-| 23 fallback and diagnostics         | f9b82e4 | `e2e/dwg.spec.ts`                                                                                                        |
-| 24 CAD fonts and substitution table | cf9540d | `src/underlay/cad-fonts.test.ts`, `src/import/dxf/fonts.test.ts`                                                         |
-| 25 licence isolation and notices    | f9b82e4 | `scripts/licences.test.ts`; `check-dist` GPL isolation                                                                   |
+| Rows                                | Commits                                  | Verified by                                                                                                            |
+| ----------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 22 DWG import                       | f9b82e4, 28b0e1f (rebuilt reader, 0.1.1) | `src/import/dwg/*.test.ts` (entity-by-entity match with AutoCAD DXF exports), `e2e/dwg.spec.ts` (under the CSP header) |
+| 23 fallback and diagnostics         | f9b82e4                                  | `e2e/dwg.spec.ts`                                                                                                      |
+| 24 CAD fonts and substitution table | cf9540d                                  | `src/underlay/cad-fonts.test.ts`, `src/import/dxf/fonts.test.ts`                                                       |
+| 25 licence isolation and notices    | f9b82e4                                  | `scripts/licences.test.ts`; `check-dist` GPL isolation                                                                 |
 
 ### 0.4.0 — Scale, units, snapping and measurement (rows 26–36)
 
@@ -111,10 +125,9 @@ projects are rebuilt from it at start-up with a notice (4d16e52).
 
 ### Not complete
 
-| Row                           | Reason                                                                                                                                                                                                                                           | What is needed                                                    |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| 17, 21 (NFR-4, NFR-2 display) | The CI and build containers render WebGL in software, so frame rates there cannot represent the reference machine. The CPU side is measured and within budget: a 20 MB DXF imports in about 4 s, with the longest main-thread block about 70 ms. | Run `PAT_PERF_STRICT=1 npm run e2e:perf` on the reference machine |
-| 22                            | The strict CSP header blocks LibreDWG's generated glue code                                                                                                                                                                                      | Decision U-1                                                      |
-| 82                            | Same as 17 and 21, for NFR-1–NFR-10                                                                                                                                                                                                              | Reference-machine run                                             |
-| 88                            | The checklist is ready (`docs/SECURITY-REVIEW.md`)                                                                                                                                                                                               | Reviewer sign-off; decision U-1; D-1 legal advice                 |
-| 89                            | Depends on every other row                                                                                                                                                                                                                       | Release decision                                                  |
+| Row                           | Reason                                                                                                                                                                                                                                      | What is needed                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 17, 21 (NFR-4, NFR-2 display) | The CI and build containers render WebGL in software, so frame rates there cannot represent the reference machine. The CPU side is measured and within budget: a 20 MB DXF imports in about 1.5–5 s, with no main-thread block over 100 ms. | Run `npm run perf:reference` on the reference machine (decision U-2) |
+| 82                            | Same as 17 and 21, for NFR-1–NFR-10 (NFR-3 is now tested: 9.4 s here for a 10 MB DWG, GPU drawing excluded)                                                                                                                                 | Reference-machine run                                                |
+| 88                            | The checklist is ready (`docs/SECURITY-REVIEW.md`); U-1 is resolved                                                                                                                                                                         | Reviewer sign-off; D-1 legal advice                                  |
+| 89                            | Depends on every other row                                                                                                                                                                                                                  | Release decision                                                     |

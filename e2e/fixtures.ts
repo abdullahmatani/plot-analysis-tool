@@ -95,6 +95,9 @@ export async function launchPersistent(
   const context = await chromium.launchPersistentContext(userDataDir, {
     baseURL,
     serviceWorkers: opts.serviceWorkers ?? 'block', // as in playwright.config.ts; PWA tests opt in
+    // Reference-machine performance run (playwright.config.ts, `npm run perf:reference`).
+    headless: !process.env.PAT_HEADED,
+    ...(process.env.PAT_CHANNEL ? { channel: process.env.PAT_CHANNEL } : {}),
   });
   const violations = await guardEgress(context, baseURL);
   return { context, userDataDir, violations };

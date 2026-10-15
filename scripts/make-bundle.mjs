@@ -35,7 +35,11 @@ const name = `plot-analysis-tool-${pkg.version}`;
 const outDir = path.join(root, 'dist-bundle', name);
 rmSync(path.join(root, 'dist-bundle'), { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
-cpSync(dist, path.join(outDir, 'app'), { recursive: true });
+// `_headers` is for hosted mode (Cloudflare); the launchers send the same headers themselves.
+cpSync(dist, path.join(outDir, 'app'), {
+  recursive: true,
+  filter: (f) => path.basename(f) !== '_headers',
+});
 const src = path.join(root, 'scripts/bundle');
 for (const f of readdirSync(src)) {
   let text = readFileSync(path.join(src, f), 'utf8');

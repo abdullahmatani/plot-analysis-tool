@@ -29,9 +29,17 @@ below (`node scripts/fixtures/dwg-fetch.mjs`).
 | `2018_Leader.dwg`      | `2018/Leader.dwg`               | AC1032 (2018)  | LEADER, MULTILEADER and IMAGE entities                                                                   |
 | `r14_v.dwg`            | `r14/v.dwg`                     | AC1014 (R14)   | Release 14                                                                                               |
 | `r11_entities-2d.dwg`  | `r11/entities-2d.dwg`           | AC1009 (R11)   | Pre-R13 format (limited support in LibreDWG)                                                             |
-| `example_r14.dwg`      | `example_r14.dwg`               | AC1014 (R14)   | LibreDWG 0.13 (libredwg-web 0.8.0) crashes on it — tests the readable-error path                         |
+| `example_r14.dwg`      | `example_r14.dwg`               | AC1014 (R14)   | Same drawing in R14. The published libredwg-web 0.8.0 build crashed on it; the rebuilt reader reads it (one polyline short of its last vertex, with the reader warning). Corrupted copies test the readable-error path |
 
 Damaged, truncated and newer-format inputs are derived from these files in memory by the tests.
+
+## Performance fixture (NFR-3)
+
+`perf/plot-plan-10mb.dwg.br` is a 10 MB AutoCAD 2000 DWG (Brotli-compressed to 3.4 MB) used by
+`e2e/perf.spec.ts` for NFR-3. It is not LibreDWG test data: it is the project's synthetic plot plan
+(`scripts/fixtures/make-large-dxf.mjs`, 17 MB of DXF, 187 840 entities in UTM-sized coordinates)
+converted by LibreDWG's `dxf2dwg`. `scripts/fixtures/make-large-dwg.sh` regenerates it. Read back by
+the app's DWG importer, it gives the same entities, extents and geometry as the DXF, bit for bit.
 
 ## Expectations
 
@@ -61,4 +69,5 @@ e72d5e86d5d36d64b08822fb25a46079f592fd895a6157b1b8d9b07775e06108  example_2004.d
 e296ca50f237abb9eec1a8bdab77aa16fd59518e246df812aa4dd4f859bd12d3  r14_v.dwg
 f9b372579812de9867961f12a842898c27a7dff763a71f41ea10335964b877d4  r11_entities-2d.dwg
 aec626c5680584c763418497495950089854ff9682af36076851fd793d9e2c0b  example_r14.dwg
+f2be3d928da5de33fc45baea19cd086bfb56bcec0e20af2d0849f1a1556edb37  perf/plot-plan-10mb.dwg (decompressed)
 ```

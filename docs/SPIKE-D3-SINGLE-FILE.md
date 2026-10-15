@@ -4,6 +4,8 @@ FDR §10, D-3 recommends "(a) + (b) for 1.0.0; spike (c) as it would allow doubl
 air-gapped PCs". This is that spike: can the app run as a single HTML file opened straight from disk
 (`file://`), with no launcher?
 
+**Decision (owner, 15 Oct 2026): keep options (a) and (b); option (c) is not adopted.**
+
 **Recommendation: do not build option (c) for 1.0.0.** It is technically possible, but the browser
 withholds two things the FDR treats as non-negotiable, and the goal it serves is already met:
 

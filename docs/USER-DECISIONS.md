@@ -57,9 +57,11 @@ the offline bundle should also carry that source, or a written offer for it.
 
 ### U-5 — Release (row 89)
 
-Tagging 1.0.0 requires every row to be Complete (U-2 and U-3 first). The offline bundle is built by
-`npm run bundle` and uploaded by CI as the `offline-bundle` artifact. Publishing a release is your
-decision. Nothing has been tagged or published.
+Tagging 1.0.0 requires every row to be Complete (U-2 and U-3 first). `docs/RELEASE-CHECKLIST.md`
+lists the steps. Once they are done, pushing the tag `v1.0.0` is all that is left: the **Release**
+workflow checks the versions, changelog and FDR statuses (`npm run release:check`), runs the tests,
+and publishes a GitHub release with the offline bundle, the licence notices and the changelog
+section as notes. Publishing a release is your decision. Nothing has been tagged or published.
 
 ### U-7 — Cloudflare build command (hosted mode)
 
@@ -131,6 +133,12 @@ with your own drawings and tools is worthwhile:
   intermittent failure of the draft crash tests in CI (run 33, Edge). Restore points and app
   settings are not in the backup. Linking a project to a file (row 98) remains the safest
   protection, because it also survives clearing the browser's site data.
+- **Long lines were drawn off at high zoom (fixed in 0.1.5).** The GPU stores each drawing as
+  float32 offsets from nearby origins, which keep about 7 significant digits. A line kilometres long,
+  or any line on a 10 km site, was therefore drawn up to 64 px from its true position at the maximum
+  zoom (13 px on a 2 km site), while snapping and measuring, which use the exact coordinates, were
+  right. Zoomed in that far, the app now draws from exact data around the view
+  (`e2e/large-site.spec.ts`).
 - **Headless browsers render WebGL in software** even on machines with a GPU, so the reference
   performance run uses a visible window (`npm run perf:reference`).
 - **`example_r14.dwg`**, a Release 14 file on which the published DWG reader crashed, now reads with

@@ -15,6 +15,7 @@ feature follows. The requirements live in `plot-analysis-tool-FDR.md` (register 
 | Build          | `npm run build` (typecheck, Vite build, `scripts/check-dist.mjs` URL audit)                |
 | E2E            | `npm run e2e` (Playwright; serves `dist/` with `vite preview` on `PAT_PORT`, default 4173) |
 | Offline bundle | `npm run bundle`, `npm run test:bundle`                                                    |
+| Release check  | `npm run release:check` (row 89; `docs/RELEASE-CHECKLIST.md`)                              |
 
 Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y npm@11 install …`.
 
@@ -41,6 +42,14 @@ Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y n
   does, and "Clear local data" empties the private file system first).
 - **Geometry is float64 world metres.** Never round stored geometry. Display formatting uses
   `src/core/units.ts` (`formatNumber`, `formatLength`, `parseLength`, area factors).
+- **Large coordinates on the GPU (row 18).** Underlay batches hold float32 offsets from a batch
+  origin and get a float64-derived transform each frame. float32 keeps about 7 digits, so a vertex
+  far from its origin (any long line, every line on a 10 km site) is drawn off at high zoom: by up
+  to 64 px at the maximum zoom on a 10 km site. When `batchErrorPx` (`src/render/detail.ts`)
+  exceeds a quarter pixel, the canvas controller draws the drawing from **detail batches** instead:
+  the float64 entities in a window three views wide, cut to it and stored relative to its centre
+  (`buildDetailData`), rebuilt only when the view leaves the window. Anything new drawn by the GPU
+  must keep its float32 values close to their origin in the same way.
 - **GPL isolation (D-1):** `@mlightcad/libredwg-web` is only imported from the DWG worker. Its
   WebAssembly and glue come from `vendor/libredwg-web`, the same release rebuilt without run-time
   code generation so the strict CSP applies to it (decision U-1); `vite.config.ts` redirects the

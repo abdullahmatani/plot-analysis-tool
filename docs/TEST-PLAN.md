@@ -14,7 +14,8 @@ the app makes a request to another host.
 | Secondary browsers | `PAT_SECONDARY=1 npx playwright test --project=firefox --project=webkit`; `PAT_EDGE=1 npx playwright test --project=msedge` | yes                                        | `@smoke` subset on Firefox and WebKit; full E2E on Edge                                                                                                                                                                                                                                                                                       |
 | Fault injection    | `npm run e2e:faults` (`KILL_POINTS=100`, `KILL_SEED=n` to replay)                                                           | yes, own job                               | 100 random browser kills while editing, snapshotting and writing the linked file, offline; projects rebuilt from the backup copy when the browser deletes its database                                                                                                                                                                        |
 | Performance        | `npm run e2e:perf`; on the reference machine `npm run perf:reference` (exact budgets, visible window so WebGL uses the GPU) | yes, own job (report only for GPU timings) | NFR-1, NFR-2, NFR-3, NFR-4, NFR-10 (plus NFR-5 and NFR-6 at their exact budgets in the reference run); NFR-4's main-thread time per frame is enforced everywhere (≤ 10 ms), as is the longest main-thread block while a 20 MB DXF, a 10 MB DWG or a 50 000-row table is read (row 21); results and WebGL renderer in `test-results/perf.json` |
-| Offline bundle     | `npm run bundle && npm run test:bundle`                                                                                     | yes                                        | Node, Python and PowerShell launchers serve the app on loopback only with the CSP as a header; offline, a DWG imports under that header                                                                                                                                                                                                       |
+| Offline bundle     | `npm run bundle && npm run test:bundle`                                                                                     | yes                                        | Node, Python and PowerShell launchers serve the app on loopback only with the CSP as a header; offline, a DWG imports under that header; the licence notices file lists every component                                                                                                                                                       |
+| Release check      | `npm run release:check` (the Release workflow runs it, then the suites above, on a `v*` tag)                                | on release tags                            | package, FDR and tag versions agree; the changelog has the version's section; for 1.0.0 and later every register row but 89 is Complete (`docs/RELEASE-CHECKLIST.md`)                                                                                                                                                                         |
 
 Wall-clock budgets (the performance suite, the fault-injection 1 s bound, a few performance unit
 tests) assume the machine is otherwise idle. Run them on their own: on an overloaded machine (for
@@ -50,6 +51,11 @@ drawings** (with permission) to confirm the results on your own drawings. See
   back from a screenshot.
 - **Snapping (row 27, row 49):** snapped picks equal source coordinates exactly (bit for bit, no
   tolerance).
+- **Rendering at large coordinates (row 18):** at every zoom up to the maximum (0.005 mm per pixel),
+  underlay lines are drawn within a quarter pixel of where the float64 view maps them, on a 10 km site
+  and along lines kilometres long. Verified by `src/render/detail.test.ts`, which emulates the
+  vertex shader's float32 arithmetic, and by `e2e/large-site.spec.ts`, which reads the rendered
+  pixels back while panning at the maximum zoom (required within one pixel; measured at most 0.25 px).
 
 ## 4. Acceptance traceability
 

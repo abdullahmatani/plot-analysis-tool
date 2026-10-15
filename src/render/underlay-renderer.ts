@@ -343,6 +343,12 @@ export class UnderlayRenderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
+  /** Whether vertex data is still queued for upload (see `uploadPending`). */
+  get uploading(): boolean {
+    for (const d of this.drawings.values()) if (d.pendingSegs?.length || d.pendingTris?.length) return true;
+    return false;
+  }
+
   /** Uploads queued vertex data up to `budget` bytes; returns true while more is pending. */
   uploadPending(budget = UPLOAD_BUDGET_BYTES): boolean {
     let used = 0;

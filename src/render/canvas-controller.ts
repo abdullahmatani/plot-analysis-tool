@@ -9,7 +9,17 @@ import type { FrameInfo, SnapResult, ToolContext, ToolPointerEvent } from '@/too
 import { substituteFont } from '@/underlay/cad-fonts';
 import { useModelsStore, type DrawingModel } from '@/underlay/models';
 import { drawingPlacement, visibleLayerFlags } from '@/underlay/pick';
+import { buildDetailData, precisionRadius, type FillCache, type RenderData } from '@/underlay/render-data';
 
+import {
+  batchErrorPx,
+  DETAIL_THRESHOLD_PX,
+  placementStretch,
+  viewInDrawing,
+  windowAround,
+  windowServes,
+  type DetailWindow,
+} from './detail';
 import { UnderlayRenderer, type DrawingRenderState } from './underlay-renderer';
 import { fitBounds, panBy, screenToWorld, visibleWorldBounds, worldToScreen, zoomAt } from './view';
 
@@ -76,6 +86,9 @@ export class CanvasController {
   private layerSig = new Map<string, string>();
   private tileManagers = new Map<string, PdfTileManager>();
   private pdfHidden = new Map<string, string>();
+  /** Detail windows in use, by drawing (row 18), and the fill triangulations they reuse. */
+  private detail = new Map<string, DetailWindow & { fills: FillCache }>();
+  private radius = new WeakMap<RenderData, number>();
   private unsubs: (() => void)[] = [];
   private ro: ResizeObserver;
   private pointers = new Map<number, Pt>();
@@ -242,6 +255,44 @@ export class CanvasController {
     }
   }
 
+  /**
+   * Switches drawings to detail batches when the view is zoomed in past the precision of their full
+   * batches, and back (row 18; see detail.ts). A window is rebuilt only when the view leaves it.
+   */
+  private syncDetail(f: FrameInfo, states: DrawingRenderState[]) {
+    const r = this.renderer!;
+    const models = useModelsStore.getState().models;
+    const shown = new Set<string>();
+    for (const s of states) {
+      const m = models[s.id];
+      const render = m?.render;
+      if (!s.visible || !render || !m.result || !m.index || !this.uploaded.has(s.id)) continue;
+      let radius = this.radius.get(render);
+      if (radius === undefined) this.radius.set(render, (radius = precisionRadius(render)));
+      const pxPerUnit = f.view.scale * placementStretch(s.placement);
+      if (batchErrorPx(radius, pxPerUnit) <= DETAIL_THRESHOLD_PX) continue;
+      shown.add(s.id);
+      const view = viewInDrawing(f.view, f.width, f.height, s.placement);
+      const prev = this.detail.get(s.id);
+      if (prev && windowServes(prev, view, pxPerUnit, m.version)) continue;
+      const rect = windowAround(view);
+      const fills = prev?.version === m.version ? prev.fills : new Map();
+      const ids = m.index.search(rect.minX, rect.minY, rect.maxX, rect.maxY);
+      r.setDetail(s.id, buildDetailData(m.result.store, render.extents, ids, rect, {}, fills));
+      this.detail.set(s.id, { rect, pxPerUnit, version: m.version, fills });
+    }
+    for (const id of [...this.detail.keys()]) {
+      if (shown.has(id)) continue;
+      r.setDetail(id, null);
+      this.detail.delete(id);
+    }
+  }
+
+  /** Detail windows in use, by drawing id (drawing units; for tests). */
+  detailWindows(): Record<string, Bounds> {
+    return Object.fromEntries([...this.detail].map(([id, w]) => [id, w.rect]));
+  }
+
   private setupPdf(d: Drawing, m: DrawingModel) {
     this.tileManagers.get(d.id)?.dispose();
     if (!m.pdf || !m.result?.page) return;
@@ -271,6 +322,7 @@ export class CanvasController {
       if (this.renderer) {
         // Large drawings are uploaded over several frames (NFR-2: no long main-thread blocks).
         if (this.renderer.uploadPending()) this.requestRender();
+        this.syncDetail(f, states);
         this.renderer.render(f.view, f.width, f.height, states, lightBg);
       }
     }

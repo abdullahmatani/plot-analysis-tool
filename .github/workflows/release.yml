@@ -1,0 +1,45 @@
+name: Release
+
+# Publishes a release when the owner pushes a version tag (FDR row 89, docs/RELEASE-CHECKLIST.md).
+# Nothing is published unless the release check and the same tests as CI pass on the tagged commit.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Check, test and publish the offline bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Release check (versions, changelog, FDR statuses)
+        run: node scripts/release-check.mjs --tag "$GITHUB_REF_NAME" --notes "$RUNNER_TEMP/release-notes.md"
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=chromium
+      - name: Offline bundle (Node, Python and PowerShell launchers)
+        run: npm run bundle && npm run test:bundle
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          pre=""
+          case "$version" in 0.*|*-*) pre="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --verify-tag $pre \
+            --title "Plot Analysis Tool $version" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            dist-bundle/*-offline.zip dist-bundle/*-THIRD-PARTY-NOTICES.txt

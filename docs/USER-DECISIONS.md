@@ -103,7 +103,7 @@ with your own drawings and tools is worthwhile:
 | D-3 | Packaging is a PWA plus a zipped static build with loopback-only launchers (PowerShell, Python, Node). The single-file HTML option was not built                                                                                   | Spike option (c) if double-click launch from `file://` is required |
 | D-5 | XLSX is read and written with a small built-in OOXML reader/writer. ExcelJS uses `eval`; current SheetJS is not distributed on npm                                                                                                 | Vendor SheetJS CE                                                  |
 | —   | "No external URLs in the build": inert URL strings inside bundled libraries (XML namespaces, licence texts, error-documentation links, pdf.js/core-js URL-parsing probes) are allow-listed one by one; nothing loadable is allowed | Stricter: strip them at build time                                 |
-| —   | Each project has a backup copy in the browser's private file system (see D below). It holds the latest snapshot and every later edit, not restore points, unfinished-tool drafts or app settings                                   | Also back up restore points and settings                           |
+| —   | Each project has a backup copy in the browser's private file system (see D below). It holds the latest snapshot, every later edit and the unfinished-work drafts, not restore points or app settings                               | Also back up restore points and settings                           |
 | —   | Drawing files are always kept in the private file system when the browser supports it (before: only files over 8 MB), so they survive the database loss described in D                                                             | Keep small files in IndexedDB                                      |
 | —   | Live offsets on a locked layer still update when their source changes                                                                                                                                                              | Freeze them while the layer is locked                              |
 | —   | A live offset whose contraction collapses becomes a point at the source centroid. It stays linked and reappears when the source grows                                                                                              | Delete or detach it instead                                        |
@@ -125,9 +125,12 @@ with your own drawings and tools is worthwhile:
   (LevelDB reuses its log file after a crash; the damaged record left in the middle of the log is
   later treated as corruption). The app cannot prevent this, so it keeps a backup copy of every
   project in the browser's private file system, and rebuilds the projects from it at the next start
-  with a notice (tested in `e2e/autosave.spec.ts` and by the fault-injection suite). Restore points,
-  drafts and app settings are not in the backup. Linking a project to a file (row 98) remains the
-  safest protection, because it also survives clearing the browser's site data.
+  with a notice (tested in `e2e/autosave.spec.ts` and by the fault-injection suite). Since 0.1.4 the
+  backup also holds each project's unfinished-work drafts, so a half-drawn shape can still be
+  resumed (`e2e/drafts.spec.ts`); before, this case lost the draft, and it was the cause of an
+  intermittent failure of the draft crash tests in CI (run 33, Edge). Restore points and app
+  settings are not in the backup. Linking a project to a file (row 98) remains the safest
+  protection, because it also survives clearing the browser's site data.
 - **Headless browsers render WebGL in software** even on machines with a GPU, so the reference
   performance run uses a visible window (`npm run perf:reference`).
 - **`example_r14.dwg`**, a Release 14 file on which the published DWG reader crashed, now reads with

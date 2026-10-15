@@ -36,7 +36,8 @@ Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y n
   origin's whole IndexedDB database if it finds it damaged on opening, which a crash in the middle
   of a write can cause; at start-up `checkMirror()` rebuilds every project from the backup when the
   database turns out to be new. Drawing files are stored in the private file system too, so they
-  survive with it. Anything that deletes projects must also remove their backup (`deleteProject`
+  survive with it, and so do drafts: after each change `DraftManager` sends the project's drafts
+  to the journal worker, which rewrites `<projectId>.drafts` next to the backup. Anything that deletes projects must also remove their backup (`deleteProject`
   does, and "Clear local data" empties the private file system first).
 - **Geometry is float64 world metres.** Never round stored geometry. Display formatting uses
   `src/core/units.ts` (`formatNumber`, `formatLength`, `parseLength`, area factors).

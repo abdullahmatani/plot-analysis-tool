@@ -4,9 +4,9 @@
 |---|---|
 | Document | FDR-PAT-001 |
 | Product | Plot Analysis Tool (working name) |
-| Current product version | **0.1.6** |
+| Current product version | **0.1.7** |
 | Target release | **1.0.0** |
-| FDR revision | Rev K — 15 Oct 2026 |
+| FDR revision | Rev L — 15 Oct 2026 |
 | Document status | Draft for review |
 | Owner | Abdullah |
 
@@ -533,3 +533,4 @@ Rows 90–102 were added in Rev B. They take the next free numbers (rows are nev
 | I | 15 Oct 2026 | Rows 14 and 27: arcs, circles, ellipses and polyline bulges were drawn with the same chords at every zoom (2 × 10⁻⁶ of the drawing's diagonal), so zoomed in they looked like polygons (a tank shell on the reference plot plan up to 0.8 mm, 4.9 px at 6 000 px/m, inside its true circle) and arc snaps sat beside the drawn line. They are now redrawn for the view at 1/8 px wherever the chords would stray more than half a pixel (`e2e/curves.spec.ts`). No status changes; product version 0.1.6 (patch). |
 | J | 15 Oct 2026 | D-3: the spike of option (c), one self-contained HTML file opened from disk, is done (`docs/SPIKE-D3-SINGLE-FILE.md`, `scripts/spikes/single-file-probe.mjs`). It is feasible (classic workers from inline code and embedded WebAssembly work from `file://`; 11 MB compressed, ready in 1.6–2.1 s before the app starts), but the browser gives such a page no private file system, so no backup copy (C7), and lets every other local HTML file read its storage (§4.1). Not recommended; (a) + (b) stay, and (b)'s Windows launcher already starts the app with a double-click. The decision stays with the owner. No product change; version stays 0.1.6. |
 | K | 15 Oct 2026 | D-3 decided by the owner: offline packaging stays (a) hosted PWA + (b) zipped offline bundle with loopback-only launchers; (c) single HTML file not adopted (see Rev J); (d) desktop wrapper stays in the post-1.0 backlog (B-6). No product change. |
+| L | 15 Oct 2026 | NFR-7 / rows 14 and 22: splines are stored as polylines that snapping, measuring, tracing and offsets use, and were tessellated to 5 × 10⁻⁵ of their own size (2.5 cm on a 500 m spline). When the drawing's units are known they now stay within 0.5 mm of the true curve, in DXF and DWG, inside scaled blocks and on hatch boundaries. No status changes; product version 0.1.7 (patch). |

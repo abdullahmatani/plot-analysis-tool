@@ -7,6 +7,16 @@ merge commits group the commits made in parallel feature branches. Register rows
 `plot-analysis-tool-FDR.md` §8. The statuses below follow the FDR's definition of Complete; the
 rows still Incomplete are listed under "Not complete" with the reason.
 
+## Product version 0.1.7 — 15 Oct 2026
+
+Hardening of NFR-7 for splines (rows 14 and 22, already Complete). A patch release under §0.3: no
+rows were added and no statuses changed. D-3 (offline packaging) was also decided: options (a) and
+(b) stay, after the spike of option (c) (`docs/SPIKE-D3-SINGLE-FILE.md`).
+
+| Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Rows          | Commit  | Verified by                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Long splines are accurate to 0.5 mm.** Splines are stored as polylines that snapping, measuring, tracing and offsets use; their chord tolerance was relative to each spline's size (5 × 10⁻⁵ of its control polygon), 2.5 cm on a 500 m spline, beyond NFR-7's 1 mm. When the drawing's units are known (`$INSUNITS`; DWG from R2000) the tolerance is now also capped at 0.5 mm, divided by a block insert's scale, for NURBS and fit-point splines and hatch boundary spline edges. Unitless drawings are unchanged. A winding 1 km spline gets about 2 200 points instead of 240 | 14, 22, NFR-7 | 896066d | `src/import/spline-tolerance.test.ts` (exact circles as rational splines: within 0.5 mm in metres, over 1 mm unitless; a block at 10× is 4.7 mm off if the insert scale is ignored), `src/import/dwg/convert.test.ts` |
+
 ## Product version 0.1.6 — 15 Oct 2026
 
 Hardening of rows 14 and 27 (already Complete). A patch release under §0.3: no rows were added and

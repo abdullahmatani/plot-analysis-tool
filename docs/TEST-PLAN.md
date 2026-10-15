@@ -42,7 +42,9 @@ drawings** (with permission) to confirm the results on your own drawings. See
 
 - **NFR-7 (vector):** measurements and offsets within 1 mm at site extents up to 10 km. Covered by
   geometry unit tests (UTM-coordinate cases), calibration E2E (re-measured dimensions, 1:500 PDF
-  within 1 mm), alignment (features coincide within 1 mm) and offset tests.
+  within 1 mm), alignment (features coincide within 1 mm) and offset tests. Splines, which are
+  stored as polylines, lie within 0.5 mm of the true curve when the drawing's units are known
+  (`src/import/spline-tolerance.test.ts`, `src/import/dwg/convert.test.ts`).
 - **Raster tracing (row 54):** on a scanned page, (a) the rendered scan lies within **one scan
   pixel** of its calibrated position, and (b) a vertex placed on a feature of the scan, at a zoom
   where one scan pixel spans several screen pixels (as with the loupe), lies within one scan pixel

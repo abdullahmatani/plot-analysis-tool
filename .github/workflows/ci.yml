@@ -9,6 +9,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Read-only token: only the Release workflow may write to the repository.
+permissions:
+  contents: read
+
 jobs:
   build-test:
     name: Lint, typecheck, unit tests, build, E2E (Chromium), offline bundle

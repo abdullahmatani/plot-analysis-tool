@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { DWG_ERR, describeReaderErrors, joinList } from './errors';
 import { flattenRings, generatePatternSegments } from './hatch';
 import { dwgTimeLimitMs, MAX_DWG_BYTES } from './limits';
-import { interpolateFitPoints, tessellateNurbs } from './spline';
+import { interpolateFitPoints, tessellateNurbs } from '../spline';
 import { decodeTextCodes, mtextToPlain } from './text';
 import { dwgVersionInfo, readDwgVersionCode } from './version';
 import { ocsXform } from './xform';

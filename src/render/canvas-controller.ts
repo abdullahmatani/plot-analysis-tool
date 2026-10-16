@@ -9,7 +9,18 @@ import type { FrameInfo, SnapResult, ToolContext, ToolPointerEvent } from '@/too
 import { substituteFont } from '@/underlay/cad-fonts';
 import { useModelsStore, type DrawingModel } from '@/underlay/models';
 import { drawingPlacement, visibleLayerFlags } from '@/underlay/pick';
+import { buildDetailData, precisionRadius, type FillCache, type RenderData } from '@/underlay/render-data';
 
+import {
+  FINE_CURVE_PX,
+  needsDetail,
+  placementStretch,
+  viewInDrawing,
+  windowAround,
+  windowServes,
+  type DetailNeeds,
+  type DetailWindow,
+} from './detail';
 import { UnderlayRenderer, type DrawingRenderState } from './underlay-renderer';
 import { fitBounds, panBy, screenToWorld, visibleWorldBounds, worldToScreen, zoomAt } from './view';
 
@@ -76,6 +87,9 @@ export class CanvasController {
   private layerSig = new Map<string, string>();
   private tileManagers = new Map<string, PdfTileManager>();
   private pdfHidden = new Map<string, string>();
+  /** Detail windows in use, by drawing (row 18), and the fill triangulations they reuse. */
+  private detail = new Map<string, DetailWindow & { fills: FillCache }>();
+  private needs = new WeakMap<RenderData, DetailNeeds>();
   private unsubs: (() => void)[] = [];
   private ro: ResizeObserver;
   private pointers = new Map<number, Pt>();
@@ -242,6 +256,49 @@ export class CanvasController {
     }
   }
 
+  /**
+   * Switches drawings to detail batches when the view is zoomed in past the precision of their full
+   * batches or the smoothness of their curves, and back (rows 14, 18, 27; see detail.ts). A window
+   * is rebuilt only when the view leaves it or zooms well into it.
+   */
+  private syncDetail(f: FrameInfo, states: DrawingRenderState[]) {
+    const r = this.renderer!;
+    const models = useModelsStore.getState().models;
+    const shown = new Set<string>();
+    for (const s of states) {
+      const m = models[s.id];
+      const render = m?.render;
+      if (!s.visible || !render || !m.result || !m.index || !this.uploaded.has(s.id)) continue;
+      let needs = this.needs.get(render);
+      if (!needs) {
+        needs = { radius: precisionRadius(render), curveTol: render.curveTol, curves: render.curves };
+        this.needs.set(render, needs);
+      }
+      const pxPerUnit = f.view.scale * placementStretch(s.placement);
+      if (!needsDetail(needs, pxPerUnit)) continue;
+      shown.add(s.id);
+      const view = viewInDrawing(f.view, f.width, f.height, s.placement);
+      const prev = this.detail.get(s.id);
+      if (prev && windowServes(prev, view, pxPerUnit, m.version)) continue;
+      const rect = windowAround(view);
+      const fills = prev?.version === m.version ? prev.fills : new Map();
+      const ids = m.index.search(rect.minX, rect.minY, rect.maxX, rect.maxY);
+      const fineTol = FINE_CURVE_PX / pxPerUnit;
+      r.setDetail(s.id, buildDetailData(m.result.store, render.extents, ids, rect, {}, fills, fineTol));
+      this.detail.set(s.id, { rect, pxPerUnit, version: m.version, fills });
+    }
+    for (const id of [...this.detail.keys()]) {
+      if (shown.has(id)) continue;
+      r.setDetail(id, null);
+      this.detail.delete(id);
+    }
+  }
+
+  /** Detail windows in use, by drawing id (drawing units; for tests). */
+  detailWindows(): Record<string, Bounds> {
+    return Object.fromEntries([...this.detail].map(([id, w]) => [id, w.rect]));
+  }
+
   private setupPdf(d: Drawing, m: DrawingModel) {
     this.tileManagers.get(d.id)?.dispose();
     if (!m.pdf || !m.result?.page) return;
@@ -257,6 +314,7 @@ export class CanvasController {
     this.raf = 0;
     if (!this.dirty) return;
     this.dirty = false;
+    const frameStart = performance.now();
     const project = getProject();
     const f = this.frame();
     const lightBg = f.lightBg;
@@ -268,11 +326,10 @@ export class CanvasController {
         if (tm && s.visible) tm.update(f.view, f.width, f.height, f.dpr, s.placement);
       }
       if (this.renderer) {
-        const t0 = performance.now();
         // Large drawings are uploaded over several frames (NFR-2: no long main-thread blocks).
         if (this.renderer.uploadPending()) this.requestRender();
+        this.syncDetail(f, states);
         this.renderer.render(f.view, f.width, f.height, states, lightBg);
-        this.lastGpuMs = performance.now() - t0;
       }
     }
     // 2D overlay.
@@ -304,10 +361,26 @@ export class CanvasController {
       drawOverlays(true);
     }
     this.frames++;
+    this.frameMs[this.frames % FRAME_SAMPLES] = performance.now() - frameStart;
   }
 
   frames = 0;
-  lastGpuMs = 0;
+  /** Main-thread time of the last frames (ms), a ring of FRAME_SAMPLES; see {@link frameTimes}. */
+  private frameMs = new Float32Array(FRAME_SAMPLES);
+  private framesAtReset = 0;
+
+  /**
+   * Main-thread (CPU) time of each frame rendered since the last reset, at most the last
+   * FRAME_SAMPLES (performance budget NFR-4, measured by e2e/perf.spec.ts). The GPU's own drawing
+   * time is not included: WebGL commands are queued, not executed, on this thread.
+   */
+  frameTimes(reset = false): number[] {
+    const n = Math.min(this.frames - this.framesAtReset, FRAME_SAMPLES);
+    const out: number[] = [];
+    for (let k = this.frames - n + 1; k <= this.frames; k++) out.push(this.frameMs[k % FRAME_SAMPLES]);
+    if (reset) this.framesAtReset = this.frames;
+    return out;
+  }
 
   /** CAD TEXT/MTEXT drawn with Canvas 2D (bundled fonts; row 24). */
   private drawUnderlayText(g: CanvasRenderingContext2D, f: FrameInfo, project: Project) {
@@ -641,6 +714,8 @@ export class CanvasController {
     });
   }
 }
+
+const FRAME_SAMPLES = 1024;
 
 function normaliseRotation(r: number): number {
   const t = Math.PI * 2;

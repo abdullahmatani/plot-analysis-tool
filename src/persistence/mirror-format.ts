@@ -1,4 +1,4 @@
-import type { JournalRecord, ProjectMeta, SnapshotRecord } from './db';
+import type { DraftRecord, JournalRecord, ProjectMeta, SnapshotRecord } from './db';
 import type { JournalMeta } from './journal-write';
 
 /**
@@ -59,8 +59,8 @@ export function crc32(bytes: Uint8Array): number {
   return (c ^ 0xffffffff) >>> 0;
 }
 
-function frame(type: number, value: unknown): Uint8Array {
-  const json = new TextEncoder().encode(JSON.stringify(value));
+function frame(type: number, value: unknown, replacer?: (key: string, v: unknown) => unknown): Uint8Array {
+  const json = new TextEncoder().encode(JSON.stringify(value, replacer));
   const out = new Uint8Array(HEADER + 1 + json.length);
   const body = out.subarray(HEADER);
   body[0] = type;
@@ -73,6 +73,56 @@ function frame(type: number, value: unknown): Uint8Array {
 
 export const encodeBase = (base: MirrorBase) => frame(BASE, base);
 export const encodeJournal = (j: MirrorJournal) => frame(JOURNAL, j);
+
+/**
+ * Unfinished-work drafts (row 93) of a project, kept next to its backup in `<projectId>.drafts`: one
+ * frame holding every draft, rewritten whenever they change. Draft state can hold file bytes (an open
+ * table-import dialog), so byte arrays are written as base64.
+ */
+const DRAFTS = 3;
+
+export const draftsFileName = (projectId: string) => `${projectId}.drafts`;
+
+export function parseDraftsFileName(name: string): string | null {
+  return /^(.+)\.drafts$/.exec(name)?.[1] ?? null;
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+function base64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+export function encodeDrafts(drafts: DraftRecord[]): Uint8Array {
+  return frame(DRAFTS, drafts, (_k, v) => (v instanceof Uint8Array ? { $bytes: bytesToBase64(v) } : v));
+}
+
+/** The drafts in a `.drafts` file, or null when it is missing, damaged or incomplete. */
+export function decodeDrafts(bytes: Uint8Array | null): DraftRecord[] | null {
+  if (!bytes || bytes.length < HEADER + 1) return null;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const len = view.getUint32(0, true);
+  if (len < 1 || HEADER + len > bytes.length) return null;
+  const body = bytes.subarray(HEADER, HEADER + len);
+  if (body[0] !== DRAFTS || crc32(body) !== view.getUint32(4, true)) return null;
+  try {
+    const value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(body.subarray(1)), (_k, v) =>
+      v && typeof v === 'object' && typeof (v as { $bytes?: unknown }).$bytes === 'string'
+        ? base64ToBytes((v as { $bytes: string }).$bytes)
+        : v,
+    );
+    return Array.isArray(value) ? (value as DraftRecord[]) : null;
+  } catch {
+    return null;
+  }
+}
 
 export type MirrorFrame = (
   { type: 'base'; base: MirrorBase } | { type: 'journal'; journal: MirrorJournal }

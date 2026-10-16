@@ -10,7 +10,8 @@ import { batchClipTransform, worldToScreen } from './view';
  * Three.js). Segments are drawn as instanced screen-space quads so lineweights, linetype patterns
  * and per-layer visibility (data texture lookup) are applied on the GPU; fills are triangles; PDF
  * pages are textured quads. Each batch carries float32 coordinates relative to its own origin and a
- * float64-derived transform (row 18).
+ * float64-derived transform (row 18). Zoomed in past the precision of those offsets, a drawing is
+ * drawn from detail batches built around the view instead (see detail.ts and `setDetail`).
  */
 
 const SEG_VS = `#version 300 es
@@ -233,6 +234,8 @@ interface GpuDrawing {
   /** Batches waiting to be uploaded (see `uploadPending`). */
   pendingSegs?: SegmentBatch[];
   pendingTris?: TriangleBatch[];
+  /** Detail batches drawn instead of `segs` and `tris` while set (row 18). */
+  detail?: { segs: GpuBatch[]; tris: GpuBatch[] };
 }
 
 export interface DrawingRenderState {
@@ -340,6 +343,12 @@ export class UnderlayRenderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
+  /** Whether vertex data is still queued for upload (see `uploadPending`). */
+  get uploading(): boolean {
+    for (const d of this.drawings.values()) if (d.pendingSegs?.length || d.pendingTris?.length) return true;
+    return false;
+  }
+
   /** Uploads queued vertex data up to `budget` bytes; returns true while more is pending. */
   uploadPending(budget = UPLOAD_BUDGET_BYTES): boolean {
     let used = 0;
@@ -403,6 +412,30 @@ export class UnderlayRenderer {
     return { vao, buffer, count: b.count, ox: b.ox, oy: b.oy, bounds: b.bounds };
   }
 
+  /**
+   * Sets (or with null, clears) the detail batches of a drawing: while set, they are drawn instead of
+   * its full batches (row 18). They cover a window around the view, so they are small and uploaded
+   * at once.
+   */
+  setDetail(id: string, data: Pick<RenderData, 'segments' | 'triangles'> | null) {
+    const d = this.drawings.get(id);
+    if (!d) return;
+    if (d.detail) this.free([...d.detail.segs, ...d.detail.tris]);
+    d.detail = data
+      ? {
+          segs: data.segments.map((b) => this.uploadSegs(b)),
+          tris: data.triangles.map((b) => this.uploadTris(b)),
+        }
+      : undefined;
+  }
+
+  private free(batches: GpuBatch[]) {
+    for (const b of batches) {
+      this.gl.deleteBuffer(b.buffer);
+      this.gl.deleteVertexArray(b.vao);
+    }
+  }
+
   /** Creates an (empty) entry for drawings rendered only as raster tiles (PDF). */
   ensureDrawing(id: string) {
     if (this.drawings.has(id)) return;
@@ -463,10 +496,7 @@ export class UnderlayRenderer {
     const d = this.drawings.get(id);
     if (!d) return;
     const gl = this.gl;
-    for (const b of [...d.segs, ...d.tris]) {
-      gl.deleteBuffer(b.buffer);
-      gl.deleteVertexArray(b.vao);
-    }
+    this.free([...d.segs, ...d.tris, ...(d.detail ? [...d.detail.segs, ...d.detail.tris] : [])]);
     for (const t of d.tiles) gl.deleteTexture(t.tex);
     gl.deleteTexture(d.layers);
     gl.deleteTexture(d.patterns);
@@ -516,8 +546,10 @@ export class UnderlayRenderer {
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
       }
+      const tris = d.detail?.tris ?? d.tris;
+      const segs = d.detail?.segs ?? d.segs;
       // Fills.
-      if (d.tris.length) {
+      if (tris.length) {
         gl.useProgram(this.triProg);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, d.layers);
@@ -525,7 +557,7 @@ export class UnderlayRenderer {
         gl.uniform1f(this.u(this.triProg, 'u_opacity'), ds.opacity);
         gl.uniform1f(this.u(this.triProg, 'u_ghost'), ds.ghost ? 1 : 0);
         gl.uniform1f(this.u(this.triProg, 'u_lightBg'), lightBg ? 1 : 0);
-        for (const b of d.tris) {
+        for (const b of tris) {
           if (!onScreen(b.bounds, ds.placement, view, cssW, cssH)) continue;
           const { m, t } = batchClipTransform(view, cssW, cssH, ds.placement, b.ox, b.oy);
           gl.uniformMatrix2fv(this.u(this.triProg, 'u_m'), false, m);
@@ -535,7 +567,7 @@ export class UnderlayRenderer {
         }
       }
       // Lines.
-      if (d.segs.length) {
+      if (segs.length) {
         gl.useProgram(this.segProg);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, d.layers);
@@ -549,7 +581,7 @@ export class UnderlayRenderer {
         gl.uniform1f(this.u(this.segProg, 'u_opacity'), ds.opacity);
         gl.uniform1f(this.u(this.segProg, 'u_ghost'), ds.ghost ? 1 : 0);
         gl.uniform1f(this.u(this.segProg, 'u_lightBg'), lightBg ? 1 : 0);
-        for (const b of d.segs) {
+        for (const b of segs) {
           if (!onScreen(b.bounds, ds.placement, view, cssW, cssH)) continue;
           const { m, t } = batchClipTransform(view, cssW, cssH, ds.placement, b.ox, b.oy);
           gl.uniformMatrix2fv(this.u(this.segProg, 'u_m'), false, m);

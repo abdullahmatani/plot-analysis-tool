@@ -14,7 +14,7 @@ import { Emitter } from './emit';
 import { codepageToLabel, decodeText } from './encoding';
 import { generatePattern } from './hatch';
 import { mtextToPlain } from './mtext';
-import { interpolateFitPoints, tessellateNurbs } from './spline';
+import { interpolateFitPoints, tessellateNurbs } from '../spline';
 import { tokenizeAscii } from './tokenizer';
 import { ocsXform } from './xform';
 import { DxfAbortError, DxfParseError, isBinaryDxf, parseDxf, sniffDxf } from './index';

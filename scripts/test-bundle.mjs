@@ -27,6 +27,18 @@ for (const [name, data] of Object.entries(
 }
 const bundleDir = path.join(dir, readdirSync(dir)[0]);
 
+let failures = 0;
+// Licence notices travel with the bundle (rows 25, 89), including the GPL-3.0 DWG reader (D-1).
+const notices = readFileSync(path.join(bundleDir, 'THIRD-PARTY-NOTICES.txt'), 'utf8');
+const listed = JSON.parse(readFileSync(path.join(root, 'src/generated/licences.json'), 'utf8')).packages;
+const missing = listed.filter((p) => !notices.includes(`${p.name} ${p.version}\r\nLicence: ${p.license}`));
+if (missing.length || !/@mlightcad\/libredwg-web [^\r]*\r\nLicence: GPL-3.0/.test(notices)) {
+  console.log(
+    `FAIL notices: THIRD-PARTY-NOTICES.txt lacks ${missing.map((p) => p.name).join(', ') || 'the DWG reader'}`,
+  );
+  failures++;
+} else console.log(`ok   notices: THIRD-PARTY-NOTICES.txt lists all ${listed.length} components`);
+
 const has = (cmd) => spawnSync(cmd, ['--version'], { stdio: 'ignore' }).status === 0;
 const launchers = [
   { name: 'node', cmd: 'node', args: ['serve.mjs', '--no-browser', '--port'] },
@@ -38,7 +50,6 @@ const launchers = [
     : []),
 ];
 
-let failures = 0;
 let port = 8790;
 for (const l of launchers) {
   port++;
@@ -49,8 +60,10 @@ for (const l of launchers) {
   const url = `http://localhost:${port}/`;
   const browser = await chromium.launch();
   try {
+    // PowerShell can take more than 10 s to start on a busy CI runner (it printed nothing in that time
+    // in CI run 33); the test checks that each launcher works, not how fast it starts.
     let up = false;
-    for (let i = 0; i < 50 && !up; i++) {
+    for (const deadline = Date.now() + 60_000; Date.now() < deadline && !up;) {
       try {
         up = (await fetch(url)).ok;
       } catch {

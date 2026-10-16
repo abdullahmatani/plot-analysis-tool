@@ -16,6 +16,12 @@ excluded):
 - NFR-2 CPU side: a 20 MB DXF parses and loads in about 1.5–5 s; the longest main-thread block is
   under 100 ms.
 - NFR-3 CPU side: a 10 MB DWG parses and loads in about 9.4 s (budget 15 s).
+- NFR-4 CPU side: 1–3 ms of main-thread time per frame while panning and zooming 200 000 segments.
+  CI enforces at most 10 ms (half a 50 fps frame), so on the reference machine the frame rate depends
+  on the GPU alone. Every navigation feature of row 17 is tested (`e2e/navigation.spec.ts`).
+- Row 21: no main-thread block over 50 ms while a 20 MB DXF, a 10 MB DWG or a 50 000-row table is
+  read (tables are parsed in a worker since 0.1.3). Progress, cancel and UI use during an import
+  are tested (`e2e/background-parsing.spec.ts`).
 - NFR-1: cold start from cache in 0.5–0.7 s.
 - NFR-10: autosave's longest synchronous step is about 1–14 ms; reopen takes 0.3–0.75 s.
 
@@ -51,9 +57,11 @@ the offline bundle should also carry that source, or a written offer for it.
 
 ### U-5 — Release (row 89)
 
-Tagging 1.0.0 requires every row to be Complete (U-2 and U-3 first). The offline bundle is built by
-`npm run bundle` and uploaded by CI as the `offline-bundle` artifact. Publishing a release is your
-decision. Nothing has been tagged or published.
+Tagging 1.0.0 requires every row to be Complete (U-2 and U-3 first). `docs/RELEASE-CHECKLIST.md`
+lists the steps. Once they are done, pushing the tag `v1.0.0` is all that is left: the **Release**
+workflow checks the versions, changelog and FDR statuses (`npm run release:check`), runs the tests,
+and publishes a GitHub release with the offline bundle, the licence notices and the changelog
+section as notes. Publishing a release is your decision. Nothing has been tagged or published.
 
 ### U-7 — Cloudflare build command (hosted mode)
 
@@ -73,6 +81,12 @@ decision. Nothing has been tagged or published.
   refuses a mismatched version.
 - **U-6 — Merging into `main`:** pull request #1 merged the integration branch into `main`. Later
   work arrives through pull requests the same way.
+- **D-3 — Offline packaging:** decided on 15 Oct 2026 to keep options (a) and (b): the hosted PWA and
+  the zipped offline bundle, whose `Start Plot Analysis Tool.cmd` starts the app with a double-click
+  on Windows. Option (c), one HTML file opened from disk, was spiked and not adopted: from `file://`
+  the browser gives the app no backup copy (C7) and lets every other local HTML file read its
+  projects (§4.1) (`docs/SPIKE-D3-SINGLE-FILE.md`). Option (d), a desktop wrapper, stays in the
+  post-1.0 backlog (B-6).
 
 ## B. Recommended checks with your own material
 
@@ -91,24 +105,24 @@ with your own drawings and tools is worthwhile:
 
 ## C. Provisional product decisions (confirm or change)
 
-| #   | Decision taken                                                                                                                                                                                                                     | Alternative                                                        |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| D-2 | Rendering uses WebGL2 directly (instanced lines, fills, PDF tiles) plus a Canvas 2D overlay; Three.js is not used                                                                                                                  | Three.js, as the FDR suggested; it was not needed                  |
-| D-3 | Packaging is a PWA plus a zipped static build with loopback-only launchers (PowerShell, Python, Node). The single-file HTML option was not built                                                                                   | Spike option (c) if double-click launch from `file://` is required |
-| D-5 | XLSX is read and written with a small built-in OOXML reader/writer. ExcelJS uses `eval`; current SheetJS is not distributed on npm                                                                                                 | Vendor SheetJS CE                                                  |
-| —   | "No external URLs in the build": inert URL strings inside bundled libraries (XML namespaces, licence texts, error-documentation links, pdf.js/core-js URL-parsing probes) are allow-listed one by one; nothing loadable is allowed | Stricter: strip them at build time                                 |
-| —   | Each project has a backup copy in the browser's private file system (see D below). It holds the latest snapshot and every later edit, not restore points, unfinished-tool drafts or app settings                                   | Also back up restore points and settings                           |
-| —   | Drawing files are always kept in the private file system when the browser supports it (before: only files over 8 MB), so they survive the database loss described in D                                                             | Keep small files in IndexedDB                                      |
-| —   | Live offsets on a locked layer still update when their source changes                                                                                                                                                              | Freeze them while the layer is locked                              |
-| —   | A live offset whose contraction collapses becomes a point at the source centroid. It stays linked and reappears when the source grows                                                                                              | Delete or detach it instead                                        |
-| —   | Merged offset envelopes are static (not live)                                                                                                                                                                                      | Multi-source live derivation                                       |
-| —   | Recalibrating with "move objects with the drawing" also moves objects on locked layers. With several drawings, only objects overlapping the recalibrated drawing move                                                              | Skip locked layers; ask per layer                                  |
-| —   | CAD drawings show "Uncalibrated" until their header units are confirmed; the guard confirms them in one click                                                                                                                      | Treat `$INSUNITS` as calibrated                                    |
-| —   | Contour shape comes only from a shape column; there is no dataset-wide "all squares" setting                                                                                                                                       | Add a dataset-level default shape                                  |
-| —   | Exports leave out CAD layers marked "do not plot" (e.g. Defpoints), and white (ACI 7) prints black                                                                                                                                 | Print everything visible                                           |
-| —   | The export dialog remembers format, DPI and region per project in browser storage; choosing a profile copies its sheet layout into the project (one undo step)                                                                     | Store them in the project                                          |
-| —   | The rebuilt DWG reader (`vendor/libredwg-web`, 10.8 MB WebAssembly) and the 10 MB DWG performance fixture (3.4 MB compressed) are committed to the repository, so builds and CI need no Emscripten or LibreDWG toolchain           | Build them in CI (adds several minutes per run)                    |
-| —   | Shortcuts chosen: trace T / Shift+T / Shift+C / B, offset O, loupe Alt+M, text X, callout Shift+X, numbered tag N, measure distance D, export Ctrl+P, export again Ctrl+Shift+E                                                    | All can be remapped in Help → Keyboard shortcuts                   |
+| #   | Decision taken                                                                                                                                                                                                                                                                                                               | Alternative                                                                                        |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| D-2 | Rendering uses WebGL2 directly (instanced lines, fills, PDF tiles) plus a Canvas 2D overlay; Three.js is not used                                                                                                                                                                                                            | Three.js, as the FDR suggested; it was not needed                                                  |
+| D-5 | XLSX is read and written with a small built-in OOXML reader/writer. ExcelJS uses `eval`; current SheetJS is not distributed on npm                                                                                                                                                                                           | Vendor SheetJS CE                                                                                  |
+| —   | "No external URLs in the build": inert URL strings inside bundled libraries (XML namespaces, licence texts, error-documentation links, pdf.js/core-js URL-parsing probes) are allow-listed one by one; nothing loadable is allowed                                                                                           | Stricter: strip them at build time                                                                 |
+| —   | Each project has a backup copy in the browser's private file system (see D below). It holds the latest snapshot, every later edit and the unfinished-work drafts, not restore points or app settings                                                                                                                         | Also back up restore points and settings                                                           |
+| —   | Drawing files are always kept in the private file system when the browser supports it (before: only files over 8 MB), so they survive the database loss described in D                                                                                                                                                       | Keep small files in IndexedDB                                                                      |
+| —   | Live offsets on a locked layer still update when their source changes                                                                                                                                                                                                                                                        | Freeze them while the layer is locked                                                              |
+| —   | A live offset whose contraction collapses becomes a point at the source centroid. It stays linked and reappears when the source grows                                                                                                                                                                                        | Delete or detach it instead                                                                        |
+| —   | Merged offset envelopes are static (not live)                                                                                                                                                                                                                                                                                | Multi-source live derivation                                                                       |
+| —   | Recalibrating with "move objects with the drawing" also moves objects on locked layers. With several drawings, only objects overlapping the recalibrated drawing move                                                                                                                                                        | Skip locked layers; ask per layer                                                                  |
+| —   | CAD drawings show "Uncalibrated" until their header units are confirmed; the guard confirms them in one click                                                                                                                                                                                                                | Treat `$INSUNITS` as calibrated                                                                    |
+| —   | Splines are tessellated to within 0.5 mm of the true curve when the drawing's units are known (half of NFR-7's 1 mm, so a distance between two snapped points stays within it). A winding 1 km spline gets about 2 200 points instead of 240; unitless drawings keep the relative tolerance (5 × 10⁻⁵ of each spline's size) | 1 mm (fewer points), or keep the relative tolerance (fastest, but centimetres off on long splines) |
+| —   | Contour shape comes only from a shape column; there is no dataset-wide "all squares" setting                                                                                                                                                                                                                                 | Add a dataset-level default shape                                                                  |
+| —   | Exports leave out CAD layers marked "do not plot" (e.g. Defpoints), and white (ACI 7) prints black                                                                                                                                                                                                                           | Print everything visible                                                                           |
+| —   | The export dialog remembers format, DPI and region per project in browser storage; choosing a profile copies its sheet layout into the project (one undo step)                                                                                                                                                               | Store them in the project                                                                          |
+| —   | The rebuilt DWG reader (`vendor/libredwg-web`, 10.8 MB WebAssembly) and the 10 MB DWG performance fixture (3.4 MB compressed) are committed to the repository, so builds and CI need no Emscripten or LibreDWG toolchain                                                                                                     | Build them in CI (adds several minutes per run)                                                    |
+| —   | Shortcuts chosen: trace T / Shift+T / Shift+C / B, offset O, loupe Alt+M, text X, callout Shift+X, numbered tag N, measure distance D, export Ctrl+P, export again Ctrl+Shift+E                                                                                                                                              | All can be remapped in Help → Keyboard shortcuts                                                   |
 
 ## D. Findings and test-environment limitations (for information)
 
@@ -119,9 +133,27 @@ with your own drawings and tools is worthwhile:
   (LevelDB reuses its log file after a crash; the damaged record left in the middle of the log is
   later treated as corruption). The app cannot prevent this, so it keeps a backup copy of every
   project in the browser's private file system, and rebuilds the projects from it at the next start
-  with a notice (tested in `e2e/autosave.spec.ts` and by the fault-injection suite). Restore points,
-  drafts and app settings are not in the backup. Linking a project to a file (row 98) remains the
-  safest protection, because it also survives clearing the browser's site data.
+  with a notice (tested in `e2e/autosave.spec.ts` and by the fault-injection suite). Since 0.1.4 the
+  backup also holds each project's unfinished-work drafts, so a half-drawn shape can still be
+  resumed (`e2e/drafts.spec.ts`); before, this case lost the draft, and it was the cause of an
+  intermittent failure of the draft crash tests in CI (run 33, Edge). Restore points and app
+  settings are not in the backup. Linking a project to a file (row 98) remains the safest
+  protection, because it also survives clearing the browser's site data.
+- **Long lines were drawn off at high zoom (fixed in 0.1.5).** The GPU stores each drawing as
+  float32 offsets from nearby origins, which keep about 7 significant digits. A line kilometres long,
+  or any line on a 10 km site, was therefore drawn up to 64 px from its true position at the maximum
+  zoom (13 px on a 2 km site), while snapping and measuring, which use the exact coordinates, were
+  right. Zoomed in that far, the app now draws from exact data around the view
+  (`e2e/large-site.spec.ts`).
+- **Long splines were centimetres off (fixed in 0.1.7).** Splines are stored as polylines that
+  snapping, measuring, tracing and offsets use, and they were tessellated relative to their own
+  size: 2.5 cm from the true curve on a 500 m spline, beyond NFR-7's 1 mm. They now stay within
+  0.5 mm when the drawing's units are known; in unitless drawings the old tolerance remains.
+- **Arcs and circles looked like polygons when zoomed in (fixed in 0.1.6).** They were drawn with
+  the same chords at every zoom: a tank shell on the reference plot plan lay up to 0.8 mm inside its
+  true circle, 1.6 px at 2 000 px per metre and 160 px at the maximum zoom, so a point snapped on
+  the circle appeared beside the drawn line. They are now redrawn for the view, as a CAD viewer does
+  (`e2e/curves.spec.ts`). Splines are still drawn as tessellated at import.
 - **Headless browsers render WebGL in software** even on machines with a GPU, so the reference
   performance run uses a visible window (`npm run perf:reference`).
 - **`example_r14.dwg`**, a Release 14 file on which the published DWG reader crashed, now reads with

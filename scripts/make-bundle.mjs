@@ -53,6 +53,28 @@ for (const f of readdirSync(src)) {
   writeFileSync(path.join(outDir, f), text);
   if (f.endsWith('.sh') || f.endsWith('.py') || f.endsWith('.mjs')) chmodSync(path.join(outDir, f), 0o755);
 }
+// Licence notices as plain text (rows 25, 89): the list shown under Help > About, privacy and
+// licences, for readers outside the app. Also kept next to the zip, which the release publishes.
+const licences = JSON.parse(readFileSync(path.join(root, 'src/generated/licences.json'), 'utf8'));
+const notices = [
+  `Plot Analysis Tool ${pkg.version} - third-party components and their licences`,
+  '',
+  'The same list is shown in the app under Help > About, privacy and licences.',
+  '',
+  ...licences.packages.flatMap((p) => [
+    '='.repeat(78),
+    `${p.name} ${p.version}`,
+    `Licence: ${p.license}`,
+    ...(p.scope ? [`Used for: ${p.scope}`] : []),
+    '',
+    p.text?.trim() || '(The component ships no licence text; its licence is named above.)',
+    '',
+  ]),
+]
+  .join('\n')
+  .replace(/\r?\n/g, '\r\n');
+writeFileSync(path.join(outDir, 'THIRD-PARTY-NOTICES.txt'), notices);
+writeFileSync(path.join(root, 'dist-bundle', `${name}-THIRD-PARTY-NOTICES.txt`), notices);
 // A launcher that does not parse must fail the build, not the user.
 const check = spawnSync(process.execPath, ['--check', path.join(outDir, 'serve.mjs')], { encoding: 'utf8' });
 if (check.status !== 0) throw new Error(`serve.mjs does not parse:\n${check.stderr}`);

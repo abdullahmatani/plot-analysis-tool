@@ -1,8 +1,11 @@
 import type { CellValue, Project } from '@/core/types';
 import { warnIfUncalibrated } from '@/features/calibration/guard';
 import { detectFileType } from '@/import/detect';
-import { importTable, type ImportInput, type ImportKind, type ImportResult } from '@/tables/table';
+import type { ImportKind } from '@/tables/table';
+import type { TableSource } from '@/tables/source';
 import { suggestMapping, type Mapping } from '@/tables/suggest';
+
+export { parseSource, type ParseOptions, type TableSource } from '@/tables/source';
 
 /**
  * Table import flow (rows 62, 72): every route (CSV / TSV file, XLSX with sheet picker, clipboard
@@ -13,15 +16,6 @@ import { suggestMapping, type Mapping } from '@/tables/suggest';
 /** Calibration guard (row 32): contour positions and sizes need a calibrated drawing. Resolves false to cancel. */
 export function calibrationGuard(): Promise<boolean> {
   return warnIfUncalibrated('Import contour dataset');
-}
-
-/** A table source held by the import dialog (bytes for files, text/html for pasted ranges). */
-export interface TableSource {
-  kind: ImportKind;
-  name: string;
-  bytes?: Uint8Array;
-  text?: string;
-  html?: string;
 }
 
 /** Table kind of a file by signature (row 13), with the extension deciding CSV vs TSV. */
@@ -40,24 +34,6 @@ export async function readTableSource(file: File): Promise<TableSource> {
     throw new Error(`“${file.name}” is not a table (detected: ${det.label}). Use CSV, TSV or XLSX.`);
   }
   return { kind, name: file.name, bytes };
-}
-
-export interface ParseOptions {
-  sheet?: string;
-  headerRow?: number;
-  delimiter?: string;
-}
-
-/** Parses a source into a table (throws a readable error on bad input). */
-export function parseSource(src: TableSource, opts: ParseOptions = {}): ImportResult {
-  const input: ImportInput = { kind: src.kind };
-  if (src.bytes) input.bytes = src.bytes;
-  if (src.text !== undefined) input.text = src.text;
-  if (src.html !== undefined) input.html = src.html;
-  if (opts.sheet !== undefined) input.sheet = opts.sheet;
-  if (opts.headerRow !== undefined) input.headerRow = opts.headerRow;
-  if (opts.delimiter !== undefined) input.delimiter = opts.delimiter;
-  return importTable(input);
 }
 
 /** Complete starting mapping for a table: suggestions with defaults for missing roles. */

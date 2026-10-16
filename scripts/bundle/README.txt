@@ -26,4 +26,5 @@ Contents
   Start Plot Analysis Tool.cmd   Windows launcher (PowerShell, no installation or admin rights)
   serve.ps1                      the Windows local server
   serve.py / serve.mjs / start.sh  launchers for Python 3 / Node.js
-Third-party licences are listed in the app under Help > About, privacy and licences.
+  THIRD-PARTY-NOTICES.txt        third-party components and their licences
+Third-party licences are also listed in the app under Help > About, privacy and licences.

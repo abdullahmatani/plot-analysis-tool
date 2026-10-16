@@ -1,4 +1,4 @@
-import type { JournalRecord } from './db';
+import type { DraftRecord, JournalRecord } from './db';
 import type { JournalMeta } from './journal-write';
 
 /** Messages from the journal worker (see src/workers/journal.worker.ts). */
@@ -13,6 +13,8 @@ export interface JournalWriter {
   rotate(projectId: string): void;
   /** Removes a deleted project's backup copy. */
   drop(projectId: string): void;
+  /** Replaces the project's drafts kept with its backup copy (row 93). */
+  drafts(projectId: string, drafts: DraftRecord[]): void;
   /** Listens to one project's acknowledgements and errors; `onCrash` when the worker dies. */
   listen(projectId: string, fn: (m: JournalWorkerMessage) => void, onCrash: () => void): () => void;
 }
@@ -50,6 +52,7 @@ export function journalWriter(): JournalWriter | null {
     flush: (projectId) => worker.postMessage({ type: 'flush', projectId }),
     rotate: (projectId) => worker.postMessage({ type: 'rotate', projectId }),
     drop: (projectId) => worker.postMessage({ type: 'drop', projectId }),
+    drafts: (projectId, drafts) => worker.postMessage({ type: 'drafts', projectId, drafts }),
     listen(projectId, fn, onCrash) {
       let set = listeners.get(projectId);
       if (!set) listeners.set(projectId, (set = new Set()));

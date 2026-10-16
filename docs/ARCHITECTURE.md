@@ -15,6 +15,8 @@ feature follows. The requirements live in `plot-analysis-tool-FDR.md` (register 
 | Build          | `npm run build` (typecheck, Vite build, `scripts/check-dist.mjs` URL audit)                |
 | E2E            | `npm run e2e` (Playwright; serves `dist/` with `vite preview` on `PAT_PORT`, default 4173) |
 | Offline bundle | `npm run bundle`, `npm run test:bundle`                                                    |
+| Release check  | `npm run release:check` (row 89; `docs/RELEASE-CHECKLIST.md`)                              |
+| D-3 spike      | `node scripts/spikes/single-file-probe.mjs` (`docs/SPIKE-D3-SINGLE-FILE.md`)               |
 
 Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y npm@11 install …`.
 
@@ -36,10 +38,25 @@ Dependency changes: npm 10 has an arborist bug with this lockfile; use `npx -y n
   origin's whole IndexedDB database if it finds it damaged on opening, which a crash in the middle
   of a write can cause; at start-up `checkMirror()` rebuilds every project from the backup when the
   database turns out to be new. Drawing files are stored in the private file system too, so they
-  survive with it. Anything that deletes projects must also remove their backup (`deleteProject`
+  survive with it, and so do drafts: after each change `DraftManager` sends the project's drafts
+  to the journal worker, which rewrites `<projectId>.drafts` next to the backup. Anything that deletes projects must also remove their backup (`deleteProject`
   does, and "Clear local data" empties the private file system first).
 - **Geometry is float64 world metres.** Never round stored geometry. Display formatting uses
   `src/core/units.ts` (`formatNumber`, `formatLength`, `parseLength`, area factors).
+- **Large coordinates on the GPU (row 18).** Underlay batches hold float32 offsets from a batch
+  origin and get a float64-derived transform each frame. float32 keeps about 7 digits, so a vertex
+  far from its origin (any long line, every line on a 10 km site) is drawn off at high zoom: by up
+  to 64 px at the maximum zoom on a 10 km site. When `batchErrorPx` (`src/render/detail.ts`)
+  exceeds a quarter pixel, the canvas controller draws the drawing from **detail batches** instead:
+  the float64 entities in a window three views wide, cut to it and stored relative to its centre
+  (`buildDetailData`), rebuilt only when the view leaves the window. Anything new drawn by the GPU
+  must keep its float32 values close to their origin in the same way.
+- **Curves at high zoom (rows 14, 27).** The full batches tessellate arcs, circles, ellipses and
+  polyline bulges once, at a chord tolerance of 2 × 10⁻⁶ of the drawing's diagonal. When those
+  chords would stray more than half a pixel (`needsDetail`), detail batches take over and redraw
+  the curves inside their window at 1/8 px (`FineCurves`; only the stretches of each arc inside the
+  window are refined, see `arcIntervalsInRect`), so a curve looks as a CAD viewer draws it and arc
+  snaps sit on the drawn line. Splines are tessellated at import and are not refined.
 - **GPL isolation (D-1):** `@mlightcad/libredwg-web` is only imported from the DWG worker. Its
   WebAssembly and glue come from `vendor/libredwg-web`, the same release rebuilt without run-time
   code generation so the strict CSP applies to it (decision U-1); `vite.config.ts` redirects the

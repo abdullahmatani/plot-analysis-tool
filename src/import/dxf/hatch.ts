@@ -1,7 +1,7 @@
 import { arcSegments } from '@/geometry/bulge';
 import { TAU } from '@/geometry/vec';
 import { InvalidEntityError } from './errors';
-import { tessellateNurbs, interpolateFitPoints } from './spline';
+import { tessellateNurbs, interpolateFitPoints } from '../spline';
 import type { Rec, Tags } from './tokenizer';
 
 /** Ring vertex list: flat (x, y, bulge) triples in the hatch's OCS. */
@@ -102,7 +102,11 @@ function angleToParam(ratio: number, a: number): number {
 }
 
 /** Parses a HATCH record (boundary paths in OCS, pattern definition). */
-export function parseHatch(t: Tags, r: Rec, warn: (msg: string) => void): HatchData {
+/**
+ * @param splineTol largest chord deviation of spline edges, in drawing units (NFR-7); hatches are
+ *   cached per definition, so inserts do not refine it further.
+ */
+export function parseHatch(t: Tags, r: Rec, warn: (msg: string) => void, splineTol?: number): HatchData {
   const h: HatchData = {
     solid: false,
     patternName: '',
@@ -252,8 +256,9 @@ export function parseHatch(t: Tags, r: Rec, warn: (msg: string) => void): HatchD
               ctrl,
               rational && weights.length === nc ? weights : null,
               warn,
+              splineTol,
             );
-          else pts = interpolateFitPoints(fit, st, et, false);
+          else pts = interpolateFitPoints(fit, st, et, false, splineTol);
           for (let k = 0; k + 3 < pts.length; k += 3) ring.push(pts[k], pts[k + 1], 0);
           if (pts.length >= 3) {
             ex = pts[pts.length - 3];

@@ -20,7 +20,9 @@ import { decodeText } from './encoding';
 import { DxfAbortError, InvalidEntityError } from './errors';
 import { flattenRings, generatePattern, parseHatch, type HatchData, type Ring } from './hatch';
 import { mtextToPlain } from './mtext';
-import { tessellateSpline, type SplineData } from './spline';
+import { fineEnough, splineTolerance, tolUnder } from '../spline-tolerance';
+
+import { tessellateSpline, type SplineDef } from '../spline';
 import { recNum, recStr, type Rec, type Tags } from './tokenizer';
 import { Xform, compose, ocsXform } from './xform';
 
@@ -104,7 +106,10 @@ export class Emitter {
   private readonly invalidSamples: string[] = [];
   private invalidCount = 0;
   private readonly warned = new Set<string>();
-  private readonly splineCache = new WeakMap<Rec, number[]>();
+  /** Splines by record, with the chord tolerance they were tessellated at (inserts scale it). */
+  private readonly splineCache = new WeakMap<Rec, { tol: number | undefined; pts: number[] }>();
+  /** Largest chord deviation of splines in drawing units, when $INSUNITS is known (NFR-7). */
+  private readonly splineTol: number | undefined;
   private readonly hatchCache = new WeakMap<
     Rec,
     { data: HatchData; segs: Float64Array | null; capped: boolean; tooDense: boolean }
@@ -127,6 +132,7 @@ export class Emitter {
     // for *new* entities: AutoCAD treats a missing 48 as 1.0, so it is intentionally not applied here.
     const lts = doc.header.get('$LTSCALE')?.num;
     this.ltScale = lts && lts > 0 && Number.isFinite(lts) ? lts : 1;
+    this.splineTol = splineTolerance(doc.header.get('$INSUNITS')?.num);
     this.buildLinetypes();
     this.buildLayers();
     this.buildStyles();
@@ -853,9 +859,9 @@ export class Emitter {
     return true;
   }
 
-  private splineData(r: Rec): SplineData {
+  private splineData(r: Rec): SplineDef {
     const t = this.t;
-    const sp: SplineData = {
+    const sp: SplineDef = {
       degree: 3,
       knots: [],
       ctrl: [],
@@ -927,12 +933,14 @@ export class Emitter {
   private spline(r: Rec, ctx: Ctx): boolean {
     this.load(r);
     this.props(ET.SPLINE, ctx);
-    let pts = this.splineCache.get(r);
+    const tol = tolUnder(this.splineTol, ctx.xf);
+    const cached = this.splineCache.get(r);
+    let pts = cached && fineEnough(cached.tol, tol) ? cached.pts : undefined;
     let closed = (this.n(70, 0) & 1) === 1;
     if (!pts) {
       const sp = this.splineData(r);
-      pts = tessellateSpline(sp, (m) => this.warnOnce(`spline:${m}`, m));
-      this.splineCache.set(r, pts);
+      pts = tessellateSpline(sp, (m) => this.warnOnce(`spline:${m}`, m), tol);
+      this.splineCache.set(r, { tol, pts });
     }
     const n = pts.length / 3;
     if (n < 2) throw new InvalidEntityError('spline has no control or fit points');
@@ -1044,7 +1052,7 @@ export class Emitter {
     const meta = { ...this.meta };
     let cached = this.hatchCache.get(r);
     if (!cached) {
-      const data = parseHatch(this.t, r, (m) => this.warnOnce(`hatch:${m}`, m));
+      const data = parseHatch(this.t, r, (m) => this.warnOnce(`hatch:${m}`, m), this.splineTol);
       cached = { data, segs: null, capped: false, tooDense: false };
       this.hatchCache.set(r, cached);
     }

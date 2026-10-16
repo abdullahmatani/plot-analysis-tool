@@ -1,10 +1,13 @@
 import { nowIso } from '@/core/ids';
 
 import { getDb, type DraftRecord } from './db';
+import { journalWriter } from './journal-client';
 
 /**
  * In-progress work drafts (row 93): unfinished interactions (half-drawn shapes, open dialogs with
  * entered values, unsaved label text) are saved within 1 s so they can be resumed after a crash.
+ * After each change they are also copied, by the journal worker, next to the project's backup outside
+ * IndexedDB, so they survive the browser deleting its database after a crash (C7; mirror.ts).
  */
 
 export const DRAFT_DELAY_MS = 300;
@@ -48,6 +51,7 @@ export class DraftManager {
               .then(() => undefined),
           )
           .catch(() => undefined);
+        this.backup();
       }, DRAFT_DELAY_MS),
     );
   }
@@ -60,6 +64,7 @@ export class DraftManager {
     this.writing = this.writing
       .then(() => getDb().drafts.delete([this.projectId, key]))
       .catch(() => undefined);
+    this.backup();
   }
 
   /** Writes pending drafts immediately (lifecycle events). */
@@ -70,10 +75,12 @@ export class DraftManager {
     }
     const recs = [...this.latest.values()];
     this.latest.clear();
-    if (recs.length)
+    if (recs.length) {
       await getDb()
         .drafts.bulkPut(recs)
         .catch(() => undefined);
+      this.backup();
+    }
     await this.writing;
   }
 
@@ -84,6 +91,16 @@ export class DraftManager {
   async clearAll(): Promise<void> {
     await this.flush();
     await getDb().drafts.where('projectId').equals(this.projectId).delete();
+    this.backup();
+  }
+
+  /** Copies the stored drafts, after the writes queued so far, to the backup (journal worker). */
+  private backup() {
+    const w = journalWriter();
+    if (!w) return;
+    this.writing = this.writing
+      .then(async () => w.drafts(this.projectId, await this.list()))
+      .catch(() => undefined);
   }
 
   dispose() {

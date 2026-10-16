@@ -1,7 +1,7 @@
 {
   "name": "plot-analysis-tool",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.7",
   "description": "Offline, private, in-browser spatial analysis on plot plans (DXF, DWG, PDF).",
   "type": "module",
   "license": "UNLICENSED",
@@ -28,7 +28,8 @@
     "predev": "node scripts/gen-licences.mjs",
     "prebuild": "node scripts/gen-licences.mjs",
     "pretypecheck": "node scripts/gen-licences.mjs",
-    "test:bundle": "node scripts/test-bundle.mjs"
+    "test:bundle": "node scripts/test-bundle.mjs",
+    "release:check": "node scripts/release-check.mjs"
   },
   "dependencies": {
     "@countertype/clipper2-ts": "^1.5.4",

@@ -393,6 +393,7 @@ function fakeWriter(opts: { failFirst?: number } = {}) {
     flush: (projectId) => void commit(projectId),
     rotate: (projectId) => void rotations.push(projectId),
     drop: () => {},
+    drafts: () => {},
     listen(projectId, fn, onCrash) {
       listeners.set(projectId, { fn, onCrash });
       return () => listeners.delete(projectId);

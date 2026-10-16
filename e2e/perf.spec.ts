@@ -169,26 +169,52 @@ test('NFR-3: 10 MB DWG parsed and displayed ≤ 15 s', async ({ page }) => {
   expect(results['nfr3.megabytes']).toBeGreaterThanOrEqual(9.5);
   expect(results['nfr3.segments']).toBeGreaterThan(150_000);
   expect(elapsed).toBeLessThanOrEqual(15 * FACTOR);
+  // Parsed in a worker (row 21): the UI stays responsive, as for DXF (NFR-2).
+  expect(results['nfr3.maxMainThreadBlockMs']).toBeLessThanOrEqual(STRICT ? 100 : 100 * 2);
 });
 
-test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ page }) => {
-  test.setTimeout(180_000);
-  const file = syntheticDxf(3.2);
+test('Row 21: a 50 000-row table is read without blocking the main thread over 100 ms', async ({ page }) => {
+  test.setTimeout(120_000);
+  // Ten times the NFR-5 reference table (5 000 rows × 3 size columns): about 3.3 MB of CSV.
+  const file = path.resolve('test-results', 'perf-table-50k.csv');
+  if (!existsSync(file)) {
+    const lines = ['Tag,Scenario,Category,X,Y,R1,R2,R3,Label,Notes'];
+    for (let i = 0; i < 50_000; i++)
+      lines.push(
+        `P-${i},S${i % 40},Jet fire,${600_000 + (i % 500)},${2_500_000 + Math.floor(i / 500)},${10 + (i % 7)},${20 + (i % 9)},${35 + (i % 5)},Release ${i},note ${i}`,
+      );
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, lines.join('\n'));
+  }
   await openApp(page);
   await createProject(page, 'Perf');
-  const gl = await glRenderer(page);
+  await installLongTaskObserver(page);
+  const t0 = Date.now();
   await importFile(page, file);
-  await expect.poll(async () => (await models(page))[0]?.status, { timeout: 120_000 }).toBe('ready');
-  await page.keyboard.press('Home');
-  // Animate pan + zoom for 3 s and count rendered frames.
-  const fps = await page.evaluate(
-    () =>
-      new Promise<number>((resolve) => {
-        const view = (
-          window as unknown as {
-            __pat: { view(): { view: { cx: number; cy: number; scale: number }; setView(v: object): void } };
-          }
-        ).__pat.view;
+  await expect(page.getByTestId('import-preview')).toBeVisible({ timeout: 60_000 });
+  results['table50k.seconds'] = (Date.now() - t0) / 1000;
+  results['table50k.maxMainThreadBlockMs'] = Math.max(0, ...(await longTasks(page)));
+  expect(results['table50k.maxMainThreadBlockMs']).toBeLessThanOrEqual(STRICT ? 100 : 100 * 2);
+});
+
+/**
+ * Animates pan and zoom for at least `ms` and `minFrames` frames; returns the frame rate and the
+ * main-thread time of each rendered frame (culling, detail batches, WebGL command encoding, overlay).
+ */
+async function panAndZoom(
+  page: Page,
+  ms: number,
+  minFrames: number,
+): Promise<{ fps: number; cpu: number[] }> {
+  return page.evaluate(
+    ([ms, minFrames]) =>
+      new Promise<{ fps: number; cpu: number[] }>((resolve) => {
+        const w = window as unknown as {
+          __pat: { view(): { view: { cx: number; cy: number; scale: number }; setView(v: object): void } };
+          __patCanvas: { frameTimes(reset?: boolean): number[] };
+        };
+        const view = w.__pat.view;
+        w.__patCanvas.frameTimes(true);
         const start = { ...view().view };
         let frames = 0;
         const t0 = performance.now();
@@ -200,23 +226,70 @@ test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ p
             scale: start.scale * (1.5 + Math.sin(k * 3)),
           });
           frames++;
-          if (t - t0 < 3000) requestAnimationFrame(step);
-          else resolve((frames * 1000) / (t - t0));
+          if ((t - t0 < ms || frames < minFrames) && t - t0 < 30_000) requestAnimationFrame(step);
+          else {
+            view().setView(start);
+            resolve({ fps: (frames * 1000) / (t - t0), cpu: w.__patCanvas.frameTimes() });
+          }
         };
         requestAnimationFrame(step);
       }),
+    [ms, minFrames] as const,
   );
-  results['nfr4.fps'] = fps;
+}
+
+test('NFR-4: pan and zoom ≥ 50 fps with 200 000 underlay segments', async ({ page }) => {
+  test.setTimeout(180_000);
+  const file = syntheticDxf(3.2);
+  await openApp(page);
+  await createProject(page, 'Perf');
+  const gl = await glRenderer(page);
+  await importFile(page, file);
+  await expect.poll(async () => (await models(page))[0]?.status, { timeout: 120_000 }).toBe('ready');
+  await page.keyboard.press('Home');
+  // The drawing is uploaded to the GPU a few MB per frame; measure only once that has finished.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __patCanvas: { renderer: { uploading: boolean } } }).__patCanvas.renderer
+              .uploading,
+        ),
+      { timeout: 60_000 },
+    )
+    .toBe(false);
+  await page.waitForTimeout(250);
+  const drawn = await panAndZoom(page, 3000, 4);
+  results['nfr4.fps'] = drawn.fps;
   results['nfr4.segments'] = (await models(page))[0].segments;
   expect(results['nfr4.segments']).toBeGreaterThanOrEqual(200_000);
-  if (gl.software && !STRICT) {
+  // Main-thread (CPU) time per frame: at most half of a 50 fps frame (20 ms), so the main thread is
+  // never what holds the frame rate below NFR-4; enforced everywhere. With a software renderer (CI)
+  // the GPU process is saturated at about one frame per second, and a frame's main thread can stall
+  // on it (CI run 47: one frame of 40 ms among five, the others 1-3 ms), which says nothing about
+  // the app. There the main thread is measured in a second pass without GPU draws, over many frames.
+  const software = gl.software && !STRICT;
+  if (software) {
+    await disableGpuDrawsIfSoftware(page);
+    await page.waitForTimeout(2000); // let the GPU process finish the last software-rendered frame
+  }
+  const cpu = (software ? (await panAndZoom(page, 1000, 60)).cpu : drawn.cpu).sort((a, b) => a - b);
+  results['nfr4.cpuFrames'] = cpu.length;
+  results['nfr4.cpuFrameMsMedian'] = cpu[Math.floor(cpu.length / 2)] ?? NaN;
+  results['nfr4.cpuFrameMsP95'] = cpu[Math.floor(cpu.length * 0.95)] ?? NaN;
+  results['nfr4.cpuFrameMsMax'] = cpu[cpu.length - 1] ?? NaN;
+  expect(cpu.length).toBeGreaterThanOrEqual(software ? 40 : 3);
+  expect(results['nfr4.cpuFrameMsMax']).toBeLessThanOrEqual(10);
+  if (software) {
     // Software rasterisation cannot represent the reference machine's integrated GPU; report only.
-    test
-      .info()
-      .annotations.push({ type: 'not-representative', description: `${gl.name}: ${fps.toFixed(1)} fps` });
+    test.info().annotations.push({
+      type: 'not-representative',
+      description: `${gl.name}: ${drawn.fps.toFixed(1)} fps`,
+    });
     return;
   }
-  expect(fps).toBeGreaterThanOrEqual(50 / FACTOR);
+  expect(drawn.fps).toBeGreaterThanOrEqual(50 / FACTOR);
 });
 
 test('NFR-1: offline cold start from cache ≤ 3 s', async ({ baseURL }) => {

@@ -109,7 +109,11 @@ export function objectsBounds(p: Project, ids: Iterable<string>, minSize = 2): B
         }
       : { ...g };
   }
-  if (!b) return null;
+  return b && padToMinSize(b, minSize);
+}
+
+/** Grows `b` about its centre so each side is at least `minSize`. */
+export function padToMinSize(b: Bounds, minSize: number): Bounds {
   const cx = (b.minX + b.maxX) / 2;
   const cy = (b.minY + b.maxY) / 2;
   const hw = Math.max(minSize / 2, (b.maxX - b.minX) / 2);

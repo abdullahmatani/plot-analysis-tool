@@ -329,3 +329,57 @@ describe('ChainTracer: arcs, circles, ellipses, points', () => {
     expect(s.pts).toEqual([P(0, 0), P(0.001, 0)]);
   });
 });
+
+describe('ChainTracer: stepwise walking (cancellable auto-follow)', () => {
+  // A long open line drawn as 2000 pieces, with a T branch half-way.
+  const N = 2000;
+  const prims: Prim[] = [];
+  for (let i = 0; i < N; i++) prims.push(seg(P(i, Math.sin(i)), P(i + 1, Math.sin(i + 1))));
+  prims.push(seg(P(1000, Math.sin(1000)), P(1000, 50)));
+
+  it('advance() in small budgets gives the same chain as start()', () => {
+    const ref = new ChainTracer(prims, { gapTol: 1e-6 }).start(10, P(10.5, 0));
+    const t = new ChainTracer(prims, { gapTol: 1e-6 });
+    t.begin(10, P(10.5, 0));
+    let calls = 1;
+    while (!t.advance(64)) calls++;
+    expect(calls).toBeGreaterThan(10);
+    expect(t.current()).toEqual(ref);
+    expect(t.current().status).toBe('junction');
+  });
+
+  it('auto mode takes the straightest way at junctions', () => {
+    const t = new ChainTracer(prims, { gapTol: 1e-6 });
+    t.begin(10, P(10.5, 0), true);
+    while (!t.advance(100));
+    const s = t.current();
+    expect(s.status).toBe('open');
+    expect(s.primIndices).toHaveLength(N);
+  });
+
+  it('a very long straight line in 100 000 collinear pieces, picked in the middle, traces in linear time', () => {
+    const M = 100_000;
+    const pieces = Array.from({ length: M }, (_, i) => seg(P(i, 0), P(i + 1, 0)));
+    const t0 = performance.now();
+    const s = new ChainTracer(pieces, { gapTol: 1e-6 }).start(M / 2, P(M / 2 + 0.5, 0));
+    expect(s.pts).toEqual([P(0, 0), P(M, 0)]);
+    expect(s.primIndices).toHaveLength(M);
+    expect(performance.now() - t0).toBeLessThan(5000);
+  });
+
+  it('abort() during a fresh walk leaves an empty chain; during accept it restores the junction', () => {
+    const t = new ChainTracer(prims, { gapTol: 1e-6 });
+    t.begin(10, P(10.5, 0));
+    expect(t.advance(50)).toBe(false);
+    t.abort();
+    expect(t.current().pts).toEqual([]);
+
+    const atJunction = t.start(10, P(10.5, 0));
+    t.beginAccept(); // the straight way: ~1000 more pieces
+    expect(t.advance(5)).toBe(false);
+    t.abort();
+    expect(t.current()).toEqual(atJunction);
+    // The restored tracer still works.
+    expect(t.accept().status).toBe('open');
+  });
+});

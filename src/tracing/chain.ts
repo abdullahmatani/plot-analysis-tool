@@ -32,6 +32,10 @@ import { distToSegment } from '@/geometry/simplify';
  * vertices, and gaps are closed at the corner where the two neighbouring lines meet when that
  * corner is within reach (otherwise at the incoming endpoint). Exactly collinear joints between
  * separate lines are merged, so a rectangle drawn as 4–12 lines traces to its 4 corners.
+ *
+ * Long chains can be followed incrementally so the UI stays responsive and the user can cancel:
+ * `begin()` / `beginAccept()` queue the walk, `advance(n)` follows at most n segments per call and
+ * `abort()` restores the chain as it was before the walk began.
  */
 
 export interface ChainOptions {
@@ -108,9 +112,23 @@ export class ChainTracer {
   private readonly nodePt: Pt[];
 
   private steps: Step[] = [];
+  /** Steps added at the start side, nearest the chain's start last (merged into `steps` on demand). */
+  private head: Step[] = [];
   private used = new Set<number>();
   private closed = false;
   private sides: { end: SideState; start: SideState } = { end: { kind: 'dead' }, start: { kind: 'dead' } };
+  /** Sides still to be walked by `advance()`. */
+  private queue: ('end' | 'start')[] = [];
+  /** Take the straightest way at every junction while advancing. */
+  private auto = false;
+  /** Segments `walk()` may still follow in the current `advance()` call. */
+  private budget = Infinity;
+  private checkpoint: {
+    steps: Step[];
+    used: Set<number>;
+    closed: boolean;
+    sides: { end: SideState; start: SideState };
+  } | null = null;
 
   constructor(prims: readonly Prim[], opts: ChainOptions) {
     this.prims = prims;
@@ -195,27 +213,89 @@ export class ChainTracer {
 
   /** Starts a trace on primitive `primIndex`; the side nearer `pick` is followed (and offered) first. */
   start(primIndex: number, pick: Pt): ChainState {
-    this.steps = [];
-    this.used = new Set([primIndex]);
-    this.closed = false;
-    this.sides = { end: { kind: 'dead' }, start: { kind: 'dead' } };
+    this.begin(primIndex, pick);
+    this.advance();
+    return this.state();
+  }
+
+  /**
+   * Like `start()`, but only queues the walk: call `advance()` until it returns true, then read
+   * `current()`. With `auto` the straightest way is taken at every junction.
+   */
+  begin(primIndex: number, pick: Pt, auto = false): void {
     const prim = this.prims[primIndex];
     if (!prim) throw new RangeError(`primitive ${primIndex} out of range`);
+    this.checkpoint = { steps: [], used: new Set(), closed: false, sides: this.deadSides() };
+    this.steps = [];
+    this.head = [];
+    this.used = new Set([primIndex]);
+    this.closed = false;
+    this.sides = this.deadSides();
+    this.queue = [];
+    this.auto = auto;
     if (prim.k === 'point') {
       this.steps = [{ prim: primIndex, dir: 1 }];
-      return this.state();
+      return;
     }
     if (!isEdgePrim(prim) || this.nodeOf[2 * primIndex] === this.nodeOf[2 * primIndex + 1]) {
       // Circles, full ellipses and curves whose ends meet within gapTol close on themselves; a
       // segment shorter than gapTol stays an open segment.
       this.steps = [{ prim: primIndex, dir: 1 }];
       this.closed = prim.k !== 'seg';
-      return this.state();
+      return;
     }
     const t = nearestOnPrim(pick, prim).t;
     this.steps = [{ prim: primIndex, dir: t >= 0.5 ? 1 : -1 }];
-    this.walk('end');
-    if (!this.closed) this.walk('start');
+    this.queue = ['end', 'start'];
+  }
+
+  /**
+   * Follows at most `maxSteps` segments of the queued walk; true when the walk is complete (the
+   * chain closed, dead-ended or reached a junction that needs a choice).
+   */
+  advance(maxSteps = Infinity): boolean {
+    this.budget = maxSteps;
+    for (;;) {
+      const side = this.queue[0];
+      if (side === undefined) {
+        const j = this.auto ? this.currentSide() : null;
+        if (!j) {
+          this.checkpoint = null;
+          return true;
+        }
+        if (this.budget <= 0) return false;
+        const s = this.sides[j] as Extract<SideState, { kind: 'junction' }>;
+        this.addStep(j, s.alts[s.current]);
+        this.budget--;
+        this.queue.push(j);
+        continue;
+      }
+      if (!this.walk(side)) return false;
+      this.queue.shift();
+      if (this.closed) this.queue = [];
+    }
+  }
+
+  /** Segments in the chain so far (progress while advancing). */
+  get length(): number {
+    return this.head.length + this.steps.length;
+  }
+
+  /** Abandons an unfinished walk and restores the chain as it was before it began. */
+  abort(): void {
+    const c = this.checkpoint;
+    this.queue = [];
+    this.checkpoint = null;
+    if (!c) return;
+    this.steps = c.steps;
+    this.head = [];
+    this.used = c.used;
+    this.closed = c.closed;
+    this.sides = c.sides;
+  }
+
+  /** The chain state (call once `advance()` has returned true). */
+  current(): ChainState {
     return this.state();
   }
 
@@ -231,13 +311,27 @@ export class ChainTracer {
 
   /** Continues along the highlighted alternative at the current junction. */
   accept(): ChainState {
-    const side = this.currentSide();
-    if (!side) return this.state();
-    const s = this.sides[side];
-    if (s.kind !== 'junction') return this.state();
-    this.addStep(side, s.alts[s.current]);
-    this.walk(side);
+    this.beginAccept();
+    this.advance();
     return this.state();
+  }
+
+  /** Like `accept()`, but only queues the walk (see `begin()`). */
+  beginAccept(): void {
+    this.queue = [];
+    this.auto = false;
+    const side = this.currentSide();
+    if (!side) return;
+    const s = this.sides[side];
+    if (s.kind !== 'junction') return;
+    this.checkpoint = {
+      steps: this.ordered().slice(),
+      used: new Set(this.used),
+      closed: this.closed,
+      sides: { end: { ...this.sides.end }, start: { ...this.sides.start } },
+    };
+    this.addStep(side, s.alts[s.current]);
+    this.queue = [side];
   }
 
   /** Stops at the current junction (that end stays open) and moves on to the other end's junction, if any. */
@@ -249,8 +343,9 @@ export class ChainTracer {
 
   /** The traced polyline (closed chains are counter-clockwise). */
   result(): { pts: Vertex[]; closed: boolean; primIndices: number[] } {
-    const pts = this.build(this.steps, this.closed);
-    let primIndices = this.steps.map((s) => s.prim);
+    const steps = this.ordered();
+    const pts = this.build(steps, this.closed);
+    let primIndices = steps.map((s) => s.prim);
     if (this.closed && pts.length > 1 && polylineSignedArea(pts) < 0) {
       return {
         pts: reversePolyline({ pts, closed: true }).pts,
@@ -260,6 +355,10 @@ export class ChainTracer {
     }
     primIndices = [...primIndices];
     return { pts, closed: this.closed, primIndices };
+  }
+
+  private deadSides(): { end: SideState; start: SideState } {
+    return { end: { kind: 'dead' }, start: { kind: 'dead' } };
   }
 
   private currentSide(): 'end' | 'start' | null {
@@ -299,14 +398,29 @@ export class ChainTracer {
     return this.nodeOf[2 * s.prim + (s.dir === 1 ? 1 : 0)];
   }
 
+  /** All steps in chain order. */
+  private ordered(): Step[] {
+    if (this.head.length) {
+      this.steps = this.head.reverse().concat(this.steps);
+      this.head = [];
+    }
+    return this.steps;
+  }
+
+  /** The step at the free end of `side`. */
+  private edgeStep(side: 'end' | 'start'): Step {
+    if (side === 'end') return this.steps.length ? this.steps[this.steps.length - 1] : this.head[0];
+    return this.head.length ? this.head[this.head.length - 1] : this.steps[0];
+  }
+
   private freeNode(side: 'end' | 'start'): number {
     return side === 'end'
-      ? this.stepEndNode(this.steps[this.steps.length - 1])
-      : this.stepStartNode(this.steps[0]);
+      ? this.stepEndNode(this.edgeStep('end'))
+      : this.stepStartNode(this.edgeStep('start'));
   }
 
   private freeEndPoint(side: 'end' | 'start'): Pt {
-    const s = side === 'end' ? this.steps[this.steps.length - 1] : this.steps[0];
+    const s = this.edgeStep(side);
     const [a, b] = ends(this.prims[s.prim]);
     if (side === 'end') return s.dir === 1 ? b : a;
     return s.dir === 1 ? a : b;
@@ -320,7 +434,7 @@ export class ChainTracer {
 
   /** Unit direction of travel when arriving at the free end of `side`. */
   private arriving(side: 'end' | 'start'): Pt {
-    const s = side === 'end' ? this.steps[this.steps.length - 1] : this.steps[0];
+    const s = this.edgeStep(side);
     // The end of the step's primitive that sits on the free node.
     const endAtNode: 0 | 1 = side === 'end' ? (s.dir === 1 ? 1 : 0) : s.dir === 1 ? 0 : 1;
     return neg(this.leaving({ prim: s.prim, end: endAtNode }));
@@ -340,24 +454,27 @@ export class ChainTracer {
   private addStep(side: 'end' | 'start', inc: Inc) {
     this.used.add(inc.prim);
     if (side === 'end') this.steps.push({ prim: inc.prim, dir: inc.end === 0 ? 1 : -1 });
-    else this.steps.unshift({ prim: inc.prim, dir: inc.end === 1 ? 1 : -1 });
+    else this.head.push({ prim: inc.prim, dir: inc.end === 1 ? 1 : -1 });
   }
 
-  private walk(side: 'end' | 'start') {
+  /** Walks one side until it closes, dead-ends or reaches a junction; false when the budget ran out first. */
+  private walk(side: 'end' | 'start'): boolean {
     for (;;) {
       const node = this.freeNode(side);
       const other = this.freeNode(side === 'end' ? 'start' : 'end');
       if (node === other) {
         this.closed = true;
-        this.sides = { end: { kind: 'dead' }, start: { kind: 'dead' } };
-        return;
+        this.sides = this.deadSides();
+        return true;
       }
       const cands = this.adj[node].filter((inc) => !this.used.has(inc.prim));
       if (cands.length === 0) {
         this.sides[side] = { kind: 'dead' };
-        return;
+        return true;
       }
       if (cands.length === 1) {
+        if (this.budget <= 0) return false;
+        this.budget--;
         this.addStep(side, cands[0]);
         continue;
       }
@@ -367,7 +484,7 @@ export class ChainTracer {
         alts: this.sortAlternatives(this.arriving(side), cands),
         current: 0,
       };
-      return;
+      return true;
     }
   }
 
@@ -484,32 +601,37 @@ export class ChainTracer {
     return [a, b];
   }
 
-  /** Drops joints whose neighbours are straight and exactly collinear through them. */
+  /** Drops joints whose neighbours are straight and exactly collinear through them (linear time). */
   private merge(pts: Vertex[], closed: boolean): Vertex[] {
-    const out = pts.slice();
-    let changed = true;
-    while (changed && out.length > (closed ? 3 : 2)) {
-      changed = false;
-      for (
-        let i = closed ? 0 : 1;
-        i < (closed ? out.length : out.length - 1) && out.length > (closed ? 3 : 2);
-        i++
-      ) {
-        const n = out.length;
-        const prev = out[(i - 1 + n) % n];
-        const v = out[i];
-        const next = out[(i + 1) % n];
-        if (prev.bulge || v.bulge) continue;
-        const d1x = v.x - prev.x;
-        const d1y = v.y - prev.y;
-        const d2x = next.x - v.x;
-        const d2y = next.y - v.y;
-        if (d1x * d2x + d1y * d2y <= 0) continue;
-        if (distToSegment(v, prev, next) > this.eps) continue;
-        out.splice(i, 1);
-        changed = true;
-        i--;
-      }
+    const min = closed ? 3 : 2;
+    const drop = (prev: Vertex, v: Vertex, next: Vertex) => {
+      if (prev.bulge || v.bulge) return false;
+      const d1x = v.x - prev.x;
+      const d1y = v.y - prev.y;
+      const d2x = next.x - v.x;
+      const d2y = next.y - v.y;
+      if (d1x * d2x + d1y * d2y <= 0) return false;
+      return distToSegment(v, prev, next) <= this.eps;
+    };
+    const out: Vertex[] = [];
+    for (let i = 0; i < pts.length; i++) {
+      const v = pts[i];
+      // Pop joints made redundant by v, keeping at least `min` vertices overall.
+      while (
+        out.length >= 2 &&
+        out.length + pts.length - i > min &&
+        drop(out[out.length - 2], out[out.length - 1], v)
+      )
+        out.pop();
+      out.push(v);
+    }
+    // A closed ring's joints at the wrap-around.
+    for (let changed = closed; changed && out.length > min;) {
+      const n = out.length;
+      changed = true;
+      if (drop(out[n - 2], out[n - 1], out[0])) out.pop();
+      else if (drop(out[n - 1], out[0], out[1])) out.shift();
+      else changed = false;
     }
     return out;
   }

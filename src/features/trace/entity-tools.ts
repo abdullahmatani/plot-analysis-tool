@@ -10,7 +10,7 @@ import { getProject } from '@/store/project';
 import { useViewStore } from '@/store/view';
 import { refreshHint, setTool } from '@/tools/registry';
 import type { FrameInfo, Tool, ToolContext } from '@/tools/types';
-import type { ChainState } from '@/tracing/chain';
+import type { ChainState, ChainTracer } from '@/tracing/chain';
 import { entityTypeName } from '@/underlay/entity-geometry';
 import { activeLayerWritable, addObjects } from '@/features/objects/ops';
 
@@ -55,32 +55,123 @@ function guardLayer(): boolean {
   return false;
 }
 
-/** Follows a chain from a primitive, taking the straightest way at every junction. */
-function autoChain(model: ChainModel, prim: number, local: Pt): ChainState {
-  let s = model.tracer.start(prim, local);
-  for (let k = 0; k < 10_000 && s.status === 'junction'; k++) s = model.tracer.accept();
-  return s;
+// ------------------------------------------------------------------------------- auto-follow
+
+/**
+ * A running auto-follow. Long chains are followed in time slices so the page stays responsive; a
+ * progress toast with Cancel appears when it takes noticeable time, and Esc cancels too.
+ */
+interface Follow {
+  cancel(): void;
+}
+
+let follow: Follow | null = null;
+
+/** Cancels a running auto-follow; true when there was one. */
+function cancelFollow(): boolean {
+  if (!follow) return false;
+  follow.cancel();
+  return true;
+}
+
+const SLICE_MS = 12;
+const SLICE_STEPS = 256;
+
+/**
+ * Runs a walk queued on `tracer` (by `begin()` / `beginAccept()`) to completion. A walk that
+ * finishes within the first slice completes synchronously. `done` gets the final state, or null
+ * when the user cancelled (the tracer is then restored to its state before the walk).
+ */
+function runFollow(tracer: ChainTracer, done: (state: ChainState | null) => void): void {
+  follow?.cancel();
+  const slice = () => {
+    const t0 = performance.now();
+    while (performance.now() - t0 < SLICE_MS) if (tracer.advance(SLICE_STEPS)) return true;
+    return false;
+  };
+  if (slice()) {
+    done(tracer.current());
+    return;
+  }
+  let toastId: string | number | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const started = performance.now();
+  const end = (state: ChainState | null) => {
+    if (timer !== null) clearTimeout(timer);
+    if (toastId !== null) toast.dismiss(toastId);
+    if (follow === cur) follow = null;
+    done(state);
+    refreshHint();
+    requestCanvasRender();
+  };
+  const cur: Follow = {
+    cancel: () => {
+      tracer.abort();
+      end(null);
+      toast('Auto-follow cancelled');
+    },
+  };
+  follow = cur;
+  refreshHint();
+  const step = () => {
+    timer = null;
+    if (follow !== cur) return;
+    let finished: boolean;
+    try {
+      finished = slice();
+    } catch (err) {
+      tracer.abort();
+      end(null);
+      toast.error('Auto-follow failed', { description: (err as Error).message });
+      return;
+    }
+    if (finished) {
+      end(tracer.current());
+      return;
+    }
+    if (performance.now() - started > 400) {
+      toastId = toast.loading('Following chain…', {
+        ...(toastId !== null && { id: toastId }),
+        description: `${tracer.length.toLocaleString()} segments followed`,
+        action: { label: 'Cancel', onClick: () => cur.cancel() },
+        duration: Infinity,
+      });
+    }
+    timer = setTimeout(step, 0);
+  };
+  timer = setTimeout(step, 0);
 }
 
 // ------------------------------------------------------------------------------- pick-trace
+
+function addPicked(geometry: Geometry | null, what: string) {
+  if (!geometry || geometry.type === 'point' || (geometry.type === 'polyline' && geometry.pts.length < 2)) {
+    toast.error('This entity has no geometry that can be traced.');
+    return;
+  }
+  addObjects([{ kind: 'trace', geometry }], `Pick-trace ${what}`);
+}
 
 export const pickTraceTool: Tool = {
   id: 'trace.pick',
   title: 'Pick-trace drawing entity',
   cursor: 'crosshair',
   hint: () =>
-    'Pick-trace: click a drawing entity (line, polyline, circle, arc, ellipse, hatch) to copy its exact geometry · Shift+click a block part for the block outline · Esc to finish',
+    follow
+      ? 'Following block outline… (Esc to cancel)'
+      : 'Pick-trace: click a drawing entity (line, polyline, circle, arc, ellipse, hatch) to copy its exact geometry · Shift+click a block part for the block outline · Esc to finish',
   activate() {
     guardLayer();
   },
   deactivate() {
+    cancelFollow();
     setHover(null);
   },
   pointerMove(e, ctx) {
     hoverAt(e.world, ctx.frame().scale);
   },
   pointerDown(e, ctx) {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || follow) return;
     const p = getProject();
     if (!p) return;
     const hit = pickTraceable(p, e.world, ctx.frame().scale);
@@ -90,8 +181,7 @@ export const pickTraceTool: Tool = {
     }
     const { source, index } = hit;
     const st = source.store;
-    let geometry: Geometry | null = null;
-    let what = entityTypeName(st, index).toLowerCase();
+    const what = entityTypeName(st, index).toLowerCase();
     if (e.shift && st.insertIndex[index] >= 0) {
       // Block outline: follow the connected parts of the same block reference.
       const ins = st.insertIndex[index];
@@ -100,23 +190,23 @@ export const pickTraceTool: Tool = {
         filter: (i) => st.insertIndex[i] === ins,
       });
       const np = nearestPrimOf(model, index, e.world);
-      if (np) {
-        autoChain(model, np.prim, np.local);
-        const r = model.tracer.result();
-        geometry = chainWorldGeometry(source, r.pts, r.closed, chordTol());
-        what = `block ${st.inserts[ins]?.name ?? ''} outline`.replace('  ', ' ');
+      if (!np) {
+        addPicked(null, what);
+        return;
       }
-    } else {
-      geometry = entityWorldGeometry(source, index, chordTol());
-    }
-    if (!geometry || geometry.type === 'point' || (geometry.type === 'polyline' && geometry.pts.length < 2)) {
-      toast.error('This entity has no geometry that can be traced.');
+      // Follows the block's outline, taking the straightest way at every junction.
+      model.tracer.begin(np.prim, np.local, true);
+      const name = `block ${st.inserts[ins]?.name ?? ''} outline`.replace('  ', ' ');
+      runFollow(model.tracer, (state) => {
+        if (state) addPicked(chainWorldGeometry(source, state.pts, state.closed, chordTol()), name);
+      });
       return;
     }
-    addObjects([{ kind: 'trace', geometry }], `Pick-trace ${what}`);
+    addPicked(entityWorldGeometry(source, index, chordTol()), what);
   },
   keyDown(e) {
     if (e.key === 'Escape') {
+      if (cancelFollow()) return true;
       setTool('select');
       return true;
     }
@@ -173,6 +263,7 @@ export const chainTraceTool: Tool & { restoreDraft(state: unknown): void } = {
   title: 'Chain trace (auto-follow)',
   cursor: 'crosshair',
   hint: () => {
+    if (follow) return 'Following chain… (Esc to cancel)';
     if (pending?.kind === 'restored') return 'Recovered chain trace: Enter to keep it · Esc to discard';
     if (pending?.kind === 'live' && pending.state.junction) {
       const j = pending.state.junction;
@@ -185,6 +276,7 @@ export const chainTraceTool: Tool & { restoreDraft(state: unknown): void } = {
     guardLayer();
   },
   deactivate() {
+    cancelFollow();
     pending = null;
     saveChainDraft();
     setHover(null);
@@ -193,7 +285,7 @@ export const chainTraceTool: Tool & { restoreDraft(state: unknown): void } = {
     hoverAt(e.world, ctx.frame().scale);
   },
   pointerDown(e, ctx) {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || follow) return;
     const p = getProject();
     if (!p) return;
     const hit = pickTraceable(p, e.world, ctx.frame().scale);
@@ -204,10 +296,20 @@ export const chainTraceTool: Tool & { restoreDraft(state: unknown): void } = {
     const model = chainModel(hit.source, traceSettings().gapTol, chordTol());
     const np = nearestPrimOf(model, hit.index, e.world);
     if (!np) return;
-    pending = { kind: 'live', model, state: model.tracer.start(np.prim, np.local) };
-    afterStep();
+    pending = null;
+    saveChainDraft();
+    model.tracer.begin(np.prim, np.local);
+    runFollow(model.tracer, (state) => {
+      if (!state) return;
+      pending = { kind: 'live', model, state };
+      afterStep();
+    });
   },
   keyDown(e) {
+    if (follow) {
+      if (e.key === 'Escape') cancelFollow();
+      return e.key === 'Escape' || e.key === 'Tab' || e.key === 'Enter';
+    }
     if (!pending) {
       if (e.key === 'Escape') {
         setTool('select');
@@ -236,8 +338,14 @@ export const chainTraceTool: Tool & { restoreDraft(state: unknown): void } = {
       return true;
     }
     if (e.key === 'Enter') {
-      pending.state = tracer.accept();
-      afterStep();
+      const live = pending;
+      tracer.beginAccept();
+      // Cancelling keeps the chain as it was at the junction.
+      runFollow(tracer, (state) => {
+        if (!state || pending !== live) return;
+        live.state = state;
+        afterStep();
+      });
       return true;
     }
     if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey && !e.altKey) {
